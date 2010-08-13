@@ -4,7 +4,7 @@
 **  Simulacion de una colonia de hormigas.
 
 **  File:       message.c
-**  Content:    structures and functions common to all implemented IPC methods.
+**  Content:    structures and functions related to the message_t ADT.
 */
 
 #include "../include/message.h"
@@ -21,7 +21,7 @@ message_t newMessage(int from, int to, size_t len, char* data) {
         new->to = to;
         new->len = len;
         
-        /* The following pointer arithmetic avoids a second call to malloc */
+        /*  The following pointer arithmetic avoids a second call to malloc */
         new->data = (char*) (new + 1);
         strncpy(new->data, data, len);
 
@@ -39,7 +39,7 @@ void delMessage(message_t m) {
     free(m);
 }
 
-char cmpMessage(message_t m1, message_t m2) {
+int cmpMessage(message_t m1, message_t m2) {
 
     return (m1->from == m2->from &&
             m1->to == m2->to &&
