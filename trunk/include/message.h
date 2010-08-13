@@ -4,7 +4,7 @@
 **  Simulacion de una colonia de hormigas.
 
 **  File:       message.h
-**  Content:    structures and functions common to all implemented IPC methods.
+**  Content:    structures and functions related to the message_t ADT.
 */
 
 #ifndef __MESSAGE_H__
@@ -30,7 +30,7 @@ message_t   newMessage  (int from, int to, size_t len, char* data);
 message_t   copyMessage (message_t);
 void        delMessage  (message_t);
 
-char        cmpMessage  (message_t, message_t);
+int         cmpMessage  (message_t, message_t);
 
 void        printMessage(message_t);
 
