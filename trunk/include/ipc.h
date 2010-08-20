@@ -17,36 +17,37 @@
 #include <sys/socket.h>
 
 enum {
-    IPCSTAT_DISCONNECTED
-    IPCSTAT_CONNECTING
-    IPCSTAT_CONNECTED
+    IPCSTAT_DISCONNECTED,
+    IPCSTAT_CONNECTING,
+    IPCSTAT_CONNECTED,
     IPCSTAT_ERROR
-}
+};
 
 union un_ipcdata_t {
     
     struct {
         int fd;
-        struct sockaddr_un sunaddr;
+        int sunaddr;
     } sundata;
     
     struct {
         int fdr;
         int fdw;
-        fifoname[100];
+        char fifonamew[50];
+        char fifonamer[50];        
     } fifodata;
     
     /* Message queues? */
     
 };
 
-typedef st_ipcdata_t* ipcdata_t;
+typedef union un_ipcdata_t* ipcdata_t;
 
 struct st_ipc_t {
     int status;
     ipcdata_t ipcdata;
     queue_t inbox, outbox;
-}
+};
 
 typedef struct st_ipc_t* ipc_t;
 
