@@ -50,10 +50,12 @@ void        qunlock(queue_t);
 /* Releases the queue's internal mutex lock. */
 
 message_t   qget(queue_t);
-/* Retrieves an item for the queue, or blocks until able to. */
+/* Retrieves an item for the queue, or NULL if there are none. May have to wait
+   to acquire the mutex lock. */
 
 int         qput(queue_t, message_t);
-/* Puts an item in the queue, or blocks until able to. Returns 1 on success, 0
-   on failure (for example, if there's no memory available). */
+/* Puts an item in the queue. May have to wait to acquire the mutex lock.
+   Returns 1 on success, 0 on failure (for example, if there's no memory
+   available). */
 
 #endif
