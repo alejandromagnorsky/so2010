@@ -9,15 +9,13 @@
 
 #include "../include/queue.h"
 
-/* [TODO] IMPLEMENT LOCKS! NOT THREAD-SAFE AS OF NOW! */
-
-int queueCount() {
+int _queueCount() {
     /* This function will generate unique queue ids within each process */
     static int n = 0;
     return n++;
 }
 
-queue_t newQueue() {
+queue_t qnew() {
     queue_t ret = (queue_t) malloc(sizeof(struct st_queue_t));
     
     pthread_mutex_init(&(ret->lock), NULL);
@@ -26,15 +24,37 @@ queue_t newQueue() {
     return ret;
 }
 
-void lockQueue(queue_t queue) {
+void qdel(queue_t queue) {
+
+    item_t this, next;
+    pthread_mutex_t* lockaddr;
+    
+    lockQueue(queue);
+    
+    lockaddr = &(queue->lock);
+    next = queue->first;
+    
+    while((this = next) != NULL) {
+        next = this->next;
+        
+        delMessage(this->message);
+        free(this);
+    }
+    
+    free(queue);
+    pthread_mutex_destroy(lockaddr);
+    
+}
+
+void qlock(queue_t queue) {
     pthread_mutex_lock(&(queue->lock));
 }
 
-void unlockQueue(queue_t queue) {
+void qunlock(queue_t queue) {
     pthread_mutex_unlock(&(queue->lock));
 }
 
-message_t qGet(queue_t queue) {
+message_t qget(queue_t queue) {
 
     item_t i;
     message_t ret = NULL;
@@ -53,7 +73,7 @@ message_t qGet(queue_t queue) {
     return ret;
 }
 
-int qPut(queue_t queue, message_t message) {
+int qput(queue_t queue, message_t message) {
     
     item_t i = (item_t) malloc(sizeof(struct st_item_t));
     
@@ -76,26 +96,4 @@ int qPut(queue_t queue, message_t message) {
     unlockQueue(queue);
     
     return 1; /* return true (success) */
-}
-
-void delQueue(queue_t queue) {
-
-    item_t this, next;
-    pthread_mutex_t* lockaddr;
-    
-    lockQueue(queue);
-    
-    lockaddr = &(queue->lock);
-    next = queue->first;
-    
-    while((this = next) != NULL) {
-        next = this->next;
-        
-        delMessage(this->message);
-        free(this);
-    }
-    
-    free(queue);
-    pthread_mutex_destroy(lockaddr);
-    
 }
