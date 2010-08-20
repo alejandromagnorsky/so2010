@@ -37,11 +37,23 @@ typedef struct st_queue_t* queue_t;
 
 int _queueCount();
 
-queue_t     newQueue();
-void        lockQueue(queue_t);
-void        unlockQueue(queue_t);
-message_t   qGet(queue_t);
-int         qPut(queue_t, message_t);
-void        delQueue(queue_t);
+queue_t     qnew();
+/* Creates a new thread-safe queue. */
+
+void        qdel(queue_t);
+/* Frees the memory allocated for the queue, and all of its items. */
+
+void        qlock(queue_t);
+/* Acquires the queue's internal mutex lock. Already called by qget/qput. */
+
+void        qunlock(queue_t);
+/* Releases the queue's internal mutex lock. */
+
+message_t   qget(queue_t);
+/* Retrieves an item for the queue, or blocks until able to. */
+
+int         qput(queue_t, message_t);
+/* Puts an item in the queue, or blocks until able to. Returns 1 on success, 0
+   on failure (for example, if there's no memory available). */
 
 #endif

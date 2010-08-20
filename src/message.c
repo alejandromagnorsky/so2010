@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 
-message_t newMessage(int from, int to, size_t len, char* data) {
+message_t mnew(int from, int to, size_t len, char* data) {
 
     message_t new = (message_t) malloc(sizeof(struct st_message_t) + len);
     
@@ -31,15 +31,24 @@ message_t newMessage(int from, int to, size_t len, char* data) {
         return NULL;
 }
 
-message_t copyMessage(message_t m) {
-    return newMessage(m->from, m->to, m->len, m->data);
+message_t mcopy(message_t m) {
+    return mnew(m->from, m->to, m->len, m->data);
 }
 
-void delMessage(message_t m) {
+void mdel(message_t m) {
     free(m);
 }
 
-int cmpMessage(message_t m1, message_t m2) {
+int     mfrom(message_t m)  { return m->from;   }
+int     mto(message_t m)    { return m->to;     }
+int     mdlen(message_t m)  { return m->len;    }
+char*   mdata(message_t m)  { return m->data;   }
+
+int mfsize(message_t m) {
+    return (sizeof(struct st_message_t) + m->len);
+}
+
+int mcmp(message_t m1, message_t m2) {
 
     return (m1->from == m2->from &&
             m1->to == m2->to &&
@@ -48,7 +57,7 @@ int cmpMessage(message_t m1, message_t m2) {
 
 }
 
-void printMessage(message_t m) {
+void mprintln(message_t m) {
 
     printf("<Message from %d to %d: \"%*s\">\n", 
            m->from, m->to, m->len, m->data);

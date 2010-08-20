@@ -6,5 +6,4 @@
 **  File:       sockqueue.h
 **  Content:    header file for the socket IPC queue implementation.
 */
-
-
+   
