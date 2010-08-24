@@ -1,5 +1,6 @@
 #include "../include/ipc_fifo.h"
 
+/*
 int main(){
 	int pid = 0;
 	message_t msg;
@@ -31,27 +32,19 @@ int main(){
 			}
 	}
 
-/*
-	ipc_t ipc = connect("fifo1");
-
-	if(ipc->status == -1){
-		return 1;
-	}	
-
-	message_t msg = newMessage(0, 0, strlen("Move 1,2"), "Move 1,2");
-
-	printf("Se envia: %s\n", msg->data);
-	
-	sendMessage(ipc, msg);
-	
-	message_t received_msg = getMessage(ipc);
-
-	printf("Recibido: %s\n", received_msg->data);
-
-	disconnect(ipc);
+}
 */
+
+ipcdata_t createIPCData(int nant){
+	ipcdata_t ans = malloc(sizeof(un_ipcdata_t));
+	if(ans != NULL){
+		ans->fw = sprintf("/tmp/fifo_c_w_%d", nant);
+		ans->fr = sprintf("/tmp/fifo_c_r_%d", nant);
+	}
+	return ans;
 }
 
+/*
 ipc_t connect(char * path){
 	int fd = 0;
 
@@ -62,17 +55,20 @@ ipc_t connect(char * path){
 		
 	if(mkfifo(path, PERMISSIONS) == -1){
 		if(errno != EEXIST){
-//			printf("No se pudo crear el fifo.\n");
 			newIpc->status = -1;
 			return newIpc;
 		}
 	}
 	
-//	printf("%s creado satisfactoriamente.\n", newIpc->path);
-
 	return newIpc;
 }
+*/
 
+void connect(ipcdata_t ipc){
+	ipc->fw = open(ipc->fw, O_RDWR | O_NONBLOCK);
+	ipc->fr = open(ipc->fr, O_RDONLY | O_NONBLOCK);
+}
+/*
 int sendMessage(ipc_t ipc, message_t msg){
 	int fd = 0;
 	int nwritten = 0;
@@ -110,8 +106,17 @@ int sendMessage(ipc_t ipc, message_t msg){
 
 	return nwrite;
 }
+*/
 
+int sendMessage(ipcdata_t ipc, message_t msg){
 
+}
+
+int getMessage(ipcdata_t ipc, message_t msg){
+
+}
+
+/*
 message_t getMessage(ipc_t ipc){
 	int fd = 0;
 	int nt_read = 0;
@@ -160,32 +165,8 @@ message_t getMessage(ipc_t ipc){
 
 	return newMessage(0, 0, len_message, msgBuffer);
 }
+*/
 
 int disconnect(ipc_t ipc){
-//	printf("%s cerrado.\n", ipc->path);
 	unlink(ipc->path);
 }
-
-int keyToInt(char * key){
-	int i = 0;
-	int ans = 0;
-	for( i = 0; i < KEYSIZE; i++){
-		ans += key[KEYSIZE - i - 1] * pow(10, i);
-	}
-	return ans;
-}
-
-int intToKey(char * keyBuf, int len){
-	int i = 0;
-	for( i = 0; i < KEYSIZE; i++){
-		keyBuf[KEYSIZE - i - 1] = (int)(len / pow(10, i)) % 10;
-	}
-	return len;
-}
-
-int fatal(char * s){
-	perror(s);
-	exit(1);
-}
-
-
