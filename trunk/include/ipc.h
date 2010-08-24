@@ -37,7 +37,9 @@ union un_ipcdata_t {
         char fifonamer[50];        
     } fifodata;
     
-    /* Message queues? */
+    struct {
+    	int id;
+    } queuedata;
     
 };
 
