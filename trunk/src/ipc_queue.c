@@ -76,7 +76,7 @@ message_t mq_getData(ipc_t ipc, int priority)
 	}
 	
 	//while(1){
-		if((mlen = msgrcv(ipc->ipcdata->queuedata.id, &r_entry, MAXOBN,priority, MSG_NOERROR)) == -1){
+		if((mlen = msgrcv(ipc->ipcdata->queuedata.id, &r_entry, MAXOBN, priority, MSG_NOERROR)) == -1){
 			perror("msgrcv failed");
 			return mnew(0,0,0,"");
 		}
