@@ -14,13 +14,15 @@
 
 #define MESSAGE_NUM 500000
 #define MESSAGE_DATA "holaHOLAchauCHAUsiSInoNO"
+#define MESSAGE_DATA_SIZE (sizeof(MESSAGE_DATA) - 1)
 
 int main(int argc, char** argv) {
 
-    message_t test, copy;
+    char* serialized;
+    message_t test, copy, deserialized;
     
     printf("Creating message... ");
-    test = newMessage(10, 20 ,sizeof(MESSAGE_DATA), MESSAGE_DATA);
+    test = mnew(MESSAGE_DATA_SIZE, MESSAGE_DATA);
         
     if (!test) {
         printf("message creation failed!\n");
@@ -31,9 +33,8 @@ int main(int argc, char** argv) {
     //printMessage(test);
     printf("Verifying created message... ");
     
-    if (!(test->from == 10 && test->to == 20
-        && test->len == sizeof(MESSAGE_DATA)
-        && strncmp(test->data, MESSAGE_DATA, sizeof(MESSAGE_DATA)) == 0)) {
+    if (!(test->len == MESSAGE_DATA_SIZE
+        && strncmp(test->data, MESSAGE_DATA, MESSAGE_DATA_SIZE) == 0)) {
    
         printf("message integrity check failed!.\n");
         exit(1);
@@ -41,7 +42,7 @@ int main(int argc, char** argv) {
     
     printf("ok.\nCreating a copy... ");
     
-    copy = copyMessage(test);
+    copy = mcopy(test);
     
     if (!copy) {
         printf("message copying failed!\n");
@@ -49,32 +50,41 @@ int main(int argc, char** argv) {
     }
     
     printf("ok.\n");
-    //printMessage(copy);
+
     printf("Verifying copied message... ");
     
-    if (!(copy->from == 10 && copy->to == 20
-        && copy->len == sizeof(MESSAGE_DATA)
-        && strncmp(copy->data, MESSAGE_DATA, sizeof(MESSAGE_DATA)) == 0)) {
+    if (!(copy->len == MESSAGE_DATA_SIZE
+        && strncmp(copy->data, MESSAGE_DATA, MESSAGE_DATA_SIZE) == 0)) {
    
         printf("message integrity check failed!.\n");
         exit(1);
     }
     
-    printf("ok.\nComparing with original using cmpMessage... ");
+    printf("ok.\nComparing with original using mcmp... ");
     
-    if (!cmpMessage(test, copy)) {
+    if (!mcmp(test, copy)) {
         printf("message comparison failed!\n");
         exit(1);
     }
     
-    printf("ok.\nFreeing allocated memory using delMessage...");
+    printf("ok.\nSerializing and de-serializing into a new copy... ");
 
-    delMessage(test);
-    delMessage(copy);
-
-    printf("done.\nYou should see a segmentation fault now:\n");
+    serialized = mserial(test);
+    deserialized = mdeserial(serialized);
     
-    copy->to = 100;
-    // porque esto no falla!?!?!?
-    printf("If you can read this, message deletion failed!\n");
+    printf("ok.\nComparing with original using mcmp... ");
+
+    if (!mcmp(test, deserialized)) {
+        printf("message comparison failed!\n");
+        exit(1);
+    }
+
+    printf("ok.\nFreeing allocated memory using mdel... ");
+
+    free(serialized);
+    mdel(test);
+    mdel(copy);
+    mdel(deserialized);
+        
+    printf("apparently ok.\nTest went ok!\n\n");
 }
