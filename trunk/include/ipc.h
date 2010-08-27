@@ -20,6 +20,11 @@ enum {
     IPCSTAT_DISCONNECTED,
     IPCSTAT_CONNECTING,
     IPCSTAT_CONNECTED,
+    IPCSTAT_PREPARING,
+    IPCSTAT_SERVING,
+    
+    IPCERR_THREAD,
+    
     IPCERR_SSOCKET,
     IPCERR_SBIND,
     IPCERR_SLISTEN
@@ -49,10 +54,11 @@ typedef union un_ipcdata_t* ipcdata_t;
 
 struct st_ipc_t {
     int stop;           /* Put here so that the thread can be stopped */
-    int status;
+    int errn;           /* The errno code of errors is stored here */
+    int status;         /* Status is stored here. Do not write! */
     
     pthread_t thread;   /* Returned by pthread_create */
-    int nclients;       /* Servers will use this */
+    int maxclts;        /* Max clients. Servers will use this */
     
     ipcdata_t ipcdata;
     queue_t inbox, outbox;

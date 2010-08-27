@@ -12,7 +12,7 @@
 #define ADDR_SIZE (sizeof(struct sockaddr_in))
 struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4545, INADDR_ANY};
 
-ipcdata_t sockIPCData(int port) {
+ipcdata_t sockIPCData() {
     
     ipcdata_t ret = (ipcdata_t) malloc(sizeof(union un_ipcdata_t));
     
@@ -25,37 +25,61 @@ ipcdata_t sockIPCData(int port) {
     
 }
 
-ipc_t sockServe(ipcdata_t ipcdata) {
-    ipc_t ret = (ipc_t) malloc (sizeof(struct st_ipc_t));
+ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
+
+    int rcreat;
+    ipc_t ret = (ipc_t) calloc (1, sizeof(struct st_ipc_t));
     
-    ret->status = IPCSTAT_DISCONNECTED;
+    ret->status = IPCSTAT_PREPARING;
+    ret->maxclts = nclients;
+    ret->ipcdata = ipcdata;
     ret->inbox = qnew();
     ret->outbox = qnew();
 
+    rcreat = pthread_create(&(ret->thread), NULL, sockServeLoop, ret);
+    
+    if (rcreat != 0)
+        ret->status = IPCERR_THREAD;
+
+   return ret;
+
 }
 
-int sockServeLoop(ipc_t ipc, int maxcl) {
-
-    int i, sfd, ccount, ret;
-    struct st_client_t* clts;
+void* sockServeLoop(void* ipcarg) {
     
-    if ((sfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
-        return errno;
-        
-    if (bind(sfd, (struct sockaddr*) &(ipcdata->sdata.addr), ADDR_SIZE) == -1) {
-        ret = errno;
+    ipc_t ipc;
+    int i, sfd, ccount, ret;
+    struct st_sclient_t* clts;
+    
+    struct sockaddr_in test = {AF_INET, 4545, INADDR_ANY};
+    
+    ipc = (ipc_t) ipcarg;
+    
+    if ((sfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        ipc->errn = errno;
+        ipc->status = IPCERR_SSOCKET;
+        return;
+    }
+
+    if (bind(sfd, (struct sockaddr*) &(ipc->ipcdata->sdata.addr), ADDR_SIZE) == -1) {
+        ipc->errn = errno;
+        ipc->status = IPCERR_SBIND;
         close(sfd);
-        return ret;
+        return;
     }
     
     if (listen(sfd, 5) == -1) {
-        ret = errno;
+        ipc->errn = errno;
+        ipc->status = IPCERR_SLISTEN;
         close(sfd);
-        return ret;
+        return;
     }
     
     /* Okay, server socket ready for accepting clients! */
-    clts = (struct st_client_t*) calloc (maxcl, sizeof(struct st_client_t));
+    ipc->status = IPCSTAT_SERVING;
+    
+    clts = (struct st_sclient_t*) calloc (ipc->maxclts,
+                                         sizeof(struct st_sclient_t));
     
     while (!ipc->stop) {
         
@@ -63,7 +87,7 @@ int sockServeLoop(ipc_t ipc, int maxcl) {
     
     }
     
-    for (i = 0; i < maxcl; i++)
+    for (i = 0; i < ipc->maxclts; i++)
         if (clts[i].active) close(clts[i].fd);
     
     close(sfd);
@@ -72,7 +96,7 @@ int sockServeLoop(ipc_t ipc, int maxcl) {
 }
 
 
-ipc_t sockConnect(ipcdata_t) {
+ipc_t sockConnect(ipcdata_t ipcdata) {
     
     ipc_t ret = (ipc_t) malloc (sizeof(struct st_ipc_t));
     
