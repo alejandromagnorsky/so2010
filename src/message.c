@@ -9,16 +9,22 @@
 
 #include "../include/message.h"
 
-message_t mnew(size_t len, char* data) {
+message_t mnew(int from, int to, size_t len, char* data) {
 
     message_t new = (message_t) malloc(sizeof(struct st_message_t) + len);
     
     if (new) {
-        new->len = len;
+        new->header.from = from;
+        new->header.to = to;
+        new->header.len = len;
         
         /*  The following pointer arithmetic avoids a second call to malloc */
         new->data = (char*) (new + 1);
-        strncpy(new->data, data, len);
+        
+        if (data != NULL)
+            strncpy(new->data, data, len);
+        else
+            memset(new->data, 0, len); 
 
         return new;
         
@@ -26,51 +32,59 @@ message_t mnew(size_t len, char* data) {
         return NULL;
 }
 
+message_t mhnew(mheader_t h, char* data) {
+    return mnew(h->from, h->to, h->len, data);
+}
+
 message_t mcopy(message_t m) {
-    return mnew(m->len, m->data);
+    return mnew(m->header.from, m->header.to, m->header.len, m->data);
 }
 
 void mdel(message_t m) {
     free(m);
 }
 
-int     mdlen(message_t m)  { return m->len;    }
-char*   mdata(message_t m)  { return m->data;   }
+int     mfrom(message_t m)  { return m->header.from; }
+int     mto(message_t m)    { return m->header.to;   }
+int     mdlen(message_t m)  { return m->header.len;  }
+char*   mdata(message_t m)  { return m->data;        }
 
 int minsert (message_t m, char* buf, size_t start, size_t n) {
-    int end;
+/*    int end, len;
     
-    if (start < m->len) {
+    len = mdlen(m);
     
-        n = (start + n <= m->len) ? n : m->len - n;
+    if (start < len) {
+    
+        n = (start + n <= len) ? n : len - n;
         
         memcpy(buf, m->data,
         
     } else
         return 0;
-
+*/
 }
 
 int mfsize(message_t m) {
-    return (sizeof(struct st_message_t) + m->len);
+    return (sizeof(struct st_message_t) + m->header.len);
 }
 
 int mcmp(message_t m1, message_t m2) {
 
-    return (m1->len == m2->len &&
-            strncmp(m1->data, m2->data, m1->len) == 0);
+    return (memcmp(&(m1->header), &(m2->header), M_HEADER_SIZE) == 0 &&
+            strncmp(m1->data, m2->data, m1->header.len) == 0);
 
 }
 
 char* mserial(message_t m) {
 
     void* pos;
-    char* ret;
+    char* ret;    
     
-    pos = ret = (char*) malloc(sizeof(struct st_message_t) + m->len);
+    pos = ret = (char*) malloc(M_HEADER_SIZE + m->header.len);
     
-    pos = dmemcpy(pos, &(m->len),  sizeof(m->len));
-    pos = dmemcpy(pos, m->data, m->len);
+    pos = dmemcpy(pos, &(m->header), M_HEADER_SIZE);
+    pos = dmemcpy(pos, m->data, m->header.len);
     
     return ret;
 
@@ -79,17 +93,17 @@ char* mserial(message_t m) {
 message_t mdeserial(char* data) {
 
     void* pos;
-    size_t len;
+    struct st_mheader_t h;
     
-    pos = smemcpy(&len, data, sizeof(len));
+    pos = smemcpy(&h, data, M_HEADER_SIZE);
 
-    return mnew(len, pos);
+    return mhnew(&h, pos);
 
 }
 
 void mprintln(message_t m) {
 
     printf("<Message: \"%*s\">\n", 
-           m->len, m->data);
+           m->header.len, m->data);
 
 }
