@@ -19,14 +19,19 @@
 #include "ipc.h"
 
 struct st_sclient_t {
+    /* This structure will hold client information for the socket server. */
     int fd;
     char active;
     
     int addr_len;
     struct sockaddr_in addr;
     
+    /* Below, buffers and byte counters for reading and writing the socket */
+    int rheader_left, rdata_left, wheader_left, wdata_left;
     struct st_mheader_t headerbuf;
-    message_t messagebuf;
+    
+    message_t inm;
+    message_t outm;
 };
 
 ipcdata_t sockIPCData();

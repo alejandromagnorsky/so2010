@@ -10,7 +10,7 @@
 #include "../include/sock.h"
 
 #define ADDR_SIZE (sizeof(struct sockaddr_in))
-struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4545, INADDR_ANY};
+struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4548, INADDR_ANY};
 
 ipcdata_t sockIPCData() {
     
@@ -46,14 +46,15 @@ ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
 }
 
 void* sockServerLoop(void* ipcarg) {
+
+    /* [TODO] THIS FUNCTION IS RIDICULOUSLY LONG!! */
     
     ipc_t ipc;                          /* The IPC struct ptr: (ipc_t) ipcarg */
     int sfd;                            /* The server socket file descriptor */
-    fd_set checkfds, readfds, errfds;   /* FD sets for Select */
+    fd_set checkfds, readfds, errfds, writefds; /* FD sets for Select */
     
-    printf("init");
     /* We'll need an array of clients, a client count, and iteration vars: */
-    int i, found, ccount;    
+    int i, found, ccount, left, offset;    
     struct st_sclient_t* clts; /* Future array to store client information */
     struct st_sclient_t* client; /* Will point to a slot. For clearer syntax */
     
@@ -85,49 +86,104 @@ void* sockServerLoop(void* ipcarg) {
        
     ipc->status = IPCSTAT_SERVING;
     
+    ccount = 0;
     clts = (struct st_sclient_t*) calloc (ipc->maxclts,
                                          sizeof(struct st_sclient_t));    
 
+
+
     FD_ZERO(&checkfds);
     FD_SET(sfd, &checkfds);
-    printf("start");    
-    while (!(ipc->stop) && (readfds = errfds = checkfds,
-           select(FD_SETSIZE, &readfds, NULL, &errfds, NULL))) {
-           
-        printf("loop1");
+
+    while (!(ipc->stop) && (readfds = errfds = writefds = checkfds,
+           select(FD_SETSIZE, &readfds, &writefds, &errfds, NULL))) {
         
         if (FD_ISSET(sfd, &readfds)) {
             /* New client connected! We need to find him a slot. */
-            for (found = 0, i = 0; i < ipc->maxclts; i++)
-                if (!clts[i].active)
+            
+            for (found = -1, i = 0; found == -1 && i < ipc->maxclts; i++)
+                if (clts[i].active == 0)
                     found = i;
                     
-            if (found != 0) {
+            if (found > -1) {
                 /* We found a slot for the new client. */
-                client = &(clts[i]);
+                client = &(clts[found]);
                 
-                if (client->fd = accept(sfd,
+                if ((client->fd = accept(sfd,
                                         (struct sockaddr *) &(client->addr),
-                                        &(client->addr_len)) > 0) {
+                                        &(client->addr_len))) > 0) {
                     /* Success! */
+                    ccount++;
                     client->active = 1;
                     FD_SET(client->fd, &checkfds);
+
                     
-                } else {/* [TODO] Accept call failed. I should do something. */}
+                } else {
+                    printf("accept failed!\n");
+                    fflush(stdout);
+                    /* [TODO] Accept call failed. I should do something. */
+                }
             
             } else { /* No slots left. Ignore? [TODO] handle exceptions! */ }
                     
         }
         
         /* We're done checking for new connections. Let's read, and write. */
-        printf("loop2");
-    }
+        for (i = 0; i < ipc->maxclts; client = &(clts[i++])) {
+        
+            /* We're going to read, then write, then check for errors */
+            if (client->active && FD_ISSET(client->fd, &readfds)) {
+                printf("data\n");
+                fflush(stdout);
+                /* Data available! */
+
+                if ((left = client->rheader_left) > 0) {
+                    /* We are receiving a message header. */
+                    offset = M_HEADER_SIZE - left;
+                    left -= recv(client->fd, (char*) &(client->headerbuf) + offset, left, 0);
+                    
+                    if (left == 0)
+                        /* Full header */
+                        client->rdata_left = client->headerbuf.len;
+                    
+                        
+                    client->rheader_left = left;
+                    
+                }
+                
+                if ((left = client->rdata_left) > 0) {
+                    /* We are receving message data */
+                    if (client->inm == NULL) {
+                        /* We just started receiving it */
+                        client->inm = mhnew(&(client->headerbuf), NULL);
+                    }                    
+                    
+                    offset = client->headerbuf.len - left;
+                    
+                    left -= recv(client->fd, mdata(client->inm) + offset, left, 0);
+                    
+                    if (left == 0) {
+                        /* Full message received! */
+                        qput(ipc->inbox, client->inm);
+                        mdel(client->inm);
+                        client->inm = NULL;
+                    }
+                    
+                    client->rdata_left = left;
+                    
+                }
+            
+            } /* End if (data is available for reading) */
+            
+        } /* End for (check all clients) */
+        
+    } /* End select loop (when ipc->stop is raised) */
     
     for (i = 0; i < ipc->maxclts; i++)
         if (clts[i].active) close(clts[i].fd);
     
     close(sfd);
-    printf("end");
+
     return;
 }
 
