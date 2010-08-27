@@ -25,9 +25,19 @@ ipcdata_t sockIPCData(int port) {
     
 }
 
-int sockServe(ipc_t ipc) {
+ipc_t sockServe(ipcdata_t ipcdata) {
+    ipc_t ret = (ipc_t) malloc (sizeof(struct st_ipc_t));
+    
+    ret->status = IPCSTAT_DISCONNECTED;
+    ret->inbox = qnew();
+    ret->outbox = qnew();
 
-    int sfd, ret;
+}
+
+int sockServeLoop(ipc_t ipc, int maxcl) {
+
+    int i, sfd, ccount, ret;
+    struct st_client_t* clts;
     
     if ((sfd = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         return errno;
@@ -44,8 +54,23 @@ int sockServe(ipc_t ipc) {
         return ret;
     }
     
-    while (ipc->
+    /* Okay, server socket ready for accepting clients! */
+    clts = (struct st_client_t*) calloc (maxcl, sizeof(struct st_client_t));
+    
+    while (!ipc->stop) {
+        
+        /* select loop */
+    
+    }
+    
+    for (i = 0; i < maxcl; i++)
+        if (clts[i].active) close(clts[i].fd);
+    
+    close(sfd);
+    
+    return 0;
 }
+
 
 ipc_t sockConnect(ipcdata_t) {
     

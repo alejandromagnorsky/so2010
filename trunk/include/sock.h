@@ -17,13 +17,21 @@
 
 #include "ipc.h"
 
+struct st_sclient_t {
+    int fd;
+    char active;
+};
+
 ipcdata_t sockIPCData(int port);
 /* Generates an ipcdata_t for a INET Domain Socket-based IPC interface */
 
 ipc_t sockConnect(ipcdata_t);
-/* Establishes a connection and creates/returns an ipc_t structure */
+/* Establishes a connection and creates/returns an ipc_t structure ptr */
 
-int sockServe(ipcdata_t ipcdata);
+ipc_t sockServe(ipcdata_t);
+/* Fires a serving thread and returns an ipc_t structure ptr */
+
+int sockServeLoop(ipc_t ipc, int maxcl);
 /* Starts a serving loop, and loops until ipcdata->sdata.stop is 1.
    Returns errno if there's an error, 0 otherwise. */
 
