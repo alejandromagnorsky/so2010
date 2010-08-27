@@ -1,5 +1,9 @@
 #include "../include/ipc_queue.h"
 
+/*gcc -o send message.c tools.c ipc_queue.c ipc_queueSend.c*/
+/*gcc -o rec message.c tools.c ipc_queue.c ipc_queueReceive.c*/
+
+
 ipc_t mq_connect()
 {
 	int queue_id;
@@ -51,9 +55,9 @@ int mq_sendData(ipc_t ipc, message_t msg, int priority)
 	}
 	
 	s_entry.mtype = (long)priority;
-	strncpy(s_entry.mtext, msg->data, MAXOBN);
+	strncpy(s_entry.mtext, mdata(msg), MAXOBN);
 
-	if(msgsnd(ipc->ipcdata->queuedata.id, &s_entry, msg->len,0) == -1){
+	if(msgsnd(ipc->ipcdata->queuedata.id, &s_entry, mdlen(msg),0) == -1){
 		perror("msgsnd failed");
 		return (-1);
 	} 
@@ -81,12 +85,10 @@ message_t mq_getData(ipc_t ipc, int priority)
 			return mnew(0,0,0,"");
 		}
 		else {
-			r_entry.mtext[mlen] = '\0';
+			//r_entry.mtext[mlen] = '\0';
 			msg = mnew(0,0,mlen,r_entry.mtext);
 			return msg;
 		}
-	//}
-	
 }
 
 int mq_disconnect(ipc_t ipc)
