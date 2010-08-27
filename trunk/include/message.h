@@ -21,7 +21,7 @@ struct st_mheader_t {
     size_t len;
 };
 
-typedef st_mheader_t* mheader_t;
+typedef struct st_mheader_t* mheader_t;
 
 struct st_message_t {
 
@@ -35,10 +35,12 @@ typedef struct st_message_t* message_t;
 #define M_HEADER_SIZE (sizeof(struct st_mheader_t))
 
 message_t   mnew    (int from, int to, size_t len, char* data);
-/* Creates a new message, deep-copying the data. */
+/* Creates a new message, deep-copying the data. If data is NULL, zeroes are
+   written. */
 
-message_t   mhnew   (mheader_t);
-/* Allocates a new, data-empty message, deep-copying the given header */
+message_t   mhnew   (mheader_t, char* data);
+/* Allocates a new message, deep-copying the given header. If data is NULL,
+   zeroes are written. */
 
 message_t   mcopy   (message_t);
 /* Returns a deep copy of an existing message. */

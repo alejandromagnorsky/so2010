@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     message_t test, copy, deserialized;
     
     printf("Creating message... ");
-    test = mnew(MESSAGE_DATA_SIZE, MESSAGE_DATA);
+    test = mnew(10, 20, MESSAGE_DATA_SIZE, MESSAGE_DATA);
         
     if (!test) {
         printf("message creation failed!\n");
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
     //printMessage(test);
     printf("Verifying created message... ");
     
-    if (!(test->len == MESSAGE_DATA_SIZE
+    if (!(test->header.len == MESSAGE_DATA_SIZE
         && strncmp(test->data, MESSAGE_DATA, MESSAGE_DATA_SIZE) == 0)) {
    
         printf("message integrity check failed!.\n");
@@ -53,7 +53,7 @@ int main(int argc, char** argv) {
 
     printf("Verifying copied message... ");
     
-    if (!(copy->len == MESSAGE_DATA_SIZE
+    if (!(copy->header.len == MESSAGE_DATA_SIZE
         && strncmp(copy->data, MESSAGE_DATA, MESSAGE_DATA_SIZE) == 0)) {
    
         printf("message integrity check failed!.\n");
