@@ -3,6 +3,7 @@
 
 #include "../include/ipc.h"
 
+#include <math.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -13,5 +14,8 @@
 #define	KEYSIZE	4
 
 #define PERMISSIONS	0666
+
+int keyToInt(char * key);
+int intToKey(char * keyBuf, int len);
 
 #endif

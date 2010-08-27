@@ -1,5 +1,6 @@
 #include "../include/ipc_fifo.h"
 
+/*
 int main(){
 	int pid = 0;
 	message_t msg;
@@ -37,24 +38,43 @@ int main(){
 				i++;
 			}
 	}
-}
+*/
 
-ipc_t connect(char * path){
-	int fd = 0;
-
-	ipc_t newIpc = malloc(sizeof(struct st_ipc_t));
-	newIpc->path = malloc(strlen(path));	
-	strcpy(newIpc->path, path);
-		
-	if(mkfifo(path, PERMISSIONS) == -1){
-		if(errno != EEXIST){
-			return NULL;
-		}
+ipc_t createIPCData(int nant){
+	ipcdata_t data = malloc(sizeof(un_ipcdata_t));
+	if(data != NULL){
+		ans->fifonamew = sprintf("/tmp/fifo_c_w_%d", nant);
+		ans->fifonamer = sprintf("/tmp/fifo_c_r_%d", nant);
 	}
-	return newIpc;
+	st_ipc_t ans = malloc(sizeof(st_ipc_t));
+	ans->status = IPCSTAT_DISCONNECTED;
+	ans->ipcdata = data;
+	
+	return ans;
 }
 
-int sendMessage(ipc_t ipc, message_t msg){ //sendData
+void connect(ipcdata_t ipc){
+	ipc->status = IPCSTAT_CONNECTING;
+	ipc->ipcdata->fw = open(ipc->fw, O_RDWR | O_NONBLOCK);
+	ipc->ipcdata->fr = open(ipc->fr, O_RDONLY | O_NONBLOCK);
+	if(ipc->ipcdata->fw < 0 || ipc->ipcdata->fr < 0){
+		ipc->status = IPCSTAT_ERROR;
+		return;	
+	}
+	ipc->status = IPCSTAT_CONNECTED;
+}
+
+int writeFifo(ipc_t ipc, void * data, int len){
+	int nwrite = 0;
+	if(nwrite = write(ipc->ipcdata->fw, (char *) data, len)){
+		return 0;
+	}
+	return nwrite;
+}
+
+
+/*
+int sendMessage(ipc_t ipc, message_t msg){
 	int fd = 0;
 	int nwritten = 0;
 	int nwrite = 0;	
@@ -81,8 +101,27 @@ int sendMessage(ipc_t ipc, message_t msg){ //sendData
 	printf("Se han escrito %d bytes\n", nwritten);
 	return nwrite;
 }
+*/
 
+int readfifo(char * fifo, char * buffer, int len){
+	return read(fifo, buffer, len);
+}
 
+/*
+message_t buildMessage(ipc_t){
+	int nread = 0;
+	
+	if(nread = read(ipc->ipcdata->fr,
+	
+	repetir
+		leo HEADER bytes en data (con fifoRead)
+	faltan?
+
+	mensaje = mhdeserial(data)
+}
+*/
+
+/*
 message_t getMessage(ipc_t ipc){
 	int fd = 0;
 	int nt_read = 0;
@@ -107,6 +146,7 @@ message_t getMessage(ipc_t ipc){
 	}
 
 	int len_message = *((int *) key);
+
 	char * msgBuffer = malloc(len_message);
 	
 
@@ -121,11 +161,16 @@ message_t getMessage(ipc_t ipc){
 			nt_read += nread;
 	}
 	free(key);
+
 	printf("Se han leido %d bytes\n", nt_read);
+
 	return (message_t) msgBuffer;
 }
+*/
 
 int disconnect(ipc_t ipc){
-//	printf("%s cerrado.\n", ipc->path);
-	unlink(ipc->path);
+	close(ipc->ipcdata->fifonamew);
+	close(ipc->ipcdata->fifonamer);
+	unlink(ipc->ipcdata->fr);
+	unlink(ipc->ipcdata->fw);
 }
