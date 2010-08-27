@@ -47,9 +47,15 @@ ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
 
 void* sockServerLoop(void* ipcarg) {
     
-    ipc_t ipc;
-    int i, sfd, ccount;
-    struct st_sclient_t* clts;
+    ipc_t ipc;                          /* The IPC struct ptr: (ipc_t) ipcarg */
+    int sfd;                            /* The server socket file descriptor */
+    fd_set checkfds, readfds, errfds;   /* FD sets for Select */
+    
+    printf("init");
+    /* We'll need an array of clients, a client count, and iteration vars: */
+    int i, found, ccount;    
+    struct st_sclient_t* clts; /* Future array to store client information */
+    struct st_sclient_t* client; /* Will point to a slot. For clearer syntax */
     
     ipc = (ipc_t) ipcarg;
     
@@ -74,22 +80,54 @@ void* sockServerLoop(void* ipcarg) {
     }
     
     /* Okay, server socket ready for accepting clients! */
+    /* We need to set the status to SERVING, allocate space for the clients,
+       and generate the fdsets for Select. */
+       
     ipc->status = IPCSTAT_SERVING;
     
     clts = (struct st_sclient_t*) calloc (ipc->maxclts,
-                                         sizeof(struct st_sclient_t));
-    
-    while (!(ipc->stop)) {
+                                         sizeof(struct st_sclient_t));    
+
+    FD_ZERO(&checkfds);
+    FD_SET(sfd, &checkfds);
+    printf("start");    
+    while (!(ipc->stop) && (readfds = errfds = checkfds,
+           select(FD_SETSIZE, &readfds, NULL, &errfds, NULL))) {
+           
+        printf("loop1");
         
-        /* trabajo */
-    
+        if (FD_ISSET(sfd, &readfds)) {
+            /* New client connected! We need to find him a slot. */
+            for (found = 0, i = 0; i < ipc->maxclts; i++)
+                if (!clts[i].active)
+                    found = i;
+                    
+            if (found != 0) {
+                /* We found a slot for the new client. */
+                client = &(clts[i]);
+                
+                if (client->fd = accept(sfd,
+                                        (struct sockaddr *) &(client->addr),
+                                        &(client->addr_len)) > 0) {
+                    /* Success! */
+                    client->active = 1;
+                    FD_SET(client->fd, &checkfds);
+                    
+                } else {/* [TODO] Accept call failed. I should do something. */}
+            
+            } else { /* No slots left. Ignore? [TODO] handle exceptions! */ }
+                    
+        }
+        
+        /* We're done checking for new connections. Let's read, and write. */
+        printf("loop2");
     }
     
     for (i = 0; i < ipc->maxclts; i++)
         if (clts[i].active) close(clts[i].fd);
     
     close(sfd);
-    
+    printf("end");
     return;
 }
 

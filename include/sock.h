@@ -21,7 +21,12 @@
 struct st_sclient_t {
     int fd;
     char active;
-    message_t buf;
+    
+    int addr_len;
+    struct sockaddr_in addr;
+    
+    struct st_mheader_t headerbuf;
+    message_t messagebuf;
 };
 
 ipcdata_t sockIPCData();
