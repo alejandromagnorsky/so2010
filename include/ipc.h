@@ -48,8 +48,12 @@ union un_ipcdata_t {
 typedef union un_ipcdata_t* ipcdata_t;
 
 struct st_ipc_t {
+    int stop;           /* Put here so that the thread can be stopped */
     int status;
-    int stop;
+    
+    pthread_t thread;   /* Returned by pthread_create */
+    int nclients;       /* Servers will use this */
+    
     ipcdata_t ipcdata;
     queue_t inbox, outbox;
 };
