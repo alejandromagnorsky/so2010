@@ -16,22 +16,29 @@
 
 #include "tools.h"
 
+struct st_mheader_t {
+    int from, to;
+    size_t len;
+};
+
+typedef st_mheader_t* mheader_t;
+
 struct st_message_t {
 
-    size_t  len;
-    char*   data;
+    struct st_mheader_t header;
+    char* data;
     
 };
 
 typedef struct st_message_t* message_t;
 
-/* This macro clarifies the serialized message transfer protocol
-   DO NOT CONFUSE THIS WITH sizeof(struct st_message_t) */
+#define M_HEADER_SIZE (sizeof(struct st_mheader_t))
 
-#define M_HEADER_SIZE (sizeof(size_t))
-
-message_t   mnew    (size_t len, char* data);
+message_t   mnew    (int from, int to, size_t len, char* data);
 /* Creates a new message, deep-copying the data. */
+
+message_t   mhnew   (mheader_t);
+/* Allocates a new, data-empty message, deep-copying the given header */
 
 message_t   mcopy   (message_t);
 /* Returns a deep copy of an existing message. */
