@@ -14,21 +14,23 @@
 #include "message.h"
 
 #include <sys/types.h>
-#include <sys/socket.h>
+#include <netinet/in.h>
 
 enum {
     IPCSTAT_DISCONNECTED,
     IPCSTAT_CONNECTING,
     IPCSTAT_CONNECTED,
-    IPCSTAT_ERROR
+    IPCERR_SSOCKET,
+    IPCERR_SBIND,
+    IPCERR_SLISTEN
 };
 
 union un_ipcdata_t {
     
     struct {
         int fd;
-        int sunaddr;
-    } sundata;
+        struct sockaddr_in addr;
+    } sdata;
     
     struct {
         int fdr;
@@ -47,6 +49,7 @@ typedef union un_ipcdata_t* ipcdata_t;
 
 struct st_ipc_t {
     int status;
+    int stop;
     ipcdata_t ipcdata;
     queue_t inbox, outbox;
 };

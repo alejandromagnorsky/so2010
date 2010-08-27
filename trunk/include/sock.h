@@ -11,16 +11,21 @@
 #define __SOCKET_H__
 
 #include <string.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>   
 
 #include "ipc.h"
 
-ipcdata_t sockIPCData(char* path);
-/* Generates an ipcdata_t for a Unix Domain Socket-based IPC interface */
+ipcdata_t sockIPCData(int port);
+/* Generates an ipcdata_t for a INET Domain Socket-based IPC interface */
 
 ipc_t sockConnect(ipcdata_t);
 /* Establishes a connection and creates/returns an ipc_t structure */
+
+int sockServe(ipcdata_t ipcdata);
+/* Starts a serving loop, and loops until ipcdata->sdata.stop is 1.
+   Returns errno if there's an error, 0 otherwise. */
 
 int sockDisconnect(ipc_t);
 /* Disconnects and destroyes the given ipc_t structure */
