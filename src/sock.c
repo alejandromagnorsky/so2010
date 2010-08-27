@@ -32,11 +32,11 @@ ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
     
     ret->status = IPCSTAT_PREPARING;
     ret->maxclts = nclients;
-    ret->ipcdata = ipcdata;
+    ret->ipcdata = ipcdata; /* [TODO] deep-copying ipcdata sounds better */
     ret->inbox = qnew();
     ret->outbox = qnew();
 
-    rcreat = pthread_create(&(ret->thread), NULL, sockServeLoop, ret);
+    rcreat = pthread_create(&(ret->thread), NULL, sockServerLoop, ret);
     
     if (rcreat != 0)
         ret->status = IPCERR_THREAD;
@@ -45,13 +45,11 @@ ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
 
 }
 
-void* sockServeLoop(void* ipcarg) {
+void* sockServerLoop(void* ipcarg) {
     
     ipc_t ipc;
-    int i, sfd, ccount, ret;
+    int i, sfd, ccount;
     struct st_sclient_t* clts;
-    
-    struct sockaddr_in test = {AF_INET, 4545, INADDR_ANY};
     
     ipc = (ipc_t) ipcarg;
     
@@ -81,9 +79,9 @@ void* sockServeLoop(void* ipcarg) {
     clts = (struct st_sclient_t*) calloc (ipc->maxclts,
                                          sizeof(struct st_sclient_t));
     
-    while (!ipc->stop) {
+    while (!(ipc->stop)) {
         
-        /* select loop */
+        /* trabajo */
     
     }
     
@@ -92,23 +90,59 @@ void* sockServeLoop(void* ipcarg) {
     
     close(sfd);
     
-    return 0;
+    return;
 }
 
 
 ipc_t sockConnect(ipcdata_t ipcdata) {
     
+    int rcreat;
     ipc_t ret = (ipc_t) malloc (sizeof(struct st_ipc_t));
     
-    ret->status = IPCSTAT_DISCONNECTED;
-    
-    
-    
+    ret->status = IPCSTAT_CONNECTING;
+    ret->ipcdata = ipcdata; /* [TODO] deep-copying ipcdata sounds better */
     ret->inbox = qnew();
     ret->outbox = qnew();
     
+    rcreat = pthread_create(&(ret->thread), NULL, sockClientLoop, ret);
     
+    if (rcreat != 0)
+        ret->status = IPCERR_THREAD;
+
+   return ret;
     
+}
+
+void* sockClientLoop(void* ipcarg) {
+    
+    ipc_t ipc;
+    int cfd;
+    
+    ipc = (ipc_t) ipcarg;
+    
+    if ((cfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        ipc->errn = errno;
+        ipc->status = IPCERR_SSOCKET;
+        return;
+    }
+    
+    if ((connect(cfd, (struct sockaddr*) &(ipc->ipcdata->sdata.addr), ADDR_SIZE)) == -1) {
+        ipc->errn = errno;
+        ipc->status = IPCERR_SCONNECT;
+        return;
+    }
+    
+    /* Ready to rumble! */
+    ipc->status = IPCSTAT_CONNECTED;
+    
+    while (!ipc->stop) {
+    
+        /* send/recv loop */
+    
+    }
+    
+    close(cfd);
+    return;
 }
 
 int sockDisconnect(ipc_t);

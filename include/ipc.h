@@ -27,7 +27,8 @@ enum {
     
     IPCERR_SSOCKET,
     IPCERR_SBIND,
-    IPCERR_SLISTEN
+    IPCERR_SLISTEN,
+    IPCERR_SCONNECT
 };
 
 union un_ipcdata_t {
