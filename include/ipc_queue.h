@@ -22,10 +22,11 @@ struct q_entry {
 };
 
 ipc_t mq_connect();
+void * mq_serverLoop(void* ipcarg);
 int init_queue(void);
-int mq_sendData(ipc_t ipc, message_t msg, int priority);
+int mq_sendData(ipc_t ipc, message_t msg);
 message_t mq_getData(ipc_t ipc, int priority);
-int mq_disconnect(ipc_t ipc);
+void mq_disconnect(ipc_t ipc);
 int warn(char * s);
 
 #endif
