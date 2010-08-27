@@ -22,16 +22,16 @@ struct st_sclient_t {
     char active;
 };
 
-ipcdata_t sockIPCData(int port);
+ipcdata_t sockIPCData();
 /* Generates an ipcdata_t for a INET Domain Socket-based IPC interface */
 
 ipc_t sockConnect(ipcdata_t);
 /* Establishes a connection and creates/returns an ipc_t structure ptr */
 
-ipc_t sockServe(ipcdata_t);
+ipc_t sockServe(ipcdata_t, int nclients);
 /* Fires a serving thread and returns an ipc_t structure ptr */
 
-int sockServeLoop(ipc_t ipc, int maxcl);
+void* sockServeLoop(void* ipc);
 /* Starts a serving loop, and loops until ipcdata->sdata.stop is 1.
    Returns errno if there's an error, 0 otherwise. */
 

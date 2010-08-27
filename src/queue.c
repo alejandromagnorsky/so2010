@@ -29,7 +29,7 @@ void qdel(queue_t queue) {
     item_t this, next;
     pthread_mutex_t* lockaddr;
     
-    lockQueue(queue);
+    qlock(queue);
     
     lockaddr = &(queue->lock);
     next = queue->first;
@@ -37,7 +37,7 @@ void qdel(queue_t queue) {
     while((this = next) != NULL) {
         next = this->next;
         
-        delMessage(this->message);
+        mdel(this->message);
         free(this);
     }
     
@@ -59,7 +59,7 @@ message_t qget(queue_t queue) {
     item_t i;
     message_t ret = NULL;
 
-    lockQueue(queue);
+    qlock(queue);
 
     if ((i = queue->first) != NULL) {
     
@@ -68,7 +68,7 @@ message_t qget(queue_t queue) {
         free(i);
     }
     
-    unlockQueue(queue);
+    qunlock(queue);
     
     return ret;
 }
@@ -80,10 +80,10 @@ int qput(queue_t queue, message_t message) {
     if (!i)
         return 0; /* returns false immediately (failure) */
     
-    i->message = copyMessage(message);
+    i->message = mcopy(message);
     i->next = NULL;
     
-    lockQueue(queue);
+    qlock(queue);
     
     if (queue->first == NULL) {
         queue->first = queue->last = i;
@@ -93,7 +93,7 @@ int qput(queue_t queue, message_t message) {
         queue->last = i;
     }
     
-    unlockQueue(queue);
+    qunlock(queue);
     
     return 1; /* return true (success) */
 }
