@@ -3,7 +3,6 @@
 
 int main(){
 	
-	int n;
 	message_t msg;
 	ipc_t ipc = mq_connect("");
 	
@@ -12,10 +11,10 @@ int main(){
 
 	while (1)
 	{
-		if ( (msg = mq_getData(ipc, prioIn)) > 0 )
+		msg = mq_getData(ipc, prioIn);
+		if (msg > 0 )
 		{
-			printf("Servidor: %.*s", n, msg->data);
-			
+			printf("Servidor: %.*s", mdlen(msg), mdata(msg));
 			//msgsnd(qout, &msg, n, 0);
 			mq_sendData(ipc,msg,prioOut);
 		}

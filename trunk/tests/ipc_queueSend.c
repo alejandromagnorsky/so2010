@@ -12,17 +12,17 @@ int main(int argc, char ** argv) {
 	ipc_t ipc;
 	
 	ipc = mq_connect();
-		
+	
 	while ( (n = read(0, mtext, sizeof mtext)) > 0 )
 	{
-		msg = mnew(0,0,200,mtext);
-		printf("Cliente envia: %.*s", n, msg->data);
+		msg = mnew(0,0,n,mtext);
+		printf("Cliente envia: %.*s", n, mdata(msg));
 		//msgsnd(qout, &msg, n, 0);
 		mq_sendData(ipc,msg,prioOut);
 		//n = msgrcv(qin, &msg, sizeof msg.mtext, msg.mtype, 0);
 		msg = mq_getData(ipc, prioIn);
-		if ( n > 0 )
-			printf("Cliente recibe: %.*s", n, msg->data);
+		if ( msg > 0 )
+			printf("Cliente recibe: %.*s", mdlen(msg), mdata(msg));
 	}
 	printf("Cliente termina\n");
 	return 0;

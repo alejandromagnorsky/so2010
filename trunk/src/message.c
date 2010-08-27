@@ -103,7 +103,6 @@ message_t mdeserial(char* data) {
 
 void mprintln(message_t m) {
 
-    printf("<Message: \"%*s\">\n", 
-           m->header.len, m->data);
+    printf("<Message: \"%*s\">\n", (int) m->header.len, m->data);
 
 }
