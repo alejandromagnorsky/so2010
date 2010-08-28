@@ -4,12 +4,7 @@ int main(){
 
 	ipcdata_t t_ant = fifoIPCData(1);
 	ipc_t ipctant = fifoConnect(t_ant);
-	printf("Se creó IPC:\n");
-	printf("ipc->status: %d\n", ipctant->status);
-	printf("ipc->ipcdata->fifodata.fifonamer: %s\n", ipctant->ipcdata->fifodata.fifonamer);
-	printf("ipc->ipcdata->fifodata.fifonamew: %s\n", ipctant->ipcdata->fifodata.fifonamew);
-	printf("ipc->ipcdata->fifodata.fdr: %d\n", ipctant->ipcdata->fifodata.fdr);
-	printf("ipc->ipcdata->fifodata.fdw: %d\n", ipctant->ipcdata->fifodata.fdw);
+	printf("Se creó el IPC para la hormiga, escribre en: %s, y lee de: %s.\n", ipctant->ipcdata->fifodata.fifonamew, ipctant->ipcdata->fifodata.fifonamew); 
 	fifoDisconnect(ipctant);
 }
 
@@ -28,10 +23,14 @@ ipc_t fifoConnect(ipcdata_t ipcdata){
 	if(ret != NULL){
 		ret->status = IPCSTAT_CONNECTING;
 		ret->ipcdata = ipcdata;
+		ret->inbox = qnew();
+		ret->outbox = qnew();
+
 		ret->ipcdata->fifodata.fdw = open(ret->ipcdata->fifodata.fifonamew, O_RDWR | O_NONBLOCK | O_CREAT);	
 		ret->ipcdata->fifodata.fdr = open(ret->ipcdata->fifodata.fifonamer, O_RDONLY | O_NONBLOCK | O_CREAT);
+
 		if(ret->ipcdata->fifodata.fdw < 0 || ret->ipcdata->fifodata.fdr < 0){
-			ret->status = IPCSTAT_FIFOFILEUSED;
+			ret->status = IPCERR_FIFOFILEUSED;
 		}else{
 			ret->status = IPCSTAT_CONNECTED;
 		}
@@ -60,17 +59,42 @@ int fifoDisconnect(ipc_t ipc){
 	unlink(ipc->ipcdata->fifodata.fifonamer);
 }
 
-int sendMessage(ipc_t ipc, message_t msg){
-
-}
-
-message_t recvMessage(ipc_t ipc){
-
-}
-
-
 void* fifoClientLoop(void* ipcarg){
 	ipc_t ipc = (ipc_t) ipcarg;
+	
+	char * bufferhd = malloc(M_HEADER_SIZE);	
+	
+	msg_writting currMsgW = (msg_writting) malloc(sizeof(struct st_msg_writting));
+	msg_reading currMsgR = (msg_reading) malloc(sizeof(struct st_msg_reading));
+
+	currMsgW->toWrite = currMsgW->written = currMsgR->read = currMsgR->toRead = 0;
+
+	while(!ipc->stop){
+		//sendMessage:
+		if((currMsgW->toWrite - currMsgW->written) == 0){
+			message_t nextMsg = qget(ipc->outbox);
+			if(nextMsg != NULL){
+				currMsgW->written = 0;
+				currMsgW->toWrite = mfsize(nextMsg);
+				currMsgW->data = mserial(nextMsg);
+			}
+		}else{
+			currMsgW->written += writefifo(ipc, (currMsgW->data + currMsgW->written), (currMsgW->toWrite - currMsgW->written)); 
+		}
+
+		//receiveMessage:
+		if((mfsize(currMsgR->recv) - currMsgR->read) == 0){
+			readfifo(ipc, bufferhd, M_HEADER_SIZE);
+			currMsgR->recv = mhnew((mheader_t) bufferhd, NULL);
+			currMsgR->toRead = currMsgR->recv->header.len;
+		}else{
+			readfifo(ipc, (currMsgR->recv->data + currMsgR->read), (currMsgR->toRead - currMsgR->read));
+		}
+	}
+
+	free(bufferhd);
+	free(currMsgW);
+	free(currMsgR);
 }
 
 

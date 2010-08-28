@@ -15,7 +15,6 @@
 
 #include <sys/types.h>
 #include <netinet/in.h>
-#include <pthread.h>
 
 enum {
     IPCSTAT_DISCONNECTED,
@@ -31,7 +30,7 @@ enum {
     IPCERR_SCONNECT,
     IPCERR_SLISTEN,
 
-	IPCSTAT_FIFOFILEUSED,
+	IPCERR_FIFOFILEUSED,
 	IPCERR_FIFOWRITING,
 	IPCERR_FIFOREADING,
 };
