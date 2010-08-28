@@ -15,6 +15,7 @@
 
 #include <sys/types.h>
 #include <netinet/in.h>
+#include <pthread.h>
 
 enum {
     IPCSTAT_DISCONNECTED,
@@ -29,10 +30,10 @@ enum {
     IPCERR_SBIND,
     IPCERR_SCONNECT,
     IPCERR_SLISTEN,
-    IPCERR_MSGGETFAILED,
-    IPCERR_INVALIDPRIORITY,
-    IPCERR_MSGSNDFAILED,
-    IPCERR_MSGRCVFAILED
+
+	IPCSTAT_FIFOFILEUSED,
+	IPCERR_FIFOWRITING,
+	IPCERR_FIFOREADING,
 };
 
 union un_ipcdata_t {
@@ -43,8 +44,8 @@ union un_ipcdata_t {
     } sdata;
     
     struct {
+		int fdw;
         int fdr;
-        int fdw;
         char fifonamew[50];
         char fifonamer[50];        
     } fifodata;
