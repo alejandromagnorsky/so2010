@@ -1,77 +1,92 @@
 #include "../include/ipc_fifo.h"
 
-/*
 int main(){
-	int pid = 0;
-	message_t msg;
-	ipc_t ipc;
-	
-	char * word;
-	switch(pid = fork()){
-		case -1: return 1;
-		case 0:
-			ipc = connect("/tmp/fifo1");
-			word = "Hola soy un child";
-			msg = mnew(0,0,strlen(word), word);
-			printf("Envio: %s\n", msg->data);
-			sendMessage(ipc, msg);
-			printf("Envio: %s\n", msg->data);
-			sendMessage(ipc, msg);
-			printf("Envio: %s\n", msg->data);
-			sendMessage(ipc, msg);
-			printf("Envio: %s\n", msg->data);
-			sendMessage(ipc, msg);
-			
-		default:
-			ipc = connect("/tmp/fifo1");
-			int i = 0;
-			while(i != 10){
-				ipc = connect("/tmp/fifo1");
-				word = "Hola soy el SERVER";
-				msg = mnew(0,0,strlen(word), word);
-				printf("Envio: %s\n", msg->data);
-				sendMessage(ipc, msg);
-				msg = getMessage(ipc);
-				if(msg != NULL){
-					printf("Recibi: %s\n", msg->data);
-				}
-				i++;
-			}
-	}
-*/
 
-ipc_t createIPCData(int nant){
-	ipcdata_t data = malloc(sizeof(un_ipcdata_t));
-	if(data != NULL){
-		ans->fifonamew = sprintf("/tmp/fifo_c_w_%d", nant);
-		ans->fifonamer = sprintf("/tmp/fifo_c_r_%d", nant);
-	}
-	st_ipc_t ans = malloc(sizeof(st_ipc_t));
-	ans->status = IPCSTAT_DISCONNECTED;
-	ans->ipcdata = data;
-	
-	return ans;
+	ipcdata_t t_ant = fifoIPCData(1);
+	ipc_t ipctant = fifoConnect(t_ant);
+	printf("Se creó IPC:\n");
+	printf("ipc->status: %d\n", ipctant->status);
+	printf("ipc->ipcdata->fifodata.fifonamer: %s\n", ipctant->ipcdata->fifodata.fifonamer);
+	printf("ipc->ipcdata->fifodata.fifonamew: %s\n", ipctant->ipcdata->fifodata.fifonamew);
+	printf("ipc->ipcdata->fifodata.fdr: %d\n", ipctant->ipcdata->fifodata.fdr);
+	printf("ipc->ipcdata->fifodata.fdw: %d\n", ipctant->ipcdata->fifodata.fdw);
+	fifoDisconnect(ipctant);
 }
 
-void connect(ipcdata_t ipc){
-	ipc->status = IPCSTAT_CONNECTING;
-	ipc->ipcdata->fw = open(ipc->fw, O_RDWR | O_NONBLOCK);
-	ipc->ipcdata->fr = open(ipc->fr, O_RDONLY | O_NONBLOCK);
-	if(ipc->ipcdata->fw < 0 || ipc->ipcdata->fr < 0){
-		ipc->status = IPCSTAT_ERROR;
-		return;	
+ipcdata_t fifoIPCData(int nant){
+	ipcdata_t ansdata = (ipcdata_t) malloc(sizeof(union un_ipcdata_t));
+	if(ansdata != NULL){
+		sprintf((ansdata->fifodata).fifonamew, "/tmp/fifo_c_w_%d", nant);
+		sprintf((ansdata->fifodata).fifonamer, "/tmp/fifo_c_r_%d", nant);
 	}
-	ipc->status = IPCSTAT_CONNECTED;
+	return ansdata;
 }
 
-int writeFifo(ipc_t ipc, void * data, int len){
+ipc_t fifoConnect(ipcdata_t ipcdata){
+	ipc_t ret = (ipc_t) malloc(sizeof(struct st_ipc_t));
+	int rcreat;
+	if(ret != NULL){
+		ret->status = IPCSTAT_CONNECTING;
+		ret->ipcdata = ipcdata;
+		ret->ipcdata->fifodata.fdw = open(ret->ipcdata->fifodata.fifonamew, O_RDWR | O_NONBLOCK | O_CREAT);	
+		ret->ipcdata->fifodata.fdr = open(ret->ipcdata->fifodata.fifonamer, O_RDONLY | O_NONBLOCK | O_CREAT);
+		if(ret->ipcdata->fifodata.fdw < 0 || ret->ipcdata->fifodata.fdr < 0){
+			ret->status = IPCSTAT_FIFOFILEUSED;
+		}else{
+			ret->status = IPCSTAT_CONNECTED;
+		}
+	}
+
+	rcreat = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);
+	return ret;
+}
+
+int writefifo(ipc_t ipc, void * data, int len){
 	int nwrite = 0;
-	if(nwrite = write(ipc->ipcdata->fw, (char *) data, len)){
-		return 0;
+	if(ipc->status == IPCSTAT_CONNECTED){
+		if((nwrite = write(ipc->ipcdata->fifodata.fdw, (char *) data, len) == -1)){
+			return -1;
+		}
 	}
 	return nwrite;
 }
 
+int readfifo(ipc_t ipc, char * buffer, int len){
+	return read(ipc->ipcdata->fifodata.fdr, buffer, len);
+}
+
+int fifoDisconnect(ipc_t ipc){
+	unlink(ipc->ipcdata->fifodata.fifonamew);
+	unlink(ipc->ipcdata->fifodata.fifonamer);
+}
+
+int sendMessage(ipc_t ipc, message_t msg){
+
+}
+
+message_t recvMessage(ipc_t ipc){
+
+}
+
+
+void* fifoClientLoop(void* ipcarg){
+	ipc_t ipc = (ipc_t) ipcarg;
+}
+
+
+/*
+int writefifo(ipc_t ipc, void * data, int len){
+	int nwrite = 0;
+	if(ipc->status == IPCSTAT_CONNECTED){
+		if((nwrite = write(ipc->ipcdata->fw, (char *) &(data), len)) == -1){
+			return -1;
+		}
+	}else{
+		perror("writefifo: Se intenta escribir en un ipc no conectado");
+	}	
+	return nwrite;	
+}
+*/
 
 /*
 int sendMessage(ipc_t ipc, message_t msg){
@@ -102,10 +117,6 @@ int sendMessage(ipc_t ipc, message_t msg){
 	return nwrite;
 }
 */
-
-int readfifo(char * fifo, char * buffer, int len){
-	return read(fifo, buffer, len);
-}
 
 /*
 message_t buildMessage(ipc_t){
@@ -167,10 +178,3 @@ message_t getMessage(ipc_t ipc){
 	return (message_t) msgBuffer;
 }
 */
-
-int disconnect(ipc_t ipc){
-	close(ipc->ipcdata->fifonamew);
-	close(ipc->ipcdata->fifonamer);
-	unlink(ipc->ipcdata->fr);
-	unlink(ipc->ipcdata->fw);
-}

@@ -1,10 +1,8 @@
 #ifndef IPC_FIFO_H_
 #define IPC_FIFO_H_
 
-#include "../include/ipc.h"
+#include "ipc.h"
 
-#include <math.h>
-#include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
@@ -15,7 +13,12 @@
 
 #define PERMISSIONS	0666
 
-int keyToInt(char * key);
-int intToKey(char * keyBuf, int len);
+ipcdata_t fifoIPCData(int nant);
+ipc_t fifoConnect(ipcdata_t ipcdata);
+int writefifo(ipc_t ipc, void * data, int len);
+int readfifo(ipc_t ipc, char * buffer, int len);
+int fifoDisconnect(ipc_t ipc);
+
+void* fifoClientLoop(void* ipcarg);
 
 #endif
