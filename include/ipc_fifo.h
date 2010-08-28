@@ -8,6 +8,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <pthread.h>
 
 #define	KEYSIZE	4
 
@@ -20,5 +21,21 @@ int readfifo(ipc_t ipc, char * buffer, int len);
 int fifoDisconnect(ipc_t ipc);
 
 void* fifoClientLoop(void* ipcarg);
+
+struct st_msg_writting {
+	int written;
+	int toWrite;
+	char * data;
+};
+
+typedef struct st_msg_writting* msg_writting;
+
+struct st_msg_reading {
+	int read;
+	int toRead;
+	message_t recv;
+};
+
+typedef struct st_msg_reading* msg_reading;
 
 #endif
