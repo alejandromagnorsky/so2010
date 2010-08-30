@@ -10,7 +10,7 @@
 #include "../include/sock.h"
 
 #define ADDR_SIZE (sizeof(struct sockaddr_in))
-struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4548, INADDR_ANY};
+struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4547, INADDR_ANY};
 
 ipcdata_t sockIPCData() {
     
@@ -55,8 +55,9 @@ void* sockServerLoop(void* ipcarg) {
     
     /* We'll need an array of clients, a client count, and iteration vars: */
     int i, found, ccount, left, offset;    
-    struct st_sclient_t* clts; /* Future array to store client information */
-    struct st_sclient_t* client; /* Will point to a slot. For clearer syntax */
+    
+    sclient_t clts;     /* Future array to store client information */
+    sclient_t client;   /* Will point to a slot. For clearer syntax */
     
     ipc = (ipc_t) ipcarg;
     
@@ -85,12 +86,8 @@ void* sockServerLoop(void* ipcarg) {
        and generate the fdsets for Select. */
        
     ipc->status = IPCSTAT_SERVING;
-    
     ccount = 0;
-    clts = (struct st_sclient_t*) calloc (ipc->maxclts,
-                                         sizeof(struct st_sclient_t));    
-
-
+    clts = (sclient_t) calloc(ipc->maxclts, sizeof(struct st_sclient_t));
 
     FD_ZERO(&checkfds);
     FD_SET(sfd, &checkfds);
@@ -116,7 +113,8 @@ void* sockServerLoop(void* ipcarg) {
                     ccount++;
                     client->active = 1;
                     FD_SET(client->fd, &checkfds);
-
+                    
+                    fflush(stdout);
                     
                 } else {
                     printf("accept failed!\n");
@@ -130,48 +128,18 @@ void* sockServerLoop(void* ipcarg) {
         
         /* We're done checking for new connections. Let's read, and write. */
         for (i = 0; i < ipc->maxclts; client = &(clts[i++])) {
-        
+            
             /* We're going to read, then write, then check for errors */
             if (client->active && FD_ISSET(client->fd, &readfds)) {
-                printf("data\n");
-                fflush(stdout);
                 /* Data available! */
 
-                if ((left = client->rheader_left) > 0) {
-                    /* We are receiving a message header. */
-                    offset = M_HEADER_SIZE - left;
-                    left -= recv(client->fd, (char*) &(client->headerbuf) + offset, left, 0);
+                 if (handleClientRecv(client)) {
+                    mprintln(client->inm);
+                    mdel(client->inm);
                     
-                    if (left == 0)
-                        /* Full header */
-                        client->rdata_left = client->headerbuf.len;
-                    
-                        
-                    client->rheader_left = left;
-                    
-                }
-                
-                if ((left = client->rdata_left) > 0) {
-                    /* We are receving message data */
-                    if (client->inm == NULL) {
-                        /* We just started receiving it */
-                        client->inm = mhnew(&(client->headerbuf), NULL);
-                    }                    
-                    
-                    offset = client->headerbuf.len - left;
-                    
-                    left -= recv(client->fd, mdata(client->inm) + offset, left, 0);
-                    
-                    if (left == 0) {
-                        /* Full message received! */
-                        qput(ipc->inbox, client->inm);
-                        mdel(client->inm);
-                        client->inm = NULL;
-                    }
-                    
-                    client->rdata_left = left;
-                    
-                }
+                    client->inm = NULL;
+                    client->rstate = SCLIENT_STATE_ZERO;
+                 }
             
             } /* End if (data is available for reading) */
             
@@ -210,17 +178,19 @@ ipc_t sockConnect(ipcdata_t ipcdata) {
 void* sockClientLoop(void* ipcarg) {
     
     ipc_t ipc;
-    int cfd;
+    int left, offset;
+    struct st_sclient_t clientstr = {};
+    sclient_t client = &clientstr;
     
     ipc = (ipc_t) ipcarg;
     
-    if ((cfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+    if ((client->fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         ipc->errn = errno;
         ipc->status = IPCERR_SSOCKET;
         return;
     }
     
-    if ((connect(cfd, (struct sockaddr*) &(ipc->ipcdata->sdata.addr), ADDR_SIZE)) == -1) {
+    if ((connect(client->fd, (struct sockaddr*) &(ipc->ipcdata->sdata.addr), ADDR_SIZE)) == -1) {
         ipc->errn = errno;
         ipc->status = IPCERR_SCONNECT;
         return;
@@ -231,14 +201,111 @@ void* sockClientLoop(void* ipcarg) {
     
     while (!ipc->stop) {
     
-        /* send/recv loop */
-    
+        if (client->outm == NULL)
+           client->outm = qget(ipc->outbox);
+
+        if (handleClientSend(client)) {
+            mdel(client->outm);
+            client->outm = NULL;
+            client->wstate = SCLIENT_STATE_ZERO;
+        }
+        
     }
     
-    close(cfd);
+    close(client->fd);
     return;
 }
 
+char handleClientRecv(sclient_t client) {
+
+    int offset;
+
+    /* We'll read as much as we can, then write as much as we can, and return */
+
+    if (client->rstate == SCLIENT_STATE_ZERO) {
+        /* We are starting the cycle, let's set us as waiting for a header */
+        client->rleft = M_HEADER_SIZE;
+        client->rstate = SCLIENT_STATE_HEADER;
+    }
+    
+    if (client->rstate == SCLIENT_STATE_HEADER) {
+        /* We are waiting for a full header to be received */
+        offset = M_HEADER_SIZE - client->rleft;
+        
+        client->rleft -= read(client->fd, &(client->header) + offset, client->rleft);
+        
+        if (client->rleft == 0) {
+            /* We are finished with the header! */            
+            client->inm = mhnew(&(client->header), NULL); /* See message.h */
+
+            client->rleft = client->inm->header.len;
+            client->rstate = SCLIENT_STATE_DATA;
+
+        }
+    }
+    
+    if (client->rstate == SCLIENT_STATE_DATA) {
+        /* We are reading the actual message data */
+        offset = client->header.len - client->rleft;
+        
+        client->rleft -= (client->fd, mdata(client->inm) + offset, client->rleft);
+        
+        if (client->rleft == 0) {
+            /* Finished receiving! */
+            client->rstate = SCLIENT_STATE_READY;
+        }
+    }
+    
+    return (client->rstate == SCLIENT_STATE_READY);
+
+}
+
+char handleClientSend(sclient_t client) {
+
+    int offset;
+
+    if (client->wstate == SCLIENT_STATE_ZERO) {
+    
+        if (client->outm != NULL) {
+            /* We are starting the cycle, let's set us as waiting for a header */
+            memcpy(&(client->header), &(client->outm->header), M_HEADER_SIZE);
+            client->wleft = M_HEADER_SIZE;
+            client->wstate = SCLIENT_STATE_HEADER;
+        }
+        
+    }
+
+    if (client->wstate == SCLIENT_STATE_HEADER) {
+        /* We are waiting for to finish sending the full header */
+        offset = M_HEADER_SIZE - client->wleft;
+
+        printf("head[%*s]", client->wleft, &client->header + offset);
+        client->wleft -= write(client->fd, &(client->header) + offset, client->wleft);
+        
+        if (client->wleft == 0) {
+            /* We are finished with the header! */
+            client->wleft = client->outm->header.len;
+            client->wstate = SCLIENT_STATE_DATA;
+        }
+    }
+    
+    if (client->wstate == SCLIENT_STATE_DATA) {
+        /* We are sending the actual message data */
+        offset = client->header.len - client->wleft;
+
+        printf("data[%*s]",client->wleft, mdata(client->outm) + offset);
+        printf("len: %d, offset:%d left:%d, %*s", client->header.len, offset, client->wleft, client->wleft, mdata(client->outm));
+        client->wleft -= write(client->fd, mdata(client->outm) + offset, client->wleft);
+        
+        if (client->wleft == 0) {
+            /* Finished sending! */
+            client->wstate = SCLIENT_STATE_READY;
+        }
+    }
+    
+    return (client->wstate == SCLIENT_STATE_READY);
+
+}
+
 int sockDisconnect(ipc_t);
-/* Disconnects and destroyes the given ipc_t structure */
 
