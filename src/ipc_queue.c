@@ -13,7 +13,7 @@ ipc_t mq_connect()
 	queue_id = init_queue();
 	newIpc->status = IPCSTAT_CONNECTING;
 	
-	pthread_create(&(newIpc->thread), NULL, mq_serverLoop, newIpc);
+	/*pthread_create(&(newIpc->thread), NULL, mq_serverLoop, newIpc);*/
 	
 	if(queue_id == -1)
 	{
@@ -29,7 +29,7 @@ ipc_t mq_connect()
 
 void * mq_serverLoop(void* ipcarg)
 {
-	ipc_t ipc;
+	/*ipc_t ipc;
 	int i;
 	ipc = (ipc_t) ipcarg;
 	struct st_sclient_t* clts;
@@ -41,7 +41,7 @@ void * mq_serverLoop(void* ipcarg)
     while (!(ipc->stop)) {
         
         
-        /*hacer esta parte*/
+        /*hacer esta parte
         msg = qget(ipc->outbox);
         
         if(msg != NULL)
@@ -65,7 +65,7 @@ void * mq_serverLoop(void* ipcarg)
     
     mq_disconnect(ipc);
     
-    return;
+    return;*/
 }
 
 int init_queue(void)
@@ -85,6 +85,7 @@ int mq_sendData(ipc_t ipc, message_t msg)
 	int priority = msg->header.to;
 	int queue_id;
 	struct q_entry s_entry;
+	char * data;
 
 	if(priority > MAXPRIOR || priority< 0)
 	{
@@ -100,10 +101,11 @@ int mq_sendData(ipc_t ipc, message_t msg)
 	}
 	
 	s_entry.mtype = (long)priority;
-	strncpy(s_entry.mtext, mdata(msg), MAXOBN);
+	data = mserial(msg);
+	memcpy(s_entry.mtext, data, MAXOBN);
 
 	if(msgsnd(ipc->ipcdata->queuedata.id, &s_entry, 
-								mdlen(msg),MSG_NOERROR) == -1){
+								mfsize(msg),MSG_NOERROR) == -1){
 		ipc->status = IPCERR_MSGSNDFAILED;
 		perror("msgsnd failed");
 		return (-1);
@@ -127,18 +129,19 @@ message_t mq_getData(ipc_t ipc, int priority)
 		return mnew(0,0,0,"");
 	}
 	
-	//while(1){
-		if((mlen = msgrcv(ipc->ipcdata->queuedata.id, &r_entry, 
-									MAXOBN, priority, MSG_NOERROR)) == -1){
-			ipc->status = IPCERR_MSGRCVFAILED;
-			perror("msgrcv failed");
-			return mnew(0,0,0,"");
-		}
-		else {
-			//r_entry.mtext[mlen] = '\0';
-			msg = mnew(0,priority,mlen,r_entry.mtext);
-			return msg;
-		}
+	if((mlen = msgrcv(ipc->ipcdata->queuedata.id, &r_entry, 
+								MAXOBN, priority, MSG_NOERROR)) == -1){
+		ipc->status = IPCERR_MSGRCVFAILED;
+		perror("msgrcv failed");
+		return mnew(0,0,0,"");
+	}
+	else {
+		//r_entry.mtext[mlen] = '\0';
+		/*msg = mnew(0,priority,mlen,r_entry.mtext);
+		return msg;*/
+		msg = mdeserial(r_entry.mtext);
+		return msg;
+	}
 }
 
 void mq_disconnect(ipc_t ipc)
