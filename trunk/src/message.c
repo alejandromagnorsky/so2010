@@ -24,7 +24,7 @@ message_t mnew(int from, int to, size_t len, char* data) {
         if (data != NULL)
             strncpy(new->data, data, len);
         else
-            memset(new->data, 0, len); 
+            memset(new->data, 'X', len);
 
         return new;
         
@@ -96,13 +96,15 @@ message_t mdeserial(char* data) {
     struct st_mheader_t h;
     
     pos = smemcpy(&h, data, M_HEADER_SIZE);
-
     return mhnew(&h, pos);
 
 }
 
 void mprintln(message_t m) {
 
-    printf("<Message: \"%*s\">\n", (int) m->header.len, m->data);
+    printf("<Message %d-%d (%db): \"%*s\">\n", m->header.from,
+                                               m->header.to,
+                                               m->header.len,
+                                               (int) m->header.len, m->data);
 
 }
