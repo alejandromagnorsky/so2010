@@ -8,7 +8,7 @@ void quit(int sig);
 int main(){
 	
 	message_t msg;
-	ipc_t ipc = mq_connect("");
+	ipc_t ipc = mq_connect();
 	
 	signal(SIGINT, quit);
 	
@@ -18,6 +18,7 @@ int main(){
 		if (msg > 0 )
 		{
 			printf("Servidor: %.*s", mdlen(msg), mdata(msg));
+			//fflush(stdout);
 			//msgsnd(qout, &msg, n, 0);
 			msg->header.from=1;
 			msg->header.to=2;
