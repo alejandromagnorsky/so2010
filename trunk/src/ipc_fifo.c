@@ -1,12 +1,42 @@
 #include "../include/ipc_fifo.h"
 
-int main(){
 
-	ipcdata_t t_ant = fifoIPCData(1);
-	ipc_t ipctant = fifoConnect(t_ant);
-	printf("Se creó el IPC para la hormiga, escribre en: %s, y lee de: %s.\n", ipctant->ipcdata->fifodata.fifonamew, ipctant->ipcdata->fifodata.fifonamew); 
-	fifoDisconnect(ipctant);
+int initFifos(int qtyAnts){
+	if(qtyAnts <= 0)
+		return;	
+
+	char word[20];
+	int i = 0;
+	
+	while(i < qtyAnts){
+		sprintf(word, "/tmp/fifo_c_w_%d", i);
+		if(mkfifo(word, PERMISSIONS) < 0){
+			return -1;
+		}
+		sprintf(word, "/tmp/fifo_c_r_%d", i);
+		if(mkfifo(word, PERMISSIONS) < 0){
+			return -1;
+		}
+		i++;
+	}
 }
+
+void unlinkFifos(int qtyAnts){
+	if(qtyAnts <= 0)
+		return;	
+
+	char word[20];
+	int i = 0;
+	
+	while(i < qtyAnts){
+		sprintf(word, "/tmp/fifo_c_w_%d", i);
+		unlink(word);		
+		sprintf(word, "/tmp/fifo_c_r_%d", i);
+		unlink(word);		
+		i++;
+	}
+}
+
 
 ipcdata_t fifoIPCData(int nant){
 	ipcdata_t ansdata = (ipcdata_t) malloc(sizeof(union un_ipcdata_t));
@@ -19,186 +49,99 @@ ipcdata_t fifoIPCData(int nant){
 
 ipc_t fifoConnect(ipcdata_t ipcdata){
 	ipc_t ret = (ipc_t) malloc(sizeof(struct st_ipc_t));
-	int rcreat;
+
 	if(ret != NULL){
 		ret->status = IPCSTAT_CONNECTING;
 		ret->ipcdata = ipcdata;
 		ret->inbox = qnew();
 		ret->outbox = qnew();
 
-		ret->ipcdata->fifodata.fdw = open(ret->ipcdata->fifodata.fifonamew, O_RDWR | O_NONBLOCK | O_CREAT);	
-		ret->ipcdata->fifodata.fdr = open(ret->ipcdata->fifodata.fifonamer, O_RDONLY | O_NONBLOCK | O_CREAT);
+		ret->ipcdata->fifodata.fdw = open(ret->ipcdata->fifodata.fifonamew, O_RDWR | O_NONBLOCK);
+		ret->ipcdata->fifodata.fdr = open(ret->ipcdata->fifodata.fifonamer, O_RDONLY | O_NONBLOCK);
 
 		if(ret->ipcdata->fifodata.fdw < 0 || ret->ipcdata->fifodata.fdr < 0){
-			ret->status = IPCERR_FIFOFILEUSED;
+			ret->status = IPCERR_OPENFIFO;
 		}else{
 			ret->status = IPCSTAT_CONNECTED;
+			ret->thread = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);	
 		}
 	}
-
-	rcreat = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);
+	
 	return ret;
 }
 
 int writefifo(ipc_t ipc, void * data, int len){
 	int nwrite = 0;
 	if(ipc->status == IPCSTAT_CONNECTED){
-		if((nwrite = write(ipc->ipcdata->fifodata.fdw, (char *) data, len) == -1)){
-			return -1;
+		nwrite = write(ipc->ipcdata->fifodata.fdw, (char *) data, len);
+		if(nwrite < 0){
+			nwrite = 0;
+			//printf("Error escribiendo\n");
 		}
 	}
 	return nwrite;
 }
 
 int readfifo(ipc_t ipc, char * buffer, int len){
-	return read(ipc->ipcdata->fifodata.fdr, buffer, len);
+	int nread = 0;
+	if(ipc->status == IPCSTAT_CONNECTED){
+		nread = read(ipc->ipcdata->fifodata.fdr, buffer, len);
+	}else{
+		printf("No se puede leer\n");
+	}	
+	
+	return nread < 0 ? 0 : nread;
 }
+
 
 int fifoDisconnect(ipc_t ipc){
 	unlink(ipc->ipcdata->fifodata.fifonamew);
 	unlink(ipc->ipcdata->fifodata.fifonamer);
 }
 
+
 void* fifoClientLoop(void* ipcarg){
 	ipc_t ipc = (ipc_t) ipcarg;
-	
-	char * bufferhd = malloc(M_HEADER_SIZE);	
 	
 	msg_writting currMsgW = (msg_writting) malloc(sizeof(struct st_msg_writting));
 	msg_reading currMsgR = (msg_reading) malloc(sizeof(struct st_msg_reading));
 
-	currMsgW->toWrite = currMsgW->written = currMsgR->read = currMsgR->toRead = 0;
-
-	while(!ipc->stop){
-		//sendMessage:
-		if((currMsgW->toWrite - currMsgW->written) == 0){
+	currMsgW->toWrite = currMsgR->toRead = currMsgR->hdread = 0;
+	currMsgR->incomingMsg = (message_t) malloc(sizeof(struct st_message_t));
+	
+	int offset = 0;
+	
+	while(ipc->stop != 1){
+		if(currMsgW->toWrite == 0){
 			message_t nextMsg = qget(ipc->outbox);
 			if(nextMsg != NULL){
-				currMsgW->written = 0;
-				currMsgW->toWrite = mfsize(nextMsg);
+				currMsgW->toWrite = M_HEADER_SIZE + nextMsg->header.len;
+				currMsgW->msglen = currMsgW->toWrite;
 				currMsgW->data = mserial(nextMsg);
 			}
 		}else{
-			currMsgW->written += writefifo(ipc, (currMsgW->data + currMsgW->written), (currMsgW->toWrite - currMsgW->written)); 
+			offset = currMsgW->msglen - currMsgW->toWrite;
+			currMsgW->toWrite -= writefifo(ipc, currMsgW->data + offset, currMsgW->toWrite);
 		}
 
-		//receiveMessage:
-		if((mfsize(currMsgR->recv) - currMsgR->read) == 0){
-			readfifo(ipc, bufferhd, M_HEADER_SIZE);
-			currMsgR->recv = mhnew((mheader_t) bufferhd, NULL);
-			currMsgR->toRead = currMsgR->recv->header.len;
+		if(currMsgR->toRead == 0){
+			currMsgR->hdread += readfifo(ipc, currMsgR->bufferhd + currMsgR->hdread, M_HEADER_SIZE - currMsgR->hdread);
+			if(currMsgR->hdread == M_HEADER_SIZE){
+				currMsgR->incomingMsg = mhnew( (mheader_t) currMsgR->bufferhd, NULL);
+				currMsgR->toRead = currMsgR->incomingMsg->header.len;
+				currMsgR->hdread = 0;
+			}
 		}else{
-			readfifo(ipc, (currMsgR->recv->data + currMsgR->read), (currMsgR->toRead - currMsgR->read));
+			offset = currMsgR->incomingMsg->header.len - currMsgR->toRead;
+			currMsgR->toRead -= readfifo(ipc, currMsgR->incomingMsg->data + offset, currMsgR->toRead);
+			if(currMsgR->toRead == 0){
+				qput(ipc->inbox, currMsgR->incomingMsg);
+			}  
 		}
 	}
-
-	free(bufferhd);
-	free(currMsgW);
+	
+	free(currMsgR->incomingMsg);
 	free(currMsgR);
+	free(currMsgW);
 }
 
-
-/*
-int writefifo(ipc_t ipc, void * data, int len){
-	int nwrite = 0;
-	if(ipc->status == IPCSTAT_CONNECTED){
-		if((nwrite = write(ipc->ipcdata->fw, (char *) &(data), len)) == -1){
-			return -1;
-		}
-	}else{
-		perror("writefifo: Se intenta escribir en un ipc no conectado");
-	}	
-	return nwrite;	
-}
-*/
-
-/*
-int sendMessage(ipc_t ipc, message_t msg){
-	int fd = 0;
-	int nwritten = 0;
-	int nwrite = 0;	
-	int msgSize = msg->len;
-	
-	fd = open(ipc->path, O_RDWR | O_NONBLOCK);
-	
-	if(fd < 0){
-		return -1;
-	}
-	
-	int msg_len = mfsize(msg);
-	if((nwrite = write(fd, (char *) &(msg_len), KEYSIZE)) == -1){
-		return -1;
-	}else{
-		nwritten += nwrite;
-	}
-
-	if((nwrite = write(fd, (char *) msg, msg->len)) == -1){
-		return -1;
-	}else{
-		nwritten += nwrite;
-	}
-	printf("Se han escrito %d bytes\n", nwritten);
-	return nwrite;
-}
-*/
-
-/*
-message_t buildMessage(ipc_t){
-	int nread = 0;
-	
-	if(nread = read(ipc->ipcdata->fr,
-	
-	repetir
-		leo HEADER bytes en data (con fifoRead)
-	faltan?
-
-	mensaje = mhdeserial(data)
-}
-*/
-
-/*
-message_t getMessage(ipc_t ipc){
-	int fd = 0;
-	int nt_read = 0;
-	int nread = 0;	
-	int * key = malloc(sizeof(int));
-	
-	fd = open(ipc->path, O_RDONLY | O_NONBLOCK);
-	
-	if(fd < 0){
-		return NULL;
-	}
-
-	switch(nread = read(fd, (char *) key, KEYSIZE)){
-		case -1: 
-			printf("Fallo la lectura en el fifo.\n"); 
-			return NULL;
-		case 0: 
-			printf("El fifo está vacio"); 
-			return NULL;
-		default:
-			nt_read += nread;
-	}
-
-	int len_message = *((int *) key);
-
-	char * msgBuffer = malloc(len_message);
-	
-
-	switch(nread = read(fd, msgBuffer, len_message)){
-		case -1: 
-			printf("Fallo la lectura en el fifo.\n"); 
-			return NULL;
-		case 0: 
-			printf("El fifo está vacio"); 
-			return NULL;
-		default:
-			nt_read += nread;
-	}
-	free(key);
-
-	printf("Se han leido %d bytes\n", nt_read);
-
-	return (message_t) msgBuffer;
-}
-*/
