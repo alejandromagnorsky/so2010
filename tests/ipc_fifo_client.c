@@ -8,12 +8,14 @@ int main(){
 	client = fifoConnect(fifoIPCData(0));
 	
 	message_t inmsg;
-	char * word = "Hola soy el cliente mas nabo que hay mando mensajes al server y recibo los que el me manda";
+	char * word = "Mensaje Cliente 1";
 	
 	while(1){
+		printf("mando mensaje\n");
 		qput(client->outbox, mnew(0,0,strlen(word) + 1, word));
 		if((inmsg = qget(client->inbox)) != NULL){
 			printf("Client recibio: %s\n", inmsg->data);
 		}
+		sleep(3);
 	}
 }

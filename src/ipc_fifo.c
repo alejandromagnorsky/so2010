@@ -1,6 +1,5 @@
 #include "../include/ipc_fifo.h"
 
-
 int initFifos(int qtyAnts){
 	if(qtyAnts <= 0)
 		return;	
@@ -17,22 +16,6 @@ int initFifos(int qtyAnts){
 		if(mkfifo(word, PERMISSIONS) < 0){
 			return -1;
 		}
-		i++;
-	}
-}
-
-void unlinkFifos(int qtyAnts){
-	if(qtyAnts <= 0)
-		return;	
-
-	char word[20];
-	int i = 0;
-	
-	while(i < qtyAnts){
-		sprintf(word, "/tmp/fifo_c_w_%d", i);
-		unlink(word);		
-		sprintf(word, "/tmp/fifo_c_r_%d", i);
-		unlink(word);		
 		i++;
 	}
 }
@@ -66,20 +49,38 @@ ipc_t fifoConnect(ipcdata_t ipcdata){
 			ret->thread = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);	
 		}
 	}
-	
 	return ret;
 }
+
+
+ipc_t fifoServe(ipcdata_t ipcdata, int nclients){
+
+	initFifos(nclients);
+
+	int rcreat;
+    ipc_t ret = (ipc_t) calloc (1, sizeof(struct st_ipc_t));
+    
+    ret->status = IPCSTAT_PREPARING;
+    ret->maxclts = nclients;
+    ret->ipcdata = ipcdata;
+    ret->inbox = qnew();
+    ret->outbox = qnew();
+
+    rcreat = pthread_create(&(ret->thread), NULL, fifoServerLoop, ret);
+    
+    if (rcreat != 0)
+        ret->status = IPCERR_THREAD;
+
+   return ret;
+}
+
 
 int writefifo(ipc_t ipc, void * data, int len){
 	int nwrite = 0;
 	if(ipc->status == IPCSTAT_CONNECTED){
 		nwrite = write(ipc->ipcdata->fifodata.fdw, (char *) data, len);
-		if(nwrite < 0){
-			nwrite = 0;
-			//printf("Error escribiendo\n");
-		}
 	}
-	return nwrite;
+	return nwrite < 0 ? 0 : nwrite;
 }
 
 int readfifo(ipc_t ipc, char * buffer, int len){
@@ -97,6 +98,8 @@ int readfifo(ipc_t ipc, char * buffer, int len){
 int fifoDisconnect(ipc_t ipc){
 	unlink(ipc->ipcdata->fifodata.fifonamew);
 	unlink(ipc->ipcdata->fifodata.fifonamer);
+	free(ipc->ipcdata);
+	free(ipc);
 }
 
 
@@ -144,4 +147,85 @@ void* fifoClientLoop(void* ipcarg){
 	free(currMsgR);
 	free(currMsgW);
 }
+
+
+void* fifoServerLoop(void * ipcarg){
+	
+	ipc_t ipc;
+	fd_set checkfds, readfds, errfds, writefds;
+	int nclt, offset, nread;
+
+	ipc = (ipc_t) ipcarg;
+
+	client_t * clients = calloc(ipc->maxclts, sizeof(client_t));
+	client_t currClient;
+
+	FD_ZERO(&readfds);
+
+	for(nclt = 0; nclt < ipc->maxclts; nclt++){
+		clients[nclt] = (client_t) malloc(sizeof(struct st_client_t));
+		clients[nclt]->cinfo = (ipcdata_t) malloc(sizeof(union un_ipcdata_t));
+		sprintf(clients[nclt]->cinfo->fifodata.fifonamew, "/tmp/fifo_c_r_%d", nclt);
+		sprintf(clients[nclt]->cinfo->fifodata.fifonamer, "/tmp/fifo_c_w_%d", nclt);
+		clients[nclt]->cinfo->fifodata.fdw = open(clients[nclt]->cinfo->fifodata.fifonamew, O_RDWR | O_NONBLOCK);
+		clients[nclt]->cinfo->fifodata.fdr = open(clients[nclt]->cinfo->fifodata.fifonamer, O_RDONLY | O_NONBLOCK);
+		if(clients[nclt]->cinfo->fifodata.fdw < 0 || clients[nclt]->cinfo->fifodata.fdr < 0){
+			printf("Error: opening clients.\n");
+			ipc->status = IPCSTAT_DISCONNECTED;
+			return;
+		}
+		FD_SET(clients[nclt]->cinfo->fifodata.fdr, &readfds);
+	}
+
+	ipc->status = IPCSTAT_SERVING;
+	
+	while (ipc->stop != 1){
+		FD_ZERO(&readfds);
+
+		for(nclt = 0; nclt < ipc->maxclts; nclt++){
+			FD_SET(clients[nclt]->cinfo->fifodata.fdr, &readfds);
+		}
+		
+		select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
+		for(nclt = 0; nclt < ipc->maxclts; nclt++){
+		//	printf("Revisa cliente: %d\n", nclt);
+			if(FD_ISSET(clients[nclt]->cinfo->fifodata.fdr, &readfds)){
+			//	printf("Activo cliente: %d\n", nclt);
+				currClient = clients[nclt];
+				if(currClient->msgr == NULL){
+					currClient->msgr = (msg_reading) malloc(sizeof(struct st_msg_reading));
+					currClient->msgr->toRead = currClient->msgr->hdread = 0;
+				}else{
+					if(currClient->msgr->toRead == 0){
+						currClient->msgr->hdread += (nread = read(currClient->cinfo->fifodata.fdr, 
+													currClient->msgr->bufferhd, M_HEADER_SIZE)) < 0 ? 0 : nread;
+						if(currClient->msgr->hdread == M_HEADER_SIZE){
+							currClient->msgr->incomingMsg = mhnew( (mheader_t) currClient->msgr->bufferhd, NULL);
+							currClient->msgr->toRead = currClient->msgr->incomingMsg->header.len;
+						}
+					}else{
+						offset = currClient->msgr->incomingMsg->header.len - currClient->msgr->toRead;
+						currClient->msgr->toRead -= read(currClient->cinfo->fifodata.fdr, 
+										currClient->msgr->incomingMsg->data + offset, currClient->msgr->toRead);
+						if(currClient->msgr->toRead == 0){
+							qput(ipc->inbox, currClient->msgr->incomingMsg);
+							mdel(currClient->msgr->incomingMsg);
+							free(currClient->msgr);
+							currClient->msgr = NULL;
+						} 
+					}
+				}
+			}
+			
+			//ACA ESCRIBE
+		}
+	}
+
+
+
+}
+
+
+
+
 
