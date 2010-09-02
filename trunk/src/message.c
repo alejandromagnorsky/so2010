@@ -102,9 +102,9 @@ message_t mdeserial(char* data) {
 
 void mprintln(message_t m) {
 
-    printf("<Message %d-%d (%db): \"%*s\">\n", m->header.from,
-                                               m->header.to,
-                                               m->header.len,
+    printf("<Message %d-%d (%db): \"%*s\">\n", (int) m->header.from,
+                                               (int) m->header.to,
+                                               (int) m->header.len,
                                                (int) m->header.len, m->data);
 
 }
