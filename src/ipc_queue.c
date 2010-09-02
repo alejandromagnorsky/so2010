@@ -13,7 +13,9 @@ ipc_t mq_connect()
 	queue_id = init_queue();
 	newIpc->status = IPCSTAT_CONNECTING;
 	
-	/*pthread_create(&(newIpc->thread), NULL, mq_serverLoop, newIpc);*/
+	//[TODO] hay un thread para el server y uno para el client o como es?
+	
+	pthread_create(&(newIpc->thread), NULL, mq_serverLoop, newIpc);
 	
 	if(queue_id == -1)
 	{
@@ -29,43 +31,57 @@ ipc_t mq_connect()
 
 void * mq_serverLoop(void* ipcarg)
 {
-	/*ipc_t ipc;
+	ipc_t ipc;
 	int i;
 	ipc = (ipc_t) ipcarg;
-	struct st_sclient_t* clts;
 	message_t msg;
 	
-	clts = (struct st_sclient_t*) calloc (ipc->maxclts,
-                                         sizeof(struct st_sclient_t));
-    
     while (!(ipc->stop)) {
-        
-        
-        /*hacer esta parte
-        msg = qget(ipc->outbox);
-        
+    	
+        msg = mq_getData(ipc, SERVERPRIOR);  //[TODO] cambiar el SERVERPRIOR por la prioridad que tenga el servidor
         if(msg != NULL)
         {
-        	mq_sendData(ipc, msg);
-        }
-        
-        msg = mq_getData(ipc, priority);
-        
-        qput(ipc->inbox, msg);
-    
-    }
-    
-    for (i = 0; i < ipc->maxclts; i++)
-    {
-        if (clts[i].active)
-        {
-        	close(clts[i].fd);
+		    if(msg->header.to == 0)
+		    {
+		    	//[TODO] ver que pasa si hay un mensaje con to = 0
+		    	//pero hay que cambiar el to.. 0 no existe
+		    	
+		    	/* Es esto lo que tiene que hacer? */
+		    	qput(ipc->inbox, msg);
+		    }
+		    else 
+		    {
+		    	mq_sendData(ipc,msg,msg->header.to);
+		    }
         }
     }
     
     mq_disconnect(ipc);
+    free(msg);
+    return;
+}
+
+void * mq_clientLoop(void* ipcarg)
+{
+	ipc_t ipc;
+	int i;
+	ipc = (ipc_t) ipcarg;
+	message_t msg;
+	
+    while (!(ipc->stop)) {
+    	
+    	msg = mq_getData(ipc, CLIENTPRIOR);
+    	qput(ipc->inbox, msg);
+    	msg = qget(ipc->outbox);
+        if(msg != NULL)
+        {
+        	mq_sendData(ipc,msg,SERVERPRIOR);
+        }
+    }
     
-    return;*/
+    mq_disconnect(ipc);
+    free(msg);
+    return;
 }
 
 int init_queue(void)
@@ -80,9 +96,8 @@ int init_queue(void)
 	return queue_id;
 }
 
-int mq_sendData(ipc_t ipc, message_t msg)
+int mq_sendData(ipc_t ipc, message_t msg, int priority)
 {
-	int priority = msg->header.to;
 	int queue_id;
 	struct q_entry s_entry;
 	char * data;
@@ -147,6 +162,7 @@ message_t mq_getData(ipc_t ipc, int priority)
 void mq_disconnect(ipc_t ipc)
 {
 	msgctl(ipc->ipcdata->queuedata.id,IPC_RMID, NULL);
+	free(ipc);
 	return;
 }
 
