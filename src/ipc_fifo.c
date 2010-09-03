@@ -153,12 +153,15 @@ void* fifoServerLoop(void * ipcarg){
 	
 	ipc_t ipc;
 	fd_set checkfds, readfds, errfds, writefds;
-	int nclt, offset, nread;
+	int nclt, offset, nread, nwrite;
 
 	ipc = (ipc_t) ipcarg;
 
 	client_t * clients = calloc(ipc->maxclts, sizeof(client_t));
 	client_t currClient;
+
+	msg_writting currMsgW = (msg_writting) malloc(sizeof(struct st_msg_writting));
+	currMsgW->toWrite = 0;
 
 	FD_ZERO(&readfds);
 
@@ -174,7 +177,6 @@ void* fifoServerLoop(void * ipcarg){
 			ipc->status = IPCSTAT_DISCONNECTED;
 			return;
 		}
-		FD_SET(clients[nclt]->cinfo->fifodata.fdr, &readfds);
 	}
 
 	ipc->status = IPCSTAT_SERVING;
@@ -188,9 +190,7 @@ void* fifoServerLoop(void * ipcarg){
 		
 		select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
 		for(nclt = 0; nclt < ipc->maxclts; nclt++){
-		//	printf("Revisa cliente: %d\n", nclt);
 			if(FD_ISSET(clients[nclt]->cinfo->fifodata.fdr, &readfds)){
-			//	printf("Activo cliente: %d\n", nclt);
 				currClient = clients[nclt];
 				if(currClient->msgr == NULL){
 					currClient->msgr = (msg_reading) malloc(sizeof(struct st_msg_reading));
@@ -216,8 +216,21 @@ void* fifoServerLoop(void * ipcarg){
 					}
 				}
 			}
-			
-			//ACA ESCRIBE
+
+			if(currMsgW->toWrite == 0){
+				message_t nextMsg = qget(ipc->outbox);
+				if(nextMsg != NULL){
+					currMsgW->toWrite = M_HEADER_SIZE + nextMsg->header.len;
+					currMsgW->msglen = currMsgW->toWrite;
+					currMsgW->data = mserial(nextMsg);
+					currMsgW->to = nextMsg->header.to;
+					currMsgW->from = nextMsg->header.from;
+				}
+			}else{
+				offset = currMsgW->msglen - currMsgW->toWrite;
+				currMsgW->toWrite -= (nwrite = write(clients[currMsgW->to], currMsgW->data + offset, currMsgW->toWrite)) < 0 ? 0 : nwrite;
+			}
+
 		}
 	}
 
