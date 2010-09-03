@@ -1,10 +1,37 @@
 #include "../include/ipc_queue.h"
 
-/*I am 2*/
+/*I was 2*/
+/*I am CLIENT*/
 
 int main() {
 
 	int n;
+	message_t msg;
+	char mtext[200];
+	ipc_t ipc;
+	
+	ipc = mq_connect(CLIENTKEY);
+	
+	while((n = read(0,mtext,sizeof mtext)) > 0)
+	{
+		msg = mnew(CLIENTKEY,SERVERKEY,n,mtext);
+		printf("Cliente envia: %.*s", n, mdata(msg));
+		qput(ipc->outbox,msg);
+		
+		msg = qget(ipc->inbox);
+		if(msg > 0)
+		{
+			printf("Cliente recibe: %.*s", mdlen(msg), mdata(msg));
+		}
+	}
+	printf("Cliente termina\n");
+	mdel(msg);
+	free(ipc);
+	return 0;
+
+	/* este anda */
+	
+	/*int n;
 	message_t msg;
 	
 	char mtext[200];
@@ -27,7 +54,9 @@ int main() {
 	printf("Cliente termina\n");
 	mdel(msg);
 	free(ipc);
-	return 0;
+	return 0;*/
+	
+	/*El de arriba anda*/
 	
 	/*int n;
 	message_t msg;

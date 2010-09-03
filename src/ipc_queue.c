@@ -1,6 +1,6 @@
 #include "../include/ipc_queue.h"
 
-ipc_t mq_connect()
+ipc_t mq_connect(int key)
 {
 	int queue_id;
 	int rcreat;
@@ -10,10 +10,37 @@ ipc_t mq_connect()
 	
 	newIpc->ipcdata = malloc(sizeof(union un_ipcdata_t));
 	
-	queue_id = init_queue();
+	queue_id = init_queue(key);
 	newIpc->status = IPCSTAT_CONNECTING;
 	
-	//[TODO] hay un thread para el server y uno para el client o como es?
+	pthread_create(&(newIpc->thread), NULL, mq_clientLoop, newIpc);
+	
+	if(queue_id == -1)
+	{
+		newIpc->status = IPCERR_MSGGETFAILED;
+		return newIpc;
+	}
+	
+	newIpc->inbox = qnew();
+	newIpc->outbox = qnew();
+	newIpc->stop = 0;
+	newIpc->status = IPCSTAT_CONNECTED;
+	newIpc->ipcdata->queuedata.id = queue_id;
+	return newIpc;
+}
+
+ipc_t mq_serve(int key)
+{
+	int queue_id;
+	int rcreat;
+	
+	ipc_t newIpc = malloc(sizeof(struct st_ipc_t));
+	newIpc->status = IPCSTAT_DISCONNECTED;
+	
+	newIpc->ipcdata = malloc(sizeof(union un_ipcdata_t));
+	
+	queue_id = init_queue(key);
+	newIpc->status = IPCSTAT_CONNECTING;
 	
 	pthread_create(&(newIpc->thread), NULL, mq_serverLoop, newIpc);
 	
@@ -23,6 +50,8 @@ ipc_t mq_connect()
 		return newIpc;
 	}
 	
+	newIpc->inbox = qnew();
+	newIpc->outbox = qnew();
 	newIpc->stop = 0;
 	newIpc->status = IPCSTAT_CONNECTED;
 	newIpc->ipcdata->queuedata.id = queue_id;
@@ -38,7 +67,7 @@ void * mq_serverLoop(void* ipcarg)
 	
     while (!(ipc->stop)) {
     	
-        msg = mq_getData(ipc, SERVERPRIOR);  //[TODO] cambiar el SERVERPRIOR por la prioridad que tenga el servidor
+        msg = mq_getData(ipc, SERVERKEY);  //[TODO] cambiar el SERVERPRIOR por la prioridad que tenga el servidor
         if(msg != NULL)
         {
 		    if(msg->header.to == 0)
@@ -70,12 +99,13 @@ void * mq_clientLoop(void* ipcarg)
 	
     while (!(ipc->stop)) {
     	
-    	msg = mq_getData(ipc, CLIENTPRIOR);
+    	msg = mq_getData(ipc, ipc->ipcdata->queuedata.id);
     	qput(ipc->inbox, msg);
+    	
     	msg = qget(ipc->outbox);
         if(msg != NULL)
         {
-        	mq_sendData(ipc,msg,SERVERPRIOR);
+        	mq_sendData(ipc,msg,SERVERKEY);
         }
     }
     
@@ -84,11 +114,11 @@ void * mq_clientLoop(void* ipcarg)
     return;
 }
 
-int init_queue(void)
+int init_queue(int key)
 {
 	int queue_id;
 	
-	if((queue_id = msgget(QKEY, IPC_CREAT | QPERM)) == -1)
+	if((queue_id = msgget((key_t)key, IPC_CREAT | QPERM)) == -1)
 	{
 		perror("msgget failed");
 	}
@@ -109,7 +139,7 @@ int mq_sendData(ipc_t ipc, message_t msg, int priority)
 		return (-1);
 	}
 	
-	if(queue_id = init_queue() == -1)
+	if(queue_id = init_queue(ipc->ipcdata->queuedata.id) == -1)
 	{
 		ipc->status = IPCERR_MSGGETFAILED;
 		return (-1);
@@ -138,7 +168,7 @@ message_t mq_getData(ipc_t ipc, int priority)
 	
 	int queue_id;
 
-	if((r_qid = init_queue()) == -1)
+	if((r_qid = init_queue(ipc->ipcdata->queuedata.id)) == -1)
 	{
 		ipc->status = IPCERR_MSGGETFAILED;
 		return mnew(0,0,0,"");
