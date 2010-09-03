@@ -8,5 +8,5 @@ MSGQUEUE_REQS="../src/ipc_queue.c"
 gcc message_test.c $MESSAGE_REQS -o message_test
 #gcc queue_singletest.c $QUEUE_REQS -o queue_singletest
 
-gcc -pthread ipc_queueSend.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_send
-gcc -pthread ipc_queueReceive.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_rec
+gcc -pthread ipc_queueClient.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_client
+gcc -pthread ipc_queueServer.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_server

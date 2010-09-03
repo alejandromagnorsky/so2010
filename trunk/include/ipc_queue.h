@@ -19,20 +19,27 @@
 #define SERVERPRIOR 1
 #define CLIENTPRIOR 2
 
+#define SERVERKEY 1234
+#define CLIENTKEY 1235
+
 
 struct q_entry {
 	long mtype;
 	char mtext[MAXOBN+1];
 };
 
-ipc_t mq_connect();
+ipc_t mq_connect(int key);
 /* Fires a thread to connect to a server, returns a ipc_t structure ptr. */
+
+ipc_t mq_serve(int key);
 
 void * mq_serverLoop(void* ipcarg);
 /* Starts a connection loop. Loops until ipc->stop is 1.
    To be called in a new thread */
+   
+void * mq_clientLoop(void* ipcarg);
 
-int init_queue(void);
+int init_queue(int key);
 /* Opens or connects to a queue as required. */
 
 int mq_sendData(ipc_t ipc, message_t msg, int priority);
