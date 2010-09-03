@@ -42,6 +42,8 @@ struct st_msg_writting {
 	int msglen;
 	int toWrite;
 	char * data;
+	int to;
+	int from;
 };
 
 struct st_msg_reading {
