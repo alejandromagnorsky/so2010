@@ -54,6 +54,8 @@ union un_ipcdata_t {
     
     struct {
     	int id;
+    	int sendPrior;
+    	int recvPrior;
     } queuedata;
     
 };

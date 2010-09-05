@@ -1,6 +1,6 @@
 #include "../include/ipc_queue.h"
 
-ipc_t mq_connect(int key)
+ipc_t mq_connect(int key, int sendprior, int recvprior)
 {
 	int queue_id;
 	int rcreat;
@@ -26,10 +26,12 @@ ipc_t mq_connect(int key)
 	newIpc->stop = 0;
 	newIpc->status = IPCSTAT_CONNECTED;
 	newIpc->ipcdata->queuedata.id = queue_id;
+	newIpc->ipcdata->queuedata.sendPrior = sendprior;
+	newIpc->ipcdata->queuedata.recvPrior = recvprior;
 	return newIpc;
 }
 
-ipc_t mq_serve(int key)
+ipc_t mq_serve(int key, int sendprior, int recvprior)
 {
 	int queue_id;
 	int rcreat;
@@ -55,6 +57,8 @@ ipc_t mq_serve(int key)
 	newIpc->stop = 0;
 	newIpc->status = IPCSTAT_CONNECTED;
 	newIpc->ipcdata->queuedata.id = queue_id;
+	newIpc->ipcdata->queuedata.sendPrior = sendprior;
+	newIpc->ipcdata->queuedata.recvPrior = recvprior;
 	return newIpc;
 }
 
@@ -67,16 +71,19 @@ void * mq_serverLoop(void* ipcarg)
 	
     while (!(ipc->stop)) {
     	
-        msg = mq_getData(ipc, SERVERKEY);  //[TODO] cambiar el SERVERPRIOR por la prioridad que tenga el servidor
-        if(msg != NULL)
+        msg = mq_getData(ipc, SERVERKEY);
+        if(msg > 0)
         {
-		    if(msg->header.to == 0)
+			if(msg->header.to == 0)
 		    {
+		    	mprintln(msg);
+		    
+		    /*
 		    	//[TODO] ver que pasa si hay un mensaje con to = 0
 		    	//pero hay que cambiar el to.. 0 no existe
 		    	
-		    	/* Es esto lo que tiene que hacer? */
-		    	qput(ipc->inbox, msg);
+		    	/* Es esto lo que tiene que hacer?
+		    	qput(ipc->inbox, msg);*/
 		    }
 		    else 
 		    {
@@ -99,11 +106,14 @@ void * mq_clientLoop(void* ipcarg)
 	
     while (!(ipc->stop)) {
     	
-    	msg = mq_getData(ipc, ipc->ipcdata->queuedata.id);
-    	qput(ipc->inbox, msg);
+    	msg = mq_getData(ipc, ipc->ipcdata->queuedata.recvPrior);
+    	if(msg > 0)
+    	{
+			qput(ipc->inbox, msg);
+    	}
     	
     	msg = qget(ipc->outbox);
-        if(msg != NULL)
+        if(msg > 0)
         {
         	mq_sendData(ipc,msg,SERVERKEY);
         }
@@ -128,6 +138,7 @@ int init_queue(int key)
 
 int mq_sendData(ipc_t ipc, message_t msg, int priority)
 {
+
 	int queue_id;
 	struct q_entry s_entry;
 	char * data;
@@ -162,6 +173,7 @@ int mq_sendData(ipc_t ipc, message_t msg, int priority)
 
 message_t mq_getData(ipc_t ipc, int priority)
 {
+
 	int mlen, r_qid;
 	message_t msg;
 	struct q_entry r_entry;
