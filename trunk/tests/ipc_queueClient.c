@@ -10,11 +10,12 @@ int main() {
 	char mtext[200];
 	ipc_t ipc;
 	
-	ipc = mq_connect(CLIENTKEY);
+	ipc = mq_connect(QKEY, CLIENTSENDPRIOR, CLIENTRECVPRIOR);
 	
 	while((n = read(0,mtext,sizeof mtext)) > 0)
 	{
-		msg = mnew(CLIENTKEY,SERVERKEY,n,mtext);
+		printf("%d\n", ipc->ipcdata->queuedata.id);
+		msg = mnew(CLIENTSENDPRIOR,CLIENT2RECVPRIOR,n,mtext);
 		printf("Cliente envia: %.*s", n, mdata(msg));
 		qput(ipc->outbox,msg);
 		

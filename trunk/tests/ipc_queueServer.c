@@ -7,19 +7,17 @@
 void quit(int sig);
 
 int main(){
-	ipc_t ipc = mq_serve(SERVERKEY);
+	ipc_t ipc = mq_serve(QKEY,SERVERKEY ,SERVERKEY);
 	message_t msg;
 	
 	while(1)
 	{
-	
 		msg = qget(ipc->inbox);
 		if( msg > 0)
 		{
+		printf("%d\n", ipc->ipcdata->queuedata.id);
 			printf("servidor: %.*s", mdlen(msg), mdata(msg));
-			msg->header.from = SERVERKEY;
-			msg->header.to = CLIENTKEY;
-			qput(ipc->outbox,msg);
+			//qput(ipc->outbox,msg);
 		}
 	}
 	
