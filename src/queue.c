@@ -73,6 +73,22 @@ message_t qget(queue_t queue) {
     return ret;
 }
 
+message_t qpeek(queue_t queue) {
+
+    item_t i;
+    message_t ret = NULL;
+
+    qlock(queue);
+
+    if ((i = queue->first) != NULL) {
+        ret = mcopy(i->message);
+    }
+    
+    qunlock(queue);
+    
+    return ret;
+}
+
 int qput(queue_t queue, message_t message) {
     
     item_t i = (item_t) malloc(sizeof(struct st_item_t));
