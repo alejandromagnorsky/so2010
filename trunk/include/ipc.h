@@ -39,7 +39,8 @@ enum {
 	IPCERR_MSGGETFAILED,
     IPCERR_INVALIDPRIORITY,
     IPCERR_MSGSNDFAILED,
-    IPCERR_MSGRCVFAILED
+    IPCERR_MSGRCVFAILED,
+    NOMSG
 };
 
 struct st_sstatus_t {
@@ -68,7 +69,7 @@ union un_ipcdata_t {
     } fifodata;
     
     struct {
-    	int id;
+    	key_t id;
     	int sendPrior;
     	int recvPrior;
     } queuedata;

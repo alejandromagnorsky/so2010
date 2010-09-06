@@ -7,7 +7,7 @@
 void quit(int sig);
 
 int main(){
-	ipc_t ipc = mq_serve(QKEY,SERVERKEY ,SERVERKEY);
+	ipc_t ipc = mq_serve(SERVERKEY ,SERVERKEY);
 	message_t msg;
 	
 	while(1)
@@ -15,7 +15,6 @@ int main(){
 		msg = qget(ipc->inbox);
 		if( msg > 0)
 		{
-		printf("%d\n", ipc->ipcdata->queuedata.id);
 			printf("servidor: %.*s", mdlen(msg), mdata(msg));
 			//qput(ipc->outbox,msg);
 		}
@@ -27,7 +26,7 @@ int main(){
 	/* este anda */
 	
 	/*message_t msg;
-	ipc_t ipc = mq_connect();
+	ipc_t ipc = mq_connect(1,1);
 	
 	signal(SIGINT, quit);
 	
@@ -43,7 +42,7 @@ int main(){
 			msg->header.to=2;
 			mq_sendData(ipc,msg,2);
 		}
-	} */
+	}*/
 	
 	/* el de arriba anda */
 	
