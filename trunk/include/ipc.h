@@ -13,7 +13,9 @@
 #include "queue.h"
 #include "message.h"
 
+#include <errno.h>
 #include <sys/types.h>
+#include <netinet/in.h>
 #include <netinet/in.h>
 
 enum {
@@ -29,6 +31,8 @@ enum {
     IPCERR_SBIND,
     IPCERR_SCONNECT,
     IPCERR_SLISTEN,
+    IPCERR_SFCNTL,
+    IPCERR_SRDWR,
 
 	IPCERR_OPENFIFO,
 	
@@ -38,11 +42,22 @@ enum {
     IPCERR_MSGRCVFAILED
 };
 
+struct st_sstatus_t {
+    int rstate, wstate;
+    int rleft, wleft;
+    struct st_mheader_t hbuffer;
+    
+    message_t outm, inm;
+};
+
+typedef struct st_sstatus_t* sstatus_t;
+
 union un_ipcdata_t {
     
     struct {
         int fd;
         struct sockaddr_in addr;
+        struct st_sstatus_t status;
     } sdata;
     
     struct {
@@ -70,6 +85,7 @@ struct st_ipc_t {
     pthread_t thread;   /* Returned by pthread_create */
     int maxclts;        /* Max clients. Servers will use this */
     
+    int err;
     ipcdata_t ipcdata;
     queue_t inbox, outbox;
 };

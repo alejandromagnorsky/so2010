@@ -20,4 +20,5 @@ void* smemcpy(void* dest, void* src, size_t n);
 /* Exactly like memcpy, only it returns a pointer to (src + n).
    Helps clear the syntax in deserialization methods (e.g. see mdeserial). */
    
+#define LOG(...) printf(__VA_ARGS__)
 #endif

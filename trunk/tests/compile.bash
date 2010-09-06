@@ -1,13 +1,18 @@
 #!/bin/bash
 
-MESSAGE_REQS="../src/message.c ../src/tools.c"
-QUEUE_REQS="$MESSAGE_REQS ../src/queue.c"
+##
+##  SISTEMAS OPERATIVOS, 2C 2010
+##  PRIMER TRABAJO PRACTICO
+##  Simulacion de una colonia de hormigas.
 
-MSGQUEUE_REQS="../src/ipc_queue.c"
+##  File:       compile.bash
+##  Content:    bash script to compile the tests.
+##
 
-gcc message_test.c $MESSAGE_REQS -o message_test
-#gcc queue_singletest.c $QUEUE_REQS -o queue_singletest
+MESSAGE_DEP="../src/message.c"
+QUEUE_DEP="../src/message.c ../src/queue.c"
+ANYIPC_DEP="../src/message.c ../src/queue.c ../src/ipc.c ../src/ipc_sock.c ../src/tools.c ../src/ipc_fifo.c ../src/ipc_queue.c"
 
-gcc -pthread -g ipc_queueClient2.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_client2
-gcc -pthread -g ipc_queueClient.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_client
-gcc -pthread -g ipc_queueServer.c $QUEUE_REQS $MSGQUEUE_REQS -o msgqueue_server
+#gcc $MESSAGE_DEP message_test.c -o message_test
+#gcc $QUEUE_DEP queue_singletest.c -o queue_singletest
+gcc $ANYIPC_DEP anyipc_test.c -lpthread -o anyipc_test -g

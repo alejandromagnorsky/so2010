@@ -18,14 +18,14 @@ int main(int argc, char** argv) {
     message_t m1, m2, m3;
     queue_t q;
     
-    q = newQueue();
-    m1 = newMessage(10, 20, sizeof(MSG), MSG);
-    m2 = newMessage(14, 20, sizeof(MSG), MSG);
-    m3 = newMessage(14, 28, sizeof(MSG), MSG);
+    q = qnew();
+    m1 = mnew(10, 20, sizeof(MSG), MSG);
+    m2 = mnew(14, 20, sizeof(MSG), MSG);
+    m3 = mnew(14, 28, sizeof(MSG), MSG);
        
     printf("Testing qGet on empty queue... ");
     
-    if (qGet(q) == NULL)
+    if (qget(q) == NULL)
         printf("ok.\n");
         
     else {
@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     }
 
     printf("qPutting a message...");
-    if (qPut(q, m1))
+    if (qput(q, m1))
         printf("ok.\n");
         
     else {
@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
     }
 
     printf("qGetting and comparing to original... ");
-    if ( cmpMessage(m1, m2 = qGet(q)) )
+    if ( mcmp(m1, m2 = qget(q)) )
         printf("ok.\n");
         
     else {
@@ -53,11 +53,11 @@ int main(int argc, char** argv) {
     
     printf("qPutting, qGetting and comparting 3 messages... ");
     
-    if( qPut(q, m1) && qPut(q, m2) && qPut(q, m3)) {
+    if( qput(q, m1) && qput(q, m2) && qput(q, m3)) {
      
-        if (cmpMessage(qGet(q), m1) &&
-            cmpMessage(qGet(q), m2) &&
-            cmpMessage(qGet(q), m3))
+        if (mcmp(qget(q), m1) &&
+            mcmp(qget(q), m2) &&
+            mcmp(qget(q), m3))
             printf("ok!\n");
         
         else
