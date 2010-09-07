@@ -14,15 +14,15 @@
 #define QKEY		(key_t)0105
 #define QPERM		0660
 #define MAXOBN		200
-#define MAXPRIOR	100
+#define MAXPRIOR	100000
 
-#define SERVERKEY 2L
+#define SERVERKEY 2
 
-#define CLIENTSENDPRIOR 3L
-#define CLIENTRECVPRIOR 4L
+#define CLIENTSENDPRIOR 3
+#define CLIENTRECVPRIOR 4
 
-#define CLIENT2SENDPRIOR 5L
-#define CLIENT2RECVPRIOR 6L
+#define CLIENT2SENDPRIOR 5
+#define CLIENT2RECVPRIOR 6
 
 
 struct q_entry {
@@ -30,10 +30,12 @@ struct q_entry {
 	char mtext[MAXOBN];
 };
 
-ipc_t mq_connect(int sendprior, int recvprior);
+ipcdata_t mq_ipcdata(int sendprior, int recvprior);
+
+ipc_t mq_connect(ipcdata_t ipcdata);
 /* Fires a thread to connect to a client, returns a ipc_t structure ptr. */
 
-ipc_t mq_serve(int sendprior, int recvprior);
+ipc_t mq_serve(ipcdata_t ipcdata);
 /* Fires a thread to connect to a server, returns a ipc_t structure ptr. */
 
 void * mq_serverLoop(void* ipcarg);
