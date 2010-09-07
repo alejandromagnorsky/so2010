@@ -7,8 +7,16 @@
 void quit(int sig);
 
 int main(){
-	ipc_t ipc = mq_serve(SERVERKEY ,SERVERKEY);
+	
+	ipcdata_t ipcdata;
+	ipc_t ipc;
+	
+	ipcdata = mq_ipcData(SERVERKEY ,SERVERKEY);
+	ipc = mq_serve(ipcdata);
+	
 	message_t msg;
+	
+	signal(SIGINT, quit);
 	
 	while(1)
 	{
@@ -18,6 +26,7 @@ int main(){
 			printf("servidor: %.*s", mdlen(msg), mdata(msg));
 			//qput(ipc->outbox,msg);
 		}
+		fflush(stdout);
 	}
 	
 	

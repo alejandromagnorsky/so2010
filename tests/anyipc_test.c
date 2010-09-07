@@ -12,8 +12,8 @@
 
 
 #define IPC_METHOD_SOCKETS
-//#define IPC_METHOD_FIFOS
 //#define IPC_METHOD_MQS
+//#define IPC_METHOD_FIFOS
 //#define IPC_METHOD_SHMEM
 
 #ifdef IPC_METHOD_SOCKETS
@@ -31,15 +31,29 @@
     #define IPCF_CONNECT(X)     sockConnect(X)
 #endif
 
+#ifdef IPC_METHOD_MQS
+	#include "../include/ipc_queue.h"
+	
+	// Requirements to build IPCData vary from IPC method to IPC method
+    #define IPCF_IPCDATA(...)   mq_ipcdata(__VA_ARGS__)
+    #define IPCF_IPCDATA_ARGS   getpid(),getpid()
+    
+    // IPCF_SERVE always receives ipcdata_t
+    #define IPCF_SERVE(X, Y)    mq_serve(X)
+
+    // IPCF_CONNECT always receives ipcdata_t
+    #define IPCF_CONNECT(X)     mq_connect(X)
+#endif
+
 int main(int argc, char** argv) {
 
     pid_t cpid, spid, pid;
     message_t temp;
-    ipcdata_t ipcdata;
+    ipcdata_t ipcdata, ipcdata2;
     ipc_t sipc, cipc;
     
     char stop = 0;
-    LOG("Creating IPCData... "); // Macro defined in tools.h
+    LOG("Creating IPCData for server... "); // Macro defined in tools.h
     
     if ((ipcdata = IPCF_IPCDATA(IPCF_IPCDATA_ARGS)) != NULL)
         LOG("ok.\n");
@@ -75,8 +89,9 @@ int main(int argc, char** argv) {
                 mprintln(temp);
                 
                 /* Swap from and to, so that the message is routed: */
-                temp->header.to = mfrom(temp);
-                temp->header.from = 0;
+                
+                temp->header.to = temp->header.from;
+                temp->header.from = getpid();
 
                 sendMessage(sipc, temp);
                 LOG("(%d) Server sent: ", spid);
@@ -87,10 +102,20 @@ int main(int argc, char** argv) {
         }
         
     } else {
+    
+	    LOG("Creating IPCData for client... "); // Macro defined in tools.h
+	    
+    	if ((ipcdata2 = IPCF_IPCDATA(IPCF_IPCDATA_ARGS)) != NULL)
+		    LOG("ok.\n");
+		else {
+		    LOG("failed!\n");
+		    exit(1);
+		}
+    
         LOG("Client: pid %d.\n", cpid = getpid());
         LOG("Attempting to connect... ");
 
-        cipc = IPCF_CONNECT(ipcdata);
+        cipc = IPCF_CONNECT(ipcdata2);
 
         while (cipc->status == IPCSTAT_CONNECTING);
         
@@ -104,19 +129,19 @@ int main(int argc, char** argv) {
             exit(1);
         }
 
-        sendMessage(cipc, temp = mnew(1, 0, 5, "ping!"));
+        sendMessage(cipc, temp = mnew(getpid(), getppid(), 5, "ping!"));
         mdel(temp);
         
         while(!stop) {
-
+        
             if (temp = recvMessage(cipc)) {
-                
+
                 LOG("(%d) Client received: ", spid);
                 mprintln(temp);
                 
                 /* Bounce the message! */
                 temp->header.to = temp->header.from;
-                temp->header.from = 1;
+                temp->header.from = getpid();
                 
                 LOG("(%d) Client sent: ", spid);
                 mprintln(temp);

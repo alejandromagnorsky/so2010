@@ -9,8 +9,11 @@ int main() {
 	message_t msg;
 	char mtext[200];
 	ipc_t ipc;
+	ipcdata_t ipcdata;
 	
-	ipc = mq_connect(CLIENTSENDPRIOR, CLIENTRECVPRIOR);
+	ipcdata = mq_ipcData(CLIENTSENDPRIOR, CLIENTRECVPRIOR);
+	
+	ipc = mq_connect(ipcdata);
 	
 	while((n = read(0,mtext,sizeof mtext)) > 0)
 	{
@@ -18,11 +21,15 @@ int main() {
 		printf("Cliente envia: %.*s", n, mdata(msg));
 		qput(ipc->outbox,msg);
 		
+		
 		msg = qget(ipc->inbox);
-		if(msg > 0)
+		printf("enviado");
+		printf("%d\n", msg == NULL);
+		if(msg != NULL)
 		{
 			printf("Cliente recibe: %.*s", mdlen(msg), mdata(msg));
 		}
+		fflush(stdout);
 	}
 	printf("Cliente termina\n");
 	mdel(msg);
