@@ -24,10 +24,8 @@ struct st_mheader_t {
 typedef struct st_mheader_t* mheader_t;
 
 struct st_message_t {
-
     struct st_mheader_t header;
     char* data;
-    
 };
 
 typedef struct st_message_t* message_t;

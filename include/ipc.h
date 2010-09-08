@@ -36,6 +36,10 @@ enum {
 
 	IPCERR_OPENFIFO,
 	
+	IPCERR_SHM,
+	IPCERR_SHMSEM,
+	IPCERR_SHMATTACH,
+	
 	IPCERR_MSGGETFAILED,
     IPCERR_INVALIDPRIORITY,
     IPCERR_MSGSNDFAILED,
@@ -74,11 +78,18 @@ union un_ipcdata_t {
     	int recvPrior;
     } queuedata;
     
+    struct {
+    	int semid;
+    	void * bufw;
+    	void * bufr;
+    }shmdata;
+    
 };
 
 typedef union un_ipcdata_t* ipcdata_t;
 
 struct st_ipc_t {
+	int id;
     int stop;           /* Put here so that the thread can be stopped */
     int errn;           /* The errno code of errors is stored here */
     int status;         /* Status is stored here. Do not write! */
