@@ -31,8 +31,14 @@ ipcdata_t fifoIPCData(int nant){
 }
 
 ipc_t fifoConnect(ipcdata_t ipcdata){
+		
 	ipc_t ret = (ipc_t) malloc(sizeof(struct st_ipc_t));
-
+	int rcreat = 0;
+	if(ipcdata == NULL){
+		ret->status = IPCSTAT_DISCONNECTED;
+		return ret;
+	}
+	
 	if(ret != NULL){
 		ret->status = IPCSTAT_CONNECTING;
 		ret->ipcdata = ipcdata;
@@ -46,7 +52,11 @@ ipc_t fifoConnect(ipcdata_t ipcdata){
 			ret->status = IPCERR_OPENFIFO;
 		}else{
 			ret->status = IPCSTAT_CONNECTED;
-			ret->thread = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);	
+			rcreat = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);	
+			if(rcreat != 0){
+				ret->status = IPCERR_THREAD;
+				return ret; //ver los free
+			}
 		}
 	}
 	return ret;
@@ -66,9 +76,7 @@ ipc_t fifoServe(int nclients){
     ret->inbox = qnew();
     ret->outbox = qnew();
 
-    rcreat = pthread_create(&(ret->thread), NULL, fifoServerLoop, ret);
-    
-    if (rcreat != 0)
+    if((ret->thread = pthread_create(&(ret->thread), NULL, fifoServerLoop, ret)) != 0);
         ret->status = IPCERR_THREAD;
 
    return ret;
