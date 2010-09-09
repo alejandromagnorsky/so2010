@@ -1,12 +1,12 @@
 #include "../include/io.h"
 
-int loadGrid(grid_t grid, char * nameFile)
+int loadGrid(grid_t grid, char * fileName)
 {
 	int c, aux, i;
 	
 	FILE * file;
 
-	file = fopen(nameFile,"r");
+	file = fopen(fileName,"r");
 	
 	if(file == NULL) 
 		return ERR_FILE;
@@ -76,8 +76,6 @@ int loadGrid(grid_t grid, char * nameFile)
 	grid->gridRows = aux;
 	aux = 0;
 	
-	//[TODO] chequear espacios
-	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
@@ -143,8 +141,6 @@ int loadGrid(grid_t grid, char * nameFile)
 	grid->anthillRow = aux;
 	aux = 0;
 	
-	//[TODO] chequear espacios
-	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
@@ -175,8 +171,6 @@ int loadGrid(grid_t grid, char * nameFile)
 	grid->antsQuant = aux;
 	aux = 0;
 	
-	//[TODO] chequear espacios
-	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
@@ -206,8 +200,6 @@ int loadGrid(grid_t grid, char * nameFile)
 	
 	grid->smallFoodQuant = aux;
 	aux = 0;
-	
-	//[TODO] chequear espacios
 	
 	c = allocSmallFood(grid, grid->smallFoodQuant);
 
@@ -248,8 +240,6 @@ int loadGrid(grid_t grid, char * nameFile)
 		grid->smallFoods[i] = aux;
 		aux = 0;
 	}
-	
-	//[TODO] chequear espacios
 	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
