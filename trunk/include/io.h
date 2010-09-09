@@ -4,17 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_FILS 80
-#define MAX_COLS 80
+#define MAX_FILS 60
+#define MAX_COLS 60
 
 struct st_grid_t {
     int gridCols;
     int gridRows;
     
-    int antCol;
-    int antRow;
+    int anthillCol;
+    int anthillRow;
     
-    int cantHor;
+    int antsQuant;
     
     int smallFoodQuant;
     int bigFoodQuant;
@@ -30,8 +30,9 @@ enum {
 	NO_ERRORS,
     ERR_FILE,
     MEMORY_ERROR,
-    ERR_HORMIGUERO,
-    ERR_CANTCOMCHICA,
+    ERR_ANTHILL,
+    ERR_SMALLFOODQUANT,
+    ERR_BIGFOODQUANT,
     ERR_CANTCOMTOTAL
 };
 
@@ -40,8 +41,8 @@ int loadGrid(grid_t tab, char * nombreArchivo);
 
 grid_t gnew();
 
-int alocarComidasChicas(grid_t grid, int cantComChicas);
+int allocSmallFood(grid_t grid, int cantComChicas);
 
-int alocarComidasGrandes(grid_t grid, int cantComGrandes);
+int allocBigFood(grid_t grid, int cantComGrandes);
 
 #endif
