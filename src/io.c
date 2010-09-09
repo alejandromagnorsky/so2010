@@ -10,7 +10,9 @@ int loadGrid(grid_t grid, char * fileName)
 	
 	if(file == NULL) 
 		return ERR_FILE;
-		
+	
+	
+	/* Reading quantity of columns */	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
@@ -46,6 +48,8 @@ int loadGrid(grid_t grid, char * fileName)
 		return ERR_FILE;
 	}
 	
+	/* Reading quantity of rows */
+	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -=48;
@@ -76,10 +80,12 @@ int loadGrid(grid_t grid, char * fileName)
 	grid->gridRows = aux;
 	aux = 0;
 	
+	/* Reading anthill column */
+	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
-	if(c > 0 && c <= 9)
+	if(c >= 0 && c <= 9)
 	{
 		aux = c;
 	}
@@ -111,10 +117,12 @@ int loadGrid(grid_t grid, char * fileName)
 		return ERR_FILE;
 	}
 	
+	/* Reading anthill row */
+	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
-	if(c > 0 && c <= 9)
+	if(c >= 0 && c <= 9)
 	{
 		aux = c;
 	}
@@ -141,10 +149,12 @@ int loadGrid(grid_t grid, char * fileName)
 	grid->anthillRow = aux;
 	aux = 0;
 	
+	/* Reading quantity of ants */
+	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
-	if(c > 0 && c <= 9)
+	if(c >= 0 && c <= 9)
 	{
 		aux = c;
 	}
@@ -171,6 +181,8 @@ int loadGrid(grid_t grid, char * fileName)
 	grid->antsQuant = aux;
 	aux = 0;
 	
+	/* Reading quantity of small food */
+	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
@@ -193,11 +205,6 @@ int loadGrid(grid_t grid, char * fileName)
 		}
 	}
 	
-	if(aux >= grid->gridRows * grid->gridCols - 1)
-	{
-		return ERR_SMALLFOODQUANT;
-	}
-	
 	grid->smallFoodQuant = aux;
 	aux = 0;
 	
@@ -207,6 +214,8 @@ int loadGrid(grid_t grid, char * fileName)
 	{
 		return MEMORY_ERROR;
 	}
+	
+	/* Reading small food positions */
 
 	for(i = 0; i < grid->smallFoodQuant*2; i++)
 	{
@@ -232,14 +241,11 @@ int loadGrid(grid_t grid, char * fileName)
 			}
 		}
 	
-		if(aux >= grid->gridRows * grid->gridCols - 1)
-		{
-			return ERR_SMALLFOODQUANT;
-		}
-	
 		grid->smallFoods[i] = aux;
 		aux = 0;
 	}
+	
+	/* Reading quantity of big food */
 	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
@@ -263,11 +269,6 @@ int loadGrid(grid_t grid, char * fileName)
 		}
 	}
 	
-	if(aux >= grid->gridRows * grid->gridCols - 1 + grid->smallFoodQuant)
-	{
-		return ERR_BIGFOODQUANT;
-	}
-	
 	grid->bigFoodQuant = aux;
 	aux = 0;
 	
@@ -277,6 +278,8 @@ int loadGrid(grid_t grid, char * fileName)
 	{
 		return MEMORY_ERROR;
 	}
+	
+	/* Reading big food positions */
 	
 	for(i = 0; i < grid->bigFoodQuant*2; i++)
 	{
@@ -302,16 +305,16 @@ int loadGrid(grid_t grid, char * fileName)
 			}
 		}
 	
-		if(aux >= grid->gridRows * grid->gridCols - 1)
-		{
-			return ERR_BIGFOODQUANT;
-		}
-	
 		grid->bigFoods[i] = aux;
 		aux = 0;
 	}
 	
 	fclose(file);
+	
+	if(checkFoodPositions(grid) == ERR_FOODPOSITION)
+	{
+		return ERR_FOODPOSITION;
+	}
 	
 	return NO_ERRORS;
 }
@@ -356,3 +359,45 @@ grid_t gnew()
 		return NULL;
 	}
 }
+
+int checkFoodPositions(grid_t grid)
+{
+	int i;
+	
+	for(i = 0; i < grid->smallFoodQuant*2; i++)
+	{
+		if(i%2 == 0)
+		{
+			if(grid->smallFoods[i] >= grid->gridCols)
+			{
+				return ERR_FOODPOSITION;
+			}
+		}
+		else
+		{
+			if(grid->smallFoods[i] >= grid->gridRows)
+			{
+				return ERR_FOODPOSITION;
+			}
+		}
+	}
+	
+	for(i = 0; i < grid->bigFoodQuant*2; i++)
+	{
+		if(i%2 == 0)
+		{
+			if(grid->bigFoods[i] >= grid->gridCols)
+			{
+				return ERR_FOODPOSITION;
+			}
+		}
+		else
+		{
+			if(grid->bigFoods[i] >= grid->gridRows)
+			{
+				return ERR_FOODPOSITION;
+			}
+		}
+	}
+}
+

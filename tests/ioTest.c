@@ -2,11 +2,13 @@
 
 int main()
 {
-	int i;
+	int i, k;
 
 	grid_t grid = gnew();
 	
-	if(loadGrid(grid, "ejemploTablero") == NO_ERRORS)
+	k = loadGrid(grid, "ejemploTablero");
+	
+	if(k == NO_ERRORS)
 	{
 	
 		printf("Quantity of columns: %d\n", grid->gridCols);
@@ -17,8 +19,8 @@ int main()
 	
 		printf("Quantity of ants: %d\n", grid->antsQuant);
 	
-		printf("Quantity of small foods: %d\n", grid->smallFoodQuant);
-		printf("Quantity of big foods: %d\n", grid->bigFoodQuant);
+		printf("Quantity of small food: %d\n", grid->smallFoodQuant);
+		printf("Quantity of big food: %d\n", grid->bigFoodQuant);
 	
 		printf("small foods: ");
 		for(i = 0; i < grid->smallFoodQuant*2; i++)
@@ -50,7 +52,11 @@ int main()
 		}
 		printf("\n");
 	}
-	else
+	else if(k == ERR_FOODPOSITION)
+	{
+		printf("ERROR IN FOOD POSITION\n");
+	}
+	else 
 	{
 		printf("ERROR IN CONFIGURATION FILE\n");
 	}
