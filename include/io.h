@@ -7,26 +7,27 @@
 #define MAX_FILS 80
 #define MAX_COLS 80
 
-struct st_tablero_t {
-    int tabCols;
-    int tabFils;
+struct st_grid_t {
+    int gridCols;
+    int gridRows;
     
-    int horCol;
-    int horFil;
+    int antCol;
+    int antRow;
     
     int cantHor;
     
-    int cantComChicas;
-    int cantComGrandes;
+    int smallFoodQuant;
+    int bigFoodQuant;
     
-    int ** comChicas;
-    int ** comGrandes;
+    int * smallFoods;
+    int * bigFoods;
 };
 
-typedef struct st_tablero_t* tablero_t;
+typedef struct st_grid_t* grid_t;
 
 
 enum {
+	NO_ERRORS,
     ERR_FILE,
     MEMORY_ERROR,
     ERR_HORMIGUERO,
@@ -35,12 +36,12 @@ enum {
 };
 
 
-int cargarTablero(tablero_t tab, char * nombreArchivo);
+int loadGrid(grid_t tab, char * nombreArchivo);
 
-tablero_t tnew();
+grid_t gnew();
 
-int alocarComidasChicas(tablero_t tab, int cantComChicas);
+int alocarComidasChicas(grid_t grid, int cantComChicas);
 
-int alocarComidasGrandes(tablero_t tab, int cantComGrandes);
+int alocarComidasGrandes(grid_t grid, int cantComGrandes);
 
 #endif
