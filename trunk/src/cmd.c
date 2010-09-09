@@ -13,6 +13,7 @@
 /* CREATION FUNCTIONS: */
 cmd_t newYellNot() {
     cmd_yell_not_t ret = (cmd_yell_not_t) malloc(sizeof(struct cmd_yell_not_t));
+    ret->type = CMD_YELL_NOT;
     
     
     return (cmd_t) ret;
@@ -21,6 +22,7 @@ cmd_t newYellNot() {
 
 cmd_t newYellReq() {
     cmd_yell_req_t ret = (cmd_yell_req_t) malloc(sizeof(struct cmd_yell_req_t));
+    ret->type = CMD_YELL_REQ;
     
     
     return (cmd_t) ret;
@@ -29,6 +31,7 @@ cmd_t newYellReq() {
 
 cmd_t newYellRes() {
     cmd_yell_res_t ret = (cmd_yell_res_t) malloc(sizeof(struct cmd_yell_res_t));
+    ret->type = CMD_YELL_RES;
     
     
     return (cmd_t) ret;
@@ -37,6 +40,7 @@ cmd_t newYellRes() {
 
 cmd_t newAidReq(int dir) {
     cmd_aid_req_t ret = (cmd_aid_req_t) malloc(sizeof(struct cmd_aid_req_t));
+    ret->type = CMD_AID_REQ;
     ret->dir = dir;
     
     return (cmd_t) ret;
@@ -45,6 +49,7 @@ cmd_t newAidReq(int dir) {
 
 cmd_t newAidRes(int status) {
     cmd_aid_res_t ret = (cmd_aid_res_t) malloc(sizeof(struct cmd_aid_res_t));
+    ret->type = CMD_AID_RES;
     ret->status = status;
     
     return (cmd_t) ret;
@@ -53,6 +58,7 @@ cmd_t newAidRes(int status) {
 
 cmd_t newTurn() {
     cmd_turn_t ret = (cmd_turn_t) malloc(sizeof(struct cmd_turn_t));
+    ret->type = CMD_TURN;
     
     
     return (cmd_t) ret;
@@ -61,6 +67,7 @@ cmd_t newTurn() {
 
 cmd_t newStop() {
     cmd_stop_t ret = (cmd_stop_t) malloc(sizeof(struct cmd_stop_t));
+    ret->type = CMD_STOP;
     
     
     return (cmd_t) ret;
@@ -69,6 +76,7 @@ cmd_t newStop() {
 
 cmd_t newSmellRes(tile_t* tiles) {
     cmd_smell_res_t ret = (cmd_smell_res_t) malloc(sizeof(struct cmd_smell_res_t));
+    ret->type = CMD_SMELL_RES;
     ret->tiles = tiles;
     
     return (cmd_t) ret;
@@ -77,6 +85,7 @@ cmd_t newSmellRes(tile_t* tiles) {
 
 cmd_t newStart() {
     cmd_start_t ret = (cmd_start_t) malloc(sizeof(struct cmd_start_t));
+    ret->type = CMD_START;
     
     
     return (cmd_t) ret;
@@ -85,6 +94,7 @@ cmd_t newStart() {
 
 cmd_t newSmellReq() {
     cmd_smell_req_t ret = (cmd_smell_req_t) malloc(sizeof(struct cmd_smell_req_t));
+    ret->type = CMD_SMELL_REQ;
     
     
     return (cmd_t) ret;
@@ -93,6 +103,7 @@ cmd_t newSmellReq() {
 
 cmd_t newPickRes(int status) {
     cmd_pick_res_t ret = (cmd_pick_res_t) malloc(sizeof(struct cmd_pick_res_t));
+    ret->type = CMD_PICK_RES;
     ret->status = status;
     
     return (cmd_t) ret;
@@ -101,6 +112,7 @@ cmd_t newPickRes(int status) {
 
 cmd_t newPickReq(int dir) {
     cmd_pick_req_t ret = (cmd_pick_req_t) malloc(sizeof(struct cmd_pick_req_t));
+    ret->type = CMD_PICK_REQ;
     ret->dir = dir;
     
     return (cmd_t) ret;
@@ -109,6 +121,7 @@ cmd_t newPickReq(int dir) {
 
 cmd_t newMoveRes(int status) {
     cmd_move_res_t ret = (cmd_move_res_t) malloc(sizeof(struct cmd_move_res_t));
+    ret->type = CMD_MOVE_RES;
     ret->status = status;
     
     return (cmd_t) ret;
@@ -117,10 +130,12 @@ cmd_t newMoveRes(int status) {
 
 cmd_t newMoveReq(int dir) {
     cmd_move_req_t ret = (cmd_move_req_t) malloc(sizeof(struct cmd_move_req_t));
+    ret->type = CMD_MOVE_REQ;
     ret->dir = dir;
     
     return (cmd_t) ret;
 }
+
 
 handler_f* buildHandlerArray() {
     return (handler_f*) calloc(NUM_CMDS, sizeof(handler_f));
