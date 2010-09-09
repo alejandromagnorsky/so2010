@@ -1,19 +1,19 @@
 #include "../include/io.h"
 
-int cargarTablero(tablero_t tab, char * nombreArchivo)
+int loadGrid(grid_t grid, char * nameFile)
 {
 	int c, aux;
 	int i,k;
 	
-	FILE * archivo;
+	FILE * file;
 
-	archivo = fopen(nombreArchivo,"r");
+	file = fopen(nameFile,"r");
 	
-	if(archivo == NULL) 
+	if(file == NULL) 
 		return ERR_FILE;
 		
 	c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -= 48;
 	if(c >= 2 && c <= 9)
 	{
@@ -26,7 +26,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -39,12 +39,21 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 		return ERR_FILE;
 	}
 	
-	tab->tabCols = aux;
+	grid->gridCols = aux;
 	printf("cant cols: %d\n",aux);
 	aux = 0;
 	
+	if(c != -4)
+	{
+		return ERR_FILE;
+	}
+	else 
+	{
+		printf("asdfasdf\n");
+	}
+	
 	c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -=48;
 	if(c >= 2 && c <= 9)
 	{
@@ -57,7 +66,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -70,12 +79,12 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 		return ERR_FILE;
 	}
 	
-	tab->tabFils = aux;
+	grid->gridRows = aux;
 	printf("cant fils: %d\n",aux);
 	aux = 0;
 	
 	c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -= 48;
 	if(c >= 2 && c <= 9)
 	{
@@ -88,7 +97,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -96,17 +105,17 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 		}
 	}
 	
-	if(aux >= tab->tabCols)
+	if(aux >= grid->gridCols)
 	{
 		return ERR_HORMIGUERO;
 	}
 	
-	tab->horCol = aux;
+	grid->antCol = aux;
 	printf("column hormiguero: %d\n",aux);
 	aux = 0;
 	
 	c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -= 48;
 	if(c >= 2 && c <= 9)
 	{
@@ -119,7 +128,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -127,17 +136,17 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 		}
 	}
 	
-	if(aux >= tab->tabFils)
+	if(aux >= grid->gridRows)
 	{
 		return ERR_HORMIGUERO;
 	}
 	
-	tab->horFil = aux;
+	grid->antRow = aux;
 	printf("filas hormiguero: %d\n",aux);
 	aux = 0;
 	
 	c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -= 48;
 	if(c >= 2 && c <= 9)
 	{
@@ -150,7 +159,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -159,17 +168,17 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	}
 	
 	//[TODO] verificar si hay un maximo de cantidad de hormigas
-	/*if(aux >= tab->tabFils)
+	/*if(aux >= grid->gridRows)
 	{
 		return ERR_HORMIGUERO;
 	}*/
 	
-	tab->cantHor = aux;
+	grid->cantHor = aux;
 	printf("cant hormigas: %d\n",aux);
 	aux = 0;
 	
 	c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -= 48;
 	if(c >= 2 && c <= 9)
 	{
@@ -182,7 +191,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -190,24 +199,24 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 		}
 	}
 	
-	if(aux >= tab->tabFils * tab->tabCols - 1)
+	if(aux >= grid->gridRows * grid->gridCols - 1)
 	{
 		return ERR_CANTCOMCHICA;
 	}
 	
-	tab->cantComChicas = aux;
+	grid->smallFoodQuant = aux;
 	printf("cant com chica: %d\n",aux);
 	aux = 0;
 	
-	c = alocarComidasChicas(tab, tab->cantComChicas);
+	c = alocarComidasChicas(grid, grid->smallFoodQuant);
 	
-	for(i = 0; i < tab->cantComChicas; i++)
+	for(i = 0; i < grid->smallFoodQuant; i++)
 	{
 		
 	}
 	
 	/*c = 0;
-	fread(&c,sizeof(char),1,archivo);
+	fread(&c,sizeof(char),1,file);
 	c -= 48;
 	if(c >= 2 && c <= 9)
 	{
@@ -220,7 +229,7 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 	
 	while(c >= 0 && c <= 9)
 	{
-		fread(&c,sizeof(char),1,archivo);
+		fread(&c,sizeof(char),1,file);
 		c -= 48;
 		if(c > 0 && c <= 9)
 		{
@@ -228,37 +237,53 @@ int cargarTablero(tablero_t tab, char * nombreArchivo)
 		}
 	}
 	
-	if(aux >= tab->tabFils * tab->tabCols - 1 + tab->cantComChicas)
+	if(aux >= grid->gridRows * grid->gridCols - 1 + grid->smallFoodQuant)
 	{
 		return ERR_CANTCOMCHICA;
 	}
 	
-	tab->cantComGrandes = aux;
+	grid->bigFoodQuant = aux;
 	printf("cant com grande: %d\n",aux);
 	aux = 0;*/
 	
 	
-	//c = alocarComidas(tab, tab->cantComChicas, tab-> cantComGrandes)
+	//c = alocarComidas(grid, grid->smallFoodQuant, grid-> bigFoodQuant)
 }
 
 
-int alocarComidasChicas(tablero_t tab, int cantComChicas)
+int alocarComidasChicas(grid_t grid, int smallFoodQuant)
 {
-	tablero_t->cantComChicas[0] = malloc(sizeof(int)*cantComChicas*2);
-}
-
-int alocarComidasGrandes(tablero_t tab, int cantComGrandes)
-{
-	tablero_t->cantComChicas[0] = malloc(sizeof(int)*cantComChicas*2);
-}
-
-tablero_t tnew()
-{
-	tablero_t tab = (tablero_t) malloc(sizeof(struct st_tablero_t));
-	
-	if(tab)
+	grid->smallFoods = (int *)malloc(sizeof(int)*smallFoodQuant*2);
+	if(grid->smallFoods)
 	{
-		return tab;
+		return NO_ERRORS;
+	}
+	else
+	{
+		return MEMORY_ERROR;
+	}
+}
+
+int alocarComidasGrandes(grid_t grid, int bigFoodQuant)
+{
+	grid->bigFoods = (int *)malloc(sizeof(int)*bigFoodQuant*2);
+	if(grid->bigFoods)
+	{
+		return NO_ERRORS;
+	}
+	else
+	{
+		return MEMORY_ERROR;
+	}
+}
+
+grid_t gnew()
+{
+	grid_t grid = (grid_t) malloc(sizeof(struct st_grid_t));
+	
+	if(grid)
+	{
+		return grid;
 	}
 	else
 	{
