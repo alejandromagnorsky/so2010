@@ -7,8 +7,8 @@
 **  Content:    general purpose functions and declarations.
 */
 
-#ifndef __TEST_H__
-#define __TEST_H__
+#ifndef __TOOLS_H__
+#define __TOOLS_H__
 
 #include <string.h>
 
