@@ -31,16 +31,21 @@ cmd_t antHandleStart(void* antarg, cmd_t cmd) {
 }
 
 cmd_t andHandleTurn(void* antarg, cmd_t cmd) {
-    cmd_t ret;
+    int i;
     ant_t ant = (ant_t) antarg;
     
     switch (ant->state) {
     
         case ANT_STATE_IDLE:
+            return newSmellReq();
+            break;
     
-        ret = (cmd_move_req_t) malloc(sizeof(struct cmd_move_req_t));
-        ret-> type = CMD_MOVE_REQ;
-        ret->dir = randDir();
+        
+        case ANT_STATE_SMELLED:
+            /* Let's see what's around! */
+            for (i = 0; i < NUM_DIRS; i++) {
+                
+            }
     
     return ret;
 

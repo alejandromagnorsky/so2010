@@ -16,7 +16,8 @@
 #include <stdlib.h>
 
 enum {
-    OBJ_ANT,
+    OBJ_OUT_OF_BOUNDS = -1,
+    OBJ_ANT = 0,
     OBJ_FOOD,
     OBJ_BIGFOOD,
     OBJ_ANTHILL
