@@ -16,6 +16,12 @@
 #include <stdlib.h>
 
 enum {
+    STATUS_FAILED,
+    STATUS_RETRY,
+    STATUS_OK
+};
+
+enum {
     OBJ_OUT_OF_BOUNDS = -1,
     OBJ_ANT = 0,
     OBJ_FOOD,
@@ -131,7 +137,7 @@ struct cmd_smell_req_t {
 struct cmd_smell_res_t {
 /* SMELL RESPONSE: Control tells an Ant what's in adjacent tiles. */
     int type;
-    tile_t* tiles;
+    tile_t tiles;
 };
 
 /* PICK REQUEST: Ant tells Control it wants to PICK in a certain direction. */
@@ -194,7 +200,7 @@ cmd_t newAidReq(int dir);
 cmd_t newAidRes(int status);
 cmd_t newTurn();
 cmd_t newStop();
-cmd_t newSmellRes(tile_t* tiles);
+cmd_t newSmellRes(tile_t tiles);
 cmd_t newStart();
 cmd_t newSmellReq();
 cmd_t newPickRes(int status);
