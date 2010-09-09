@@ -105,7 +105,7 @@ int loadGrid(grid_t grid, char * nameFile)
 		return ERR_ANTHILL;
 	}
 	
-	grid->antCol = aux;
+	grid->anthillCol = aux;
 	aux = 0;
 	
 	if(c != -4)
@@ -140,7 +140,7 @@ int loadGrid(grid_t grid, char * nameFile)
 		return ERR_ANTHILL;
 	}
 	
-	grid->antRow = aux;
+	grid->anthillRow = aux;
 	aux = 0;
 	
 	//[TODO] chequear espacios
@@ -172,7 +172,7 @@ int loadGrid(grid_t grid, char * nameFile)
 		return ERR_FILE;
 	}	
 	
-	grid->cantAnts = aux;
+	grid->antsQuant = aux;
 	aux = 0;
 	
 	//[TODO] chequear espacios
@@ -320,6 +320,8 @@ int loadGrid(grid_t grid, char * nameFile)
 		grid->bigFoods[i] = aux;
 		aux = 0;
 	}
+	
+	fclose(file);
 	
 	return NO_ERRORS;
 }
