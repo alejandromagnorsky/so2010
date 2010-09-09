@@ -56,9 +56,35 @@ struct cmd_t {
     int type;
 };
 
+/* TYPE DEFINITIONS: */
+
 typedef struct cmd_t* cmd_t;
+typedef struct cmd_start_t* cmd_start_t;
+
+typedef struct cmd_move_req_t* cmd_move_req_t;
+typedef struct cmd_move_res_t* cmd_move_req_t;
+
+typedef struct cmd_smell_req_t* cmd_smell_req_t;
+typedef struct cmd_smell_res_t* cmd_smell_req_t;
+
+typedef struct cmd_pick_req_t* cmd_pick_req_t;
+typedef struct cmd_pick_res_t* cmd_pick_req_t;
+
+typedef struct cmd_aid_req_t* cmd_aid_req_t;
+typedef struct cmd_aid_res_t* cmd_aid_req_t;
+
+typedef struct cmd_yell_req_t* cmd_yell_req_t;
+typedef struct cmd_yell_res_t* cmd_yell_req_t;
+
+typedef struct cmd_stop_t* cmd_stop_t;
+typedef struct cmd_no_t* cmd_no_t;
 
 /* COMMAND-SPECIFIC STRUCTURES: */
+
+struct cmd_start_t {
+/* START command: Control tells an Ant the simulation has begun */
+    int type;
+};
 
 struct cmd_turn_t {
 /* TURN command: Control tells an Ant it can attempt its move */
@@ -127,6 +153,11 @@ struct cmd_yell_res_t {
 struct cmd_yell_not_t {
     int type;
     int x, y;
+};
+
+struct cmd_stop_t {
+/* STOP command: Control tells an Ant the simulation has ended */
+    int type;
 };
 
 /* NO command: general purpose command.
