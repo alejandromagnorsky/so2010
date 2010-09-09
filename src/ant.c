@@ -31,23 +31,28 @@ cmd_t antHandleStart(void* antarg, cmd_t cmd) {
 }
 
 cmd_t andHandleTurn(void* antarg, cmd_t cmd) {
-    int i;
+    int i, mindir;
+    tile_t tile;
     ant_t ant = (ant_t) antarg;
     
     switch (ant->state) {
     
-        case ANT_STATE_IDLE:
-            return newSmellReq();
-            break;
-    
+        case ANT_STATE_SEEKING:
         
-        case ANT_STATE_SMELLED:
-            /* Let's see what's around! */
-            for (i = 0; i < NUM_DIRS; i++) {
-                
-            }
+            if (ant->smelled) {
+                /* Look up, right, down, left: */
+                mindir = -1;
+                for(i = 0; i < 4; i += 2) {
+                    mindir = ant->smell[i].trail > ant->smell[i].trail ?
+                             ant->smell[i].trail : ant->smell[i].trail;
+                }
+                    
+            } else {
+                return newSmellReq();
+
     
-    return ret;
+    }
+    return NULL;
 
 }
 

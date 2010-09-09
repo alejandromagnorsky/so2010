@@ -14,13 +14,17 @@
 #include "tools.h"
 #include "logic.h"
 #include <stdlib.h>
+#include <math.h>
+
+#define COINFLIP() (rand() % 2)
+#define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
 
 enum {
     ANT_STATE_ZERO,     /* Initial state. Simulation is not running. */
-    ANT_STATE_IDLE,     /* Default behaviour. Will smell around. */
-    ANT_STATE_SMELLED,
-    ANT_STATE_YELLED,   /* Yelled for aid in carrying BIG food. It's BIG. */
-    ANT_STATE_AIDING,   /* Heard a naerby yell, and decided to help. */
+    ANT_STATE_SEEKING,  /* Default behaviour. Will smell around. */
+    ANT_STATE_WAITING,  /* Yelled for aid in carrying BIG food. It's BIG. */
+    ANT_STATE_GOING,    /* Heard a naerby yell, and decided to help. */
+    ANT_STATE_AIDING,   /* Got there, looking for the big food. */
     ANT_STATE_CARRYING  /* Carrying food back to the anthill. */    
 };
 
@@ -29,11 +33,13 @@ enum {
 struct ant_t {
     int state;
 
-    int x, y;       /* Ant's own position */
-    int ahx, ahy;   /* Anthill position */
-    int mx, my;     /* Memorized position */
+    int pickdir;    /* Waiting next to big food in this direction */
+    int r, c;       /* Ant's own position */
+    int ahr, ahc;   /* Anthill position */
+    int mr, mc;     /* Memorized position */
     
-    tile_t smell[8];
+    char smelled;
+    struct tile_t smell[8];
 };
 
 typedef struct ant_t* ant_t;
