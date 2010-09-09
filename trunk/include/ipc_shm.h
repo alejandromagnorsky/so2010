@@ -17,7 +17,6 @@
 #define INVALIDPTR	-1
 #define VALIDPTR	0
 
-#define QTYSEM 2
 
 #define WRITELOCK "/writelock1"
 #define READLOCK "/writelock2"
@@ -47,8 +46,14 @@ ipcdata_t shmIPCData();
 ipc_t shmConnect(ipcdata_t ipcdata, int antid);
 /* Fires a thread connected with the server */
 
+void shmDisconnect(ipc_t ipc);
+
+
 ipc_t shmServe();
 /* Starts the server that allows clients read & write messages */
+
+void shmStopServe(ipc_t server);
+
 ipc_t shmServeFail(ipc_t ret, int error);
 
 void* shmServerLoop(void * ipcarg);

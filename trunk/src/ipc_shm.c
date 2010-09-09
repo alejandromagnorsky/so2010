@@ -43,6 +43,14 @@ ipc_t shmConnect(ipcdata_t ipcdata, int antid){
 	return ret;
 }
 
+void shmDisconnect(ipc_t client){
+	client->stop = 1;
+	qdel(client->inbox);
+	qdel(client->outbox);
+	free(client->ipcdata);
+	free(client);
+}
+
 
 ipc_t shmServe(){
 	int semun, x;
@@ -84,6 +92,14 @@ ipc_t shmServeFail(ipc_t ret, int error){
 	return ret;
 }
 
+void shmStopServe(ipc_t server){
+	server->stop = 1;
+	qdel(server->inbox);
+	qdel(server->outbox);
+	free(server->ipcdata);
+	free(server);
+}
+
 void* shmServerLoop(void * ipcarg){
 	/* create locks */
 	sem_t * clientReadLock = sem_open(READLOCK, O_CREAT, 0666, 1);
@@ -98,15 +114,17 @@ void* shmServerLoop(void * ipcarg){
 	
 	ipc_t ipc = (ipc_t) ipcarg;
 	ipc->status = IPCSTAT_SERVING;
+	
+	int sval;
 	while(ipc->stop != 1){
-//		if(sem_trywait(clientWriteLock) == -1){
+		if(sem_trywait(clientWriteLock) != -1){
 			shmHandlerServerReadMessage(ipc);
-//			sem_post(clientWriteLock);
-//		}
-//		if(sem_trywait(clientReadLock) == -1){
+			sem_post(clientWriteLock);
+		}
+		if(sem_trywait(clientReadLock) != -1){
 			shmHandlerWriteMessage(ipc);
-//			sem_post(clientReadLock);
-//		}
+			sem_post(clientReadLock);
+		}
 	}
 	
 	sem_close(clientReadLock);
@@ -127,13 +145,13 @@ void* shmCientLoop(void * ipcarg){
 	ipc_t ipc = (ipc_t) ipcarg;
 	ipc->status = IPCSTAT_CONNECTED;
 	while(ipc->stop != 1){
-		if(sem_trywait(clientWriteLock) == -1){
-			shmHandlerWriteMessage(ipc);
-			sem_post(clientWriteLock);
-		}
-		if(sem_trywait(clientReadLock) == -1){
+		if(sem_trywait(clientReadLock) != -1){
 			shmHandlerReadMessage(ipc);
 			sem_post(clientReadLock);
+		}
+		if(sem_trywait(clientWriteLock) != -1){
+			shmHandlerWriteMessage(ipc);
+			sem_post(clientWriteLock);
 		}
 	}
 	sem_close(clientWriteLock);
@@ -145,11 +163,14 @@ void* shmCientLoop(void * ipcarg){
 
 mheader_t nextHeaderMessage(ipc_t ipc){
 	databuf_t buffer = ipc->ipcdata->shmdata.bufr;
+	int i; int auxPtr = ((databuf_t) ipc->ipcdata->shmdata.bufr)->pread;
 	char * nextHeader = NULL;
 	int auxPtrRead = buffer->pread;
 	if(canReadN(buffer, M_HEADER_SIZE) == VALIDPTR){
 		nextHeader = malloc(M_HEADER_SIZE);
-		memcpy(nextHeader, buffer->buffer + auxPtrRead, M_HEADER_SIZE);
+		for(i = 0; i < M_HEADER_SIZE; i++, nextBufPtr(&auxPtr)){
+			nextHeader[i] = buffer->buffer[auxPtr];
+		}
 	}
 	return (mheader_t) nextHeader;
 }
@@ -161,19 +182,13 @@ void shmHandlerReadMessage(ipc_t ipc_client){
 	message_t incomingMsg;
 	int i = 0;
 	
-	if(nextHeader != NULL && nextHeader->to == ipc_client->id){
+	if(nextHeader != NULL && nextHeader->to == ipc_client->id && canReadN(buffer, M_HEADER_SIZE + nextHeader->len) == VALIDPTR){
 		addBufPtr(&(buffer->pread), M_HEADER_SIZE);
-		if(canReadN(buffer, nextHeader->len - 1) == VALIDPTR){
-			incomingMsg = mhnew(nextHeader, NULL);
-			readBuf(buffer, incomingMsg->data, nextHeader->len);
-			qput(ipc_client->inbox, incomingMsg);
-			mdel(incomingMsg);
-			free(nextHeader);
-		}else{
-			ipc_client->status = IPCERR_MSGGETFAILED;
-			perror("Malformed message.");
-			exit(1);
-		}
+		incomingMsg = mhnew(nextHeader, NULL);
+		readBuf(buffer, incomingMsg->data, nextHeader->len);
+		qput(ipc_client->inbox, incomingMsg);
+		mdel(incomingMsg);
+		free(nextHeader);
 	}
 }
 
@@ -183,15 +198,13 @@ void shmHandlerServerReadMessage(ipc_t ipc_server){
 	message_t incomingMsg;
 	databuf_t buffer = ipc_server->ipcdata->shmdata.bufr;
 	int i = 0;
-	if(nextHeader != NULL){
-		if(canReadN(buffer, M_HEADER_SIZE + nextHeader->len) == VALIDPTR){
-			addBufPtr(&(buffer->pread), M_HEADER_SIZE);
-			incomingMsg = mhnew(nextHeader, NULL);
-			readBuf(buffer, incomingMsg->data, incomingMsg->header.len);
-			qput(ipc_server->inbox, incomingMsg);
-			free(nextHeader);
-			mdel(incomingMsg);
-		}
+	if(nextHeader != NULL && canReadN(buffer, M_HEADER_SIZE + nextHeader->len) == VALIDPTR){
+		addBufPtr(&(buffer->pread), M_HEADER_SIZE);
+		incomingMsg = mhnew(nextHeader, NULL);
+		readBuf(buffer, incomingMsg->data, incomingMsg->header.len);
+		qput(ipc_server->inbox, incomingMsg);
+		free(nextHeader);
+		mdel(incomingMsg);
 	}
 }
 
@@ -201,7 +214,7 @@ void shmHandlerWriteMessage(ipc_t ipc){
 	char * aux;
 	databuf_t buffer = ipc->ipcdata->shmdata.bufw;
 	if(msgToSend != NULL){
-		if(canWriteN(buffer, msgToSend->header.len) == VALIDPTR){
+		if(canWriteN(buffer, M_HEADER_SIZE + msgToSend->header.len) == VALIDPTR){
 			mdel(msgToSend);
 			msgToSend = qget(ipc->outbox);
 			writeBuf(buffer, (aux = mserial(msgToSend)), M_HEADER_SIZE + msgToSend->header.len);
@@ -213,19 +226,17 @@ void shmHandlerWriteMessage(ipc_t ipc){
 
 
 int writeBuf(databuf_t databuf, char * buffer, int nwrite){
-	int i = 0;
-	for(i = 0; i < nwrite; i++){
+	int i;
+	for(i = 0; i < nwrite; i++, nextBufPtr(&(databuf->pwrite))){
 		databuf->buffer[databuf->pwrite] = buffer[i];
-		nextBufPtr(&(databuf->pwrite));
 	}
 	return nwrite;
 }
 
 int readBuf(databuf_t databuf, char * buffer, int nread){
-	int i = 0;
-	for(i = 0; i < nread; i++){
+	int i;
+	for(i = 0; i < nread; i++, nextBufPtr(&(databuf->pread))){
 		 buffer[i] = databuf->buffer[databuf->pread];
-		 nextBufPtr(&(databuf->pread));
 	}
 	return nread;
 }
@@ -236,8 +247,8 @@ void nextBufPtr(int * nptr){
 
 void addBufPtr(int * nptr, int n){
 	int aux = *(nptr) + n;
-	if(aux >= BUFSIZ ){
-		*(nptr) = aux % BUFSIZ; 
+	if(aux >= BSIZE ){
+		*(nptr) = aux % BSIZE; 
 	}else{
 		*(nptr) = aux;
 	}
@@ -247,14 +258,14 @@ void addBufPtr(int * nptr, int n){
 int canReadN(databuf_t databuf, int pread){
 	int readptr = databuf->pread;
 	int writeptr = databuf->pwrite;
-	int afterread = (readptr + pread) % BUFSIZ;
+	int afterread = (readptr + pread) % BSIZE;
 	
 	if(writeptr > readptr){
 		if(pread <= (writeptr - readptr)){
 			return VALIDPTR;
 		}
 	}else if(writeptr < readptr){
-		if(pread <= (BUFSIZ - readptr + writeptr)){
+		if(pread <= (BSIZE - readptr + writeptr)){
 			return VALIDPTR;
 		}
 	}
@@ -264,10 +275,10 @@ int canReadN(databuf_t databuf, int pread){
 int canWriteN(databuf_t databuf, int pwrite){
 	int readptr = databuf->pread;
 	int writeptr = databuf->pwrite;
-	int afterwrite = (writeptr + pwrite) % BUFSIZ;
+	int afterwrite = (writeptr + pwrite) % BSIZE;
 	
 	if(writeptr > readptr){
-		if(pwrite >= (BUFSIZ - writeptr + readptr)){
+		if(pwrite >= (BSIZE - writeptr + readptr)){
 			return INVALIDPTR;
 		}
 	}else if(writeptr < readptr){
