@@ -7,6 +7,9 @@
 **  Content:    structures and functions related to the ants in the simulation.
 */
 
+#ifndef __ANT_H__
+#define __ANT_H__
+
 #include "cmd.h"
 #include "tools.h"
 #include "logic.h"
@@ -28,7 +31,7 @@ enum {
 
 struct ant_t {
     int state;
-    
+
     int x, y;       /* Ant's own position */
     int ahx, ahy;   /* Anthill position */
     int mx, my;     /* Memorized position */
@@ -45,3 +48,5 @@ void antFillHandlerArray(handler_f*);
    of handlers as a 3rd argument. Returns what the appropiate handler rets,
    or NULL if no handler was found. */
 cmd_t antDispatchCmd(ant_t, cmd_t, handler_f*);
+
+#endif

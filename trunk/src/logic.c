@@ -23,3 +23,7 @@ cmd_t dispatchCmd(void* obj, cmd_t cmd, handler_f* handlers) {
     return NULL;
 
 }
+
+int randDir() {
+    return rand() % NUM_DIRS;
+}
