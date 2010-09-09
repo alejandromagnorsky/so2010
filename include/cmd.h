@@ -51,6 +51,8 @@ enum {
     DIR_NORTHWEST
 };
 
+#define NUM_DIRS (DIR_NORTHWEST + 1)
+
 struct cmd_t {
 /* Generic command structure, for casts. All structures have the same size: */
     int type;
