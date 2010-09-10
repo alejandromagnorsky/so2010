@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <ncurses.h> 
 
 #define MAX_FILS 60
 #define MAX_COLS 60
@@ -35,12 +36,21 @@ enum {
 };
 
 
-int loadGrid(grid_t tab, char * fileName);
+int loadGrid(grid_t grid, char * fileName);
+/* Loads the grid information from the specified file */
 
 grid_t gnew();
+/* Allocs a new grid, but doesnt reserve space for the big and small food arrays */
 
 int allocSmallFood(grid_t grid, int smallFoodQuant);
 
 int allocBigFood(grid_t grid, int bigFoodQuant);
+
+int checkFoodPositions(grid_t grid);
+
+int initializeScreen(grid_t grid);
+
+void addcharat(int col, int row, char c);
+
 
 #endif

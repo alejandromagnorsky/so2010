@@ -11,12 +11,11 @@ int loadGrid(grid_t grid, char * fileName)
 	if(file == NULL) 
 		return ERR_FILE;
 	
-	
 	/* Reading quantity of columns */	
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -= 48;
-	if(c >= 2 && c <= 9)
+	if(c >= 0 && c <= 9)
 	{
 		aux = c;
 	}
@@ -49,11 +48,11 @@ int loadGrid(grid_t grid, char * fileName)
 	}
 	
 	/* Reading quantity of rows */
-	
+
 	c = 0;
 	fread(&c,sizeof(char),1,file);
 	c -=48;
-	if(c >= 2 && c <= 9)
+	if(c >= 0 && c <= 9)
 	{
 		aux = c;
 	}
@@ -79,6 +78,11 @@ int loadGrid(grid_t grid, char * fileName)
 	
 	grid->gridRows = aux;
 	aux = 0;
+	
+	if((grid->gridRows * grid->gridCols) < 2)
+	{
+		return ERR_FILE;
+	}
 	
 	/* Reading anthill column */
 	
@@ -399,5 +403,61 @@ int checkFoodPositions(grid_t grid)
 			}
 		}
 	}
+	
+	return NO_ERRORS;
+}
+
+int initializeScreen(grid_t grid)
+{
+	int i;
+
+	initscr();
+
+	for(i = 0; i < grid->gridRows+1; i++)
+	{
+		mvaddch(i, 0, '|');
+	}
+	
+	for(i = 0; i < grid->gridRows+1; i++)
+	{
+		mvaddch(i, grid->gridCols + 1, '|');
+	}
+	
+	for(i = 0; i < grid->gridCols+1; i++)
+	{
+		mvaddch(0, i, '-');
+	}
+	
+	for(i = 0; i < grid->gridCols+1; i++)
+	{
+		mvaddch(grid->gridRows + 1, i, '-');
+	}
+	
+	mvaddch(0, 0, '*');
+	mvaddch(grid->gridRows+1, grid->gridCols+1, '*');
+	mvaddch(0, grid->gridCols+1, '*');
+	mvaddch(grid->gridRows+1, 0, '*');
+	
+	addcharat(grid->anthillCol, grid->anthillRow, 'H');
+	
+	for(i = 0; i < grid->smallFoodQuant * 2; i+=2)
+	{
+		addcharat(grid->smallFoods[i+1], grid->smallFoods[i], 's');
+	}
+	
+	for(i = 0; i < grid->bigFoodQuant * 2; i+=2)
+	{
+		addcharat(grid->bigFoods[i+1], grid->bigFoods[i], 'B');
+	}
+	getch();
+	refresh();
+	
+	// [TODO] sacar el endwin
+	endwin();
+}
+
+void addcharat(int col, int row, char c)
+{
+	mvaddch(col + 1, row + 1, c);
 }
 
