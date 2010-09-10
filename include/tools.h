@@ -19,6 +19,15 @@ void* dmemcpy(void* dest, const void* src, size_t n);
 void* smemcpy(void* dest, void* src, size_t n);
 /* Exactly like memcpy, only it returns a pointer to (src + n).
    Helps clear the syntax in deserialization methods (e.g. see mdeserial). */
-   
-#define LOG(...) printf(__VA_ARGS__)
+
+#ifdef LOGGING_ENABLED
+    #define LOG(...) fprintf(stderr, __VA_ARGS__)
+    #define LOGPID(...) (fprintf(stderr, "(%d) ", getpid()), \
+                         fprintf(stderr, __VA_ARGS__))
+
+#else
+    #define LOG(...)
+    #define LOGPID(...)
+#endif
+
 #endif

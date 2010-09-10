@@ -24,8 +24,23 @@ void antFree(ant_t ant) {
 
 cmd_t antHandleStart(void* antarg, cmd_t cmd) {
     ant_t ant = (ant_t) antarg;
-    
-    ant->state = ANT_STATE_IDLE;
+	LOGPID("Handling start command.\n");    
+    ant->state = ANT_STATE_SEEKING;
     
     return NULL;
+}
+
+cmd_t antHandleTurn(void* antarg, cmd_t cmd) {
+	ant_t ant = (ant_t) antarg;
+	LOGPID("Handling turn command.\n");	
+	return newMoveReq(randDir());
+
+}
+
+void antFillHandlerArray(handler_f* handlers) {
+    
+    handlers[CMD_START] = antHandleStart;
+    handlers[CMD_TURN] = antHandleTurn;
+    
+    return;
 }
