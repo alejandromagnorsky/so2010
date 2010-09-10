@@ -16,12 +16,7 @@
 #include <stdlib.h>
 
 enum {
-    STATUS_FAILED,
-    STATUS_RETRY,
-    STATUS_OK
-};
-
-enum {
+	NO_OBJ = -2,
     OBJ_OUT_OF_BOUNDS = -1,
     OBJ_ANT = 0,
     OBJ_FOOD,
