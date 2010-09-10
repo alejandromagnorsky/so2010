@@ -1,19 +1,23 @@
 #include "../include/server.h"
 
-int main(int argc, char * argv[]){
+void initControl(grid_t gridinfo){
 	
+	/*
 	if(argc != 2){
 		printf("Error: Needs a filename.\n");
 		exit(1);
 	}
 	
 	char * filename = argv[1];
-	
+
 	grid_t gridinfo;
+
 	if((gridinfo = getGridInfo(filename)) == NULL){
 		printf("Error: File problem.\n");
 		exit(1);
 	}
+
+	*/
 	
 	board_t board;
 	int rows = gridinfo->gridRows, cols = gridinfo->gridCols;
@@ -27,10 +31,10 @@ int main(int argc, char * argv[]){
 	
 	fillWithFood(board, gridinfo);
 	
-	int turn = 0;
 	
+	
+	/* AUXILIAR PARA PODER VER EL TABLERO MOMENTANEAMENTE */
 	int i, j;
-	
 	for(i = 0; i < qtyAnt; i++){
 		board[ants[i].row][ants[i].col].obj = OBJ_ANT;
 	}
@@ -49,6 +53,7 @@ int main(int argc, char * argv[]){
 		}
 		printf("\n");
 	}
+	/**********************************************************/
 }
 
 board_t createBoard(int rows, int cols){
