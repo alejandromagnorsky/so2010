@@ -2,7 +2,9 @@
 
 int main()
 {
-	int i, k;
+	/* FILE TEST */
+
+	/*int i, k;
 
 	grid_t grid = gnew();
 	
@@ -59,8 +61,23 @@ int main()
 	else 
 	{
 		printf("ERROR IN CONFIGURATION FILE\n");
+	}*/
+	
+	/* NCURSES TEST */
+	
+	int i, k;
+
+	grid_t grid = gnew();
+	
+	k = loadGrid(grid, "ejemploTablero");
+	
+	if(k == NO_ERRORS)
+	{
+		k = initializeScreen(grid);
 	}
-	
-	
+	else 
+	{
+		printf("FILE ERROR\n");
+	}
 }
 
