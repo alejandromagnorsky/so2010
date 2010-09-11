@@ -88,7 +88,7 @@ void * mq_serverLoop(void* ipcarg)
         msg = mq_getData(ipc, SERVERKEY);
         if(msg != NULL)
         {
-			if(msg->header.to == getpid())
+			if(msg->header.to == SERVERKEY)
 		    {
 		    /*
 		    	//[TODO] ver que pasa si hay un mensaje con to = 0

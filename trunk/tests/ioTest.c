@@ -65,11 +65,63 @@ int main()
 	
 	/* NCURSES TEST */
 	
-	int i, k;
-
-	grid_t grid = gnew();
+	int i,j,k, rows, cols;
+	board_t board;
+	grid_t grid;
+	int qtyAnt;
+	int qtySmallFood;
+	int qtyBigFood;
 	
-	k = loadGrid(grid, "ejemploTablero");
+	struct st_dir_info* ants = calloc(qtyAnt, sizeof(struct st_dir_info));
+	
+	grid = gnew();
+	loadGrid(grid, "ejemploTablero");
+	
+	rows = grid->gridRows;
+	cols = grid->gridCols;
+	qtyAnt = grid->antsQuant;
+	qtySmallFood = grid->smallFoodQuant;
+	qtyBigFood = grid->bigFoodQuant;
+	
+	board = (board_t) malloc(sizeof(struct tile_t*) * rows);
+	if(board == NULL){
+		return -1;
+	}
+	
+	for(i = 0; i < rows; i++){
+		board[i] = (struct tile_t * ) malloc(sizeof(struct tile_t) * cols);
+		if(board[i] == NULL){
+			for(j = 0; j < i; j++){
+			}
+			return -1;
+		}
+		for(j = 0; j < cols; j++){
+			board[i][j].obj = NO_OBJ;
+			board[i][j].trail = 0;
+		}
+	}
+	
+	
+	
+	if(board == NULL){
+		printf("Error: Memory error.\n");
+		exit(1);
+	}
+	
+	for(i = 0; i < qtyAnt; i++){
+		ants[i].row = grid->anthillRow;
+		ants[i].col = grid->anthillCol;
+	}
+	
+	
+	
+	/*for(i = 0; i < qtySmallFood; i++){
+		board[grid->smallFoods[i]][grid->smallFoods[i + 1]].obj = OBJ_FOOD;
+	}
+	for(i = 0; i < qtyBigFood*2; i++){
+		board[grid->bigFoods[i]][grid->bigFoods[i + 1]].obj = OBJ_BIGFOOD;
+	}*/
+	
 	
 	if(k == NO_ERRORS)
 	{
@@ -79,5 +131,80 @@ int main()
 	{
 		printf("FILE ERROR\n");
 	}
+	
+	
+	for(i = 0; i < grid->gridRows; i++)
+	{
+		for(j = 0; j < grid->gridCols; j++)
+		{
+			if(board[i][j].obj == NO_OBJ)
+			{
+				addDoubleAt(i,j,4.55);
+			}
+			else if(board[i][j].obj == OBJ_FOOD)
+			{
+				addCharAt(i,j,'s');
+			}
+			else if(board[i][j].obj == OBJ_BIGFOOD)
+			{
+				addCharAt(i,j,'B');
+			}
+			else if(board[i][j].obj == OBJ_ANT)
+			{
+				addCharAt(i,j,'@');
+			}
+			else if(board[i][j].obj == OBJ_ANTHILL)
+			{
+				addCharAt(i,j,'H');
+			}
+			else
+			{
+				addDoubleAt(i,j,board[i][j].trail);
+			}
+		}
+	}
+	
+	refresh();
+	getch();
+	endwin();
+	
+	
+	
+	/*for(i = 0; i < grid->gridRows; i++)
+	{
+		for(j = 0; j < grid->gridCols; j++)
+		{
+			if(board[i][j].obj == NO_OBJ)
+			{
+				printf(" ");
+				//addCharAt(i,j,' ');
+			}
+			else if(board[i][j].obj == OBJ_FOOD)
+			{
+				printf("s");
+				//addCharAt(i,j,'s');
+			}
+			else if(board[i][j].obj == OBJ_BIGFOOD)
+			{
+				printf("B");
+				//addCharAt(i,j,'B');
+			}
+			else if(board[i][j].obj == OBJ_ANT)
+			{
+				printf("@");
+				//addCharAt(i,j,'@');
+			}
+			else if(board[i][j].obj == OBJ_ANTHILL)
+			{
+				printf("H");
+				//addCharAt(i,j,'H');
+			}
+			else
+			{
+				printf("M");
+				//saddDoubleAt(i,j,board[i][j].trail);
+			}
+		}
+	}*/
 }
 

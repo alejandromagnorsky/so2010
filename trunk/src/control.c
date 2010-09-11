@@ -1,4 +1,4 @@
-#include "../include/server.h"
+#include "../include/control.h"
 
 void initControl(grid_t gridinfo){
 	
