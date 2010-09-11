@@ -27,30 +27,34 @@ ctrl_info_t createCtrlInfo(grid_t gridinfo){
 	
 	ret->rows = gridinfo->gridRows;
 	ret->cols = gridinfo->gridCols;
-	ret->qtyAnts = gridinfo->antsQuant;
+	ret->qtyAnt = gridinfo->antsQuant;
 	
 	ret->board= createBoard(ret->rows, ret->cols);
 	if(ret->board == NULL){
-		free(ret);
-		return ERROR_MEM;
+		ret->status = CTRL_ERR_MEM;
+		return ret;
 	}
 	
 	ret->ants = createAntPosArray(qtyAnt, gridinfo);
 	if(ret->ants == NULL){
 		deleteBoard(ret->board, ret->rows, ret->cols);
-		free(ret);
-		return ERROR_MEM;
+		ret->status = CTRL_ERR_MEM;
+		return ret;
 	}
 	
 	if(fillWithFood(ret, gridinfo->smallFoodQuant, gridinfo->bigFoodQuant, 
 			gridinfo->smallFoods, gridinfo->bigFoods) != NO_ERROR){
 		deleteBoard(ret->board, ret->rows, ret->cols);
-		free(ret);
-		return ERROR_FOOD;
+		ret->status = CTRL_ERROR_FOOD;
+		return ret;
 	}
 	return ret;
 }
 
+void deleteCtrlInfo(ctrl_info_t ctrl_info){
+	deleteBoard(ctrl_info->board);
+	free(ctrl_info);
+}
 
 board_t createBoard(int rows, int cols){
 	
@@ -77,7 +81,7 @@ board_t createBoard(int rows, int cols){
 	return board;
 }
 
-void freeBoard(board_t board, int rows, int cols){
+void deleteBoard(board_t board, int rows, int cols){
 	int i;
 	for(i = 0; i < rows; i++){
 		free(board[i]);
@@ -97,18 +101,7 @@ struct st_dir_info* createAntPosArray(int qtyAnt, grid_t gridinfo){
 	return ants;
 }
 
-/*
-grid_t getGridInfo(char * filename){
-	grid_t gridinfo = (grid_t) malloc(sizeof(struct st_grid_t));
-	if(gridinfo == NULL){
-		return NULL;
-	}
-	if(loadGrid(gridinfo, filename) != NO_ERROR){
-		return NULL;
-	}
-	return gridinfo;
-}
-*/
+
 int fillWithFood(ctrl_info_t ctrl_info, int qtySmallFood, int qtyBigFood, int * smallFoods, int * bigFoods){
 	int i;
 	for(i = 0; i < qtySmallFood; i++){
@@ -123,4 +116,45 @@ int fillWithFood(ctrl_info_t ctrl_info, int qtySmallFood, int qtyBigFood, int * 
 		}
 		board[gridinfo->bigFoods[i]][gridinfo->bigFoods[i + 1]].obj = OBJ_BIGFOOD;
 	}
+	return NO_ERROR;
+}
+
+
+handler_f* buildControlHandlerArray(ctrl_info_t ctrl_info){
+	handler_f* ctrlHandlers = buildHandlerArray();
+	ctrlHandlers[CMD_START] = ctrlHandleStart;
+	ctrlHandlers[CMD_MOVE_REQ] = ctrlHandleMove;
+	ctrlHandlers[CMD_SMELL_REQ] = ctrlHandleSmell;
+	ctrlHandlers[CMD_PICK_REQ] = ctrlHandlePick;
+	ctrlHandlers[CMD_AID_REQ] = ctrlHandleAid;
+	ctrlHandlers[CMD_YELL_REQ] = ctrlHandleYell;
+	ctrlHandlers[CMD_STOP] = ctrlHandleStop;
+}
+
+cmd_t ctrlHandleStart(void * ctrlInfo , cmd_t cmd){
+	return newStart();
+}
+
+cmd_t ctrlHandleMove(void * ctrlInfo, cmd_t cmd){
+	return NULL;
+}
+
+cmd_t ctrlHandleSmell(void * ctrlInfo, cmd_t cmd){
+	return NULL;
+}
+
+cmd_t ctrlHandlePick(void * ctrlInfo, cmd_t cmd){
+	return NULL;
+}
+
+cmd_t ctrlHandleAid(void * ctrlInfo, cmd_t cmd){
+	return NULL;
+}
+
+cmd_t ctrlHandleYell(void * ctrlInfo, cmd_t cmd){
+	return NULL;
+}
+
+cmd_t ctrlHandleStop(void * ctrlInfo, cmd_t cmd){
+	return NULL;
 }
