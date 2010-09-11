@@ -19,6 +19,8 @@ int main(int argc, char** argv) {
     ipc_t ipc;
     message_t temp;
     
+    LOGPID("Using IPC method: %s.\n", IPC_METHOD);
+    
     /* Before doing anything else, map data should be loaded! */
     /* (so as to know the number of ants beforehand, at least */
 
@@ -36,13 +38,13 @@ int main(int argc, char** argv) {
     
         /* Control code here */
         while(1) {
-        fflush(stdout);
-        if (temp = recvMessage(ipc)) {
-            LOGPID("Control received: ");
-            mprintln(temp);
-            mdel(temp);   
-        }}
-    
+            fflush(stdout);
+            if (temp = recvMessage(ipc)) {
+                LOGPID("Control received: ");
+                mprintln(temp);
+                mdel(temp);   
+            }
+        }
     } else {       
     
         /* Ants here */
