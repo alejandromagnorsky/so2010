@@ -422,22 +422,22 @@ int initializeScreen(grid_t grid)
 	
 	for(i = 0; i < grid->gridRows + 1; i++)
 	{
-		mvaddch(i, grid->gridCols * 4 + 1, '|');
+		mvaddch(i, grid->gridCols * 5 + 1, '|');
 	}
 	
-	for(i = 0; i < grid->gridCols * 4 + 1; i++)
+	for(i = 0; i < grid->gridCols * 5 + 1; i++)
 	{
 		mvaddch(0, i, '-');
 	}
 	
-	for(i = 0; i < grid->gridCols * 4 + 1; i++)
+	for(i = 0; i < grid->gridCols * 5 + 1; i++)
 	{
 		mvaddch(grid->gridRows + 1, i, '-');
 	}
 	
 	mvaddch(0, 0, '*');
-	mvaddch(grid->gridRows + 1, grid->gridCols * 4 + 1, '*');
-	mvaddch(0, grid->gridCols * 4 + 1, '*');
+	mvaddch(grid->gridRows + 1, grid->gridCols * 5 + 1, '*');
+	mvaddch(0, grid->gridCols * 5 + 1, '*');
 	mvaddch(grid->gridRows + 1, 0, '*');
 	
 	/*addCharAt(grid->anthillRow, grid->anthillCol, 'H');
@@ -460,12 +460,12 @@ int initializeScreen(grid_t grid)
 
 void addCharAt(int col, int row, char c)
 {
-	mvaddch(col + 1, row * 4 + 2, c);
+	mvaddch(col + 1, row * 5 + 2, c);
 }
 
 void addDoubleAt(int col, int row, double num)
 {
-	move(col + 1, row * 4 + 1);
+	move(col + 1, row * 5 + 1);
 	printw("%g",num);
 }
 
