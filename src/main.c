@@ -13,11 +13,11 @@
 
 int main(int argc, char** argv) {
 
-    int sid;            /* Simulation ID */
+    int sid, status;
     char forking;
+    message_t message;
     pid_t pid, cpid;
     ipc_t ipc;
-    message_t temp;
     
     LOGPID("Using IPC method: %s.\n", IPC_METHOD);
     
@@ -39,10 +39,13 @@ int main(int argc, char** argv) {
         /* Control code here */
         while(1) {
             fflush(stdout);
-            if (temp = recvMessage(ipc)) {
+            if (message = recvMessage(ipc)) {
                 LOGPID("Control received: ");
-                mprintln(temp);
-                mdel(temp);   
+                sendMessage(ipc, mnew(1, mfrom(message),
+                                      sizeof(struct cmd_start_t),
+                                      (char*) newStart()));
+                mprintln(message);
+                mdel(message);
             }
         }
     } else {       
@@ -59,10 +62,11 @@ int main(int argc, char** argv) {
         
         /* We can do our own stuff now */           
         ipc = initClient();
+        ipc->id = sid; /* Grasaaaa! */
+
+        status = antLoop(ipc);
+        exit(status);
         
-        sendMessage(ipc, mnew(sid, 1, 5, "hola!"));
-        
-        while(1);
     }
     
 }

@@ -10,9 +10,9 @@
 #ifndef __ANT_H__
 #define __ANT_H__
 
+#include "ipc.h"
 #include "cmd.h"
 #include "tools.h"
-#include "logic.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -25,7 +25,8 @@ enum {
     ANT_STATE_WAITING,  /* Yelled for aid in carrying BIG food. It's BIG. */
     ANT_STATE_GOING,    /* Heard a naerby yell, and decided to help. */
     ANT_STATE_AIDING,   /* Got there, looking for the big food. */
-    ANT_STATE_CARRYING  /* Carrying food back to the anthill. */    
+    ANT_STATE_CARRYING, /* Carrying food back to the anthill. */ 
+    ANT_STATE_FINAL     /* Simulation has ended. */
 };
 
 #define NUM_STATES 6

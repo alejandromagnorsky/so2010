@@ -14,6 +14,7 @@
 #define __CMD_H__
 
 #include <stdlib.h>
+#include "tools.h"
 
 enum {
 	NO_OBJ = -2,
@@ -203,8 +204,8 @@ cmd_t newPickReq(int dir);
 cmd_t newMoveRes(int status);
 cmd_t newMoveReq(int dir);
 
-handler_f* buildAntHandlerArray();
-
+handler_f* buildHandlerArray();
+cmd_t dispatchCmd(void* obj, cmd_t cmd, handler_f* handlers);
 int randDir();
 
 #endif
