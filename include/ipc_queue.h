@@ -16,7 +16,7 @@
 #define MAXOBN		200
 #define MAXPRIOR	100000
 
-#define SERVERKEY 2
+#define SERVERKEY 1
 
 #define CLIENTSENDPRIOR 3
 #define CLIENTRECVPRIOR 4

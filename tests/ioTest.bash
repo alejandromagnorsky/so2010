@@ -1,3 +1,3 @@
 #!/bin/bash
 
-gcc -lncurses ioTest.c ../include/io.h ../src/io.c -lncurses -o ioTest
+gcc -lncurses ioTest.c ../include/common.h ../include/io.h ../include/control.h ../src/io.c -lncurses -o ioTest

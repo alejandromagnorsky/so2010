@@ -410,54 +410,99 @@ int checkFoodPositions(grid_t grid)
 int initializeScreen(grid_t grid)
 {
 	int i;
+	double num;
 
 	initscr();
+	noecho();
 
-	for(i = 0; i < grid->gridRows+1; i++)
+	for(i = 0; i < grid->gridRows + 1; i++)
 	{
 		mvaddch(i, 0, '|');
 	}
 	
-	for(i = 0; i < grid->gridRows+1; i++)
+	for(i = 0; i < grid->gridRows + 1; i++)
 	{
-		mvaddch(i, grid->gridCols + 1, '|');
+		mvaddch(i, grid->gridCols * 4 + 1, '|');
 	}
 	
-	for(i = 0; i < grid->gridCols+1; i++)
+	for(i = 0; i < grid->gridCols * 4 + 1; i++)
 	{
 		mvaddch(0, i, '-');
 	}
 	
-	for(i = 0; i < grid->gridCols+1; i++)
+	for(i = 0; i < grid->gridCols * 4 + 1; i++)
 	{
 		mvaddch(grid->gridRows + 1, i, '-');
 	}
 	
 	mvaddch(0, 0, '*');
-	mvaddch(grid->gridRows+1, grid->gridCols+1, '*');
-	mvaddch(0, grid->gridCols+1, '*');
-	mvaddch(grid->gridRows+1, 0, '*');
+	mvaddch(grid->gridRows + 1, grid->gridCols * 4 + 1, '*');
+	mvaddch(0, grid->gridCols * 4 + 1, '*');
+	mvaddch(grid->gridRows + 1, 0, '*');
 	
-	addcharat(grid->anthillCol, grid->anthillRow, 'H');
+	/*addCharAt(grid->anthillRow, grid->anthillCol, 'H');
 	
 	for(i = 0; i < grid->smallFoodQuant * 2; i+=2)
 	{
-		addcharat(grid->smallFoods[i+1], grid->smallFoods[i], 's');
+		addCharAt(grid->smallFoods[i+1], grid->smallFoods[i], 's');
 	}
 	
 	for(i = 0; i < grid->bigFoodQuant * 2; i+=2)
 	{
-		addcharat(grid->bigFoods[i+1], grid->bigFoods[i], 'B');
+		addCharAt(grid->bigFoods[i+1], grid->bigFoods[i], 'B');
+	}*/
+	// [TODO] sacar el endwin y el getch en caso que sea necesario
+	
+	getch();
+	refresh();
+	/*endwin();*/
+}
+
+void addCharAt(int col, int row, char c)
+{
+	mvaddch(col + 1, row * 4 + 2, c);
+}
+
+void addDoubleAt(int col, int row, double num)
+{
+	move(col + 1, row * 4 + 1);
+	printw("%g",num);
+}
+
+void refreshGrid(board_t board, grid_t grid)
+{
+	int i,j;
+	
+	for(i = 0; i < grid->gridRows; i++)
+	{
+		for(j = 0; j < grid->gridCols; j++)
+		{
+			if(board[i][j].obj == NO_OBJ)
+			{
+				addCharAt(i,j,' ');
+			}
+			else if(board[i][j].obj == OBJ_FOOD)
+			{
+				addCharAt(i,j,'s');
+			}
+			else if(board[i][j].obj == OBJ_BIGFOOD)
+			{
+				addCharAt(i,j,'B');
+			}
+			else if(board[i][j].obj == OBJ_ANT)
+			{
+				addCharAt(i,j,'@');
+			}
+			else if(board[i][j].obj == OBJ_ANTHILL)
+			{
+				addCharAt(i,j,'H');
+			}
+			else
+			{
+				addDoubleAt(i,j,board[i][j].trail);
+			}
+		}
 	}
 	getch();
 	refresh();
-	
-	// [TODO] sacar el endwin
-	endwin();
 }
-
-void addcharat(int col, int row, char c)
-{
-	mvaddch(col + 1, row + 1, c);
-}
-
