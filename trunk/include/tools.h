@@ -11,6 +11,7 @@
 #define __TOOLS_H__
 
 #include <string.h>
+#include <stdio.h>
 
 void* dmemcpy(void* dest, const void* src, size_t n);
 /* Exactly like memcpy, only it returns a pointer to (dest + n).
@@ -19,6 +20,9 @@ void* dmemcpy(void* dest, const void* src, size_t n);
 void* smemcpy(void* dest, void* src, size_t n);
 /* Exactly like memcpy, only it returns a pointer to (src + n).
    Helps clear the syntax in deserialization methods (e.g. see mdeserial). */
+
+
+#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
     #define LOG(...) fprintf(stdout, __VA_ARGS__)

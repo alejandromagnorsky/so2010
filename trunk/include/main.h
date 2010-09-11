@@ -12,9 +12,8 @@
 
 /* Before including any other headers, some definitions are needed: */
 
-#define LOGGING_ENABLED
-//#define IPC_METHOD_SOCKETS
-#define IPC_METHOD_MQS
+#define IPC_METHOD_SOCKETS
+//#define IPC_METHOD_MQS
 //#define IPC_METHOD_FIFOS
 //#define IPC_METHOD_SHMEM
 
@@ -96,6 +95,8 @@
 
 #include "tools.h"
 #include "ipc.h"
+#include "message.h"
+#include "cmd.h"
 
 #endif // Include guard endif
 

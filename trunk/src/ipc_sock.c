@@ -188,7 +188,7 @@ void* sockServerLoop(void* ipcarg) {
             }
             
             while ((tempm = qget(ipc->outbox)) != NULL) {
-                qput(clients[mto(tempm) - 1]->outbox, tempm);
+                qput(clients[mto(tempm) - 2]->outbox, tempm);
                 mdel(tempm);
             }
         }

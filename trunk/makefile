@@ -8,14 +8,14 @@
 ##
 
 CC := gcc
-CFLAGS := -c
+CFLAGS := -c -g
 LDFLAGS := -lpthread
 
 SOURCEDIR := src
 HEADERDIR := include
 
 #SOURCES := $(wildcard $(SOURCEDIR)/*.c)
-SRCNAMES := /main /ipc /ipc_sock /ipc_queue /queue /message /tools
+SRCNAMES := /main /ipc /ipc_sock /ipc_queue /queue /message /tools /ant /cmd
 SOURCES := $(SRCNAMES:/%=$(SOURCEDIR)/%.c)
 HEADERS := $(SRCNAMES:/%=$(SOURCEDIR)/%.h)
 OBJECTS := $(SOURCES:%.c=%.o)
@@ -29,6 +29,9 @@ anthill: $(OBJECTS)
 .o:
 	@echo $(@:%.o=$(HEADERDIR)/%.h)
 	$(CC) $(CFLAGS) $< -o $@
+
+rebuild: clean all
 	
 clean:
-	rm $(SOURCEDIR)/*.o
+	rm -f anthill
+	rm -f $(SOURCEDIR)/*.o
