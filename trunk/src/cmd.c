@@ -137,10 +137,6 @@ cmd_t newMoveReq(int dir) {
 }
 
 
-handler_f* buildHandlerArray() {
-    return (handler_f*) calloc(NUM_CMDS, sizeof(handler_f));
-}
-
 cmd_t dispatchCmd(void* obj, cmd_t cmd, handler_f* handlers) {
 
     if (cmd->type >= 0 && cmd->type < NUM_CMDS)
