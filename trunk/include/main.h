@@ -48,6 +48,51 @@
     // IPCF_CONNECT always receives ipcdata_t
     #define IPCF_CONNECT(X)     mq_connect(X)
 #endif
+    
+#ifdef IPC_METHOD_MQS
+	#include "ipc_queue.h"
+	#define IPC_METHOD "MQS"
+	
+	// Requirements to build IPCData vary from IPC method to IPC method
+    #define IPCF_IPCDATA(...)   mq_ipcdata(__VA_ARGS__)
+    #define IPCF_IPCDATA_ARGS   getpid(), getpid()
+    
+    // IPCF_SERVE always receives ipcdata_t
+    #define IPCF_SERVE(X, Y)    mq_serve(X)
+
+    // IPCF_CONNECT always receives ipcdata_t
+    #define IPCF_CONNECT(X)     mq_connect(X)
+#endif
+    
+#ifdef IPC_METHOD_FIFOS
+	#include "ipc_fifo.h"
+	#define IPC_METHOD "FIFOS"
+	
+	// Requirements to build IPCData vary from IPC method to IPC method
+    #define IPCF_IPCDATA(...)   fifoIPCData(__VA_ARGS__)
+    #define IPCF_IPCDATA_ARGS   sid
+    
+    // IPCF_SERVE always receives ipcdata_t
+    #define IPCF_SERVE(IPCDATA, QTYANTS)   fifoServe(QTYANTS)
+
+    // IPCF_CONNECT always receives ipcdata_t
+    #define IPCF_CONNECT(IPCDATA)     fifoConnect(IPCDATA)
+#endif
+    
+#ifdef IPC_METHOD_SHM
+	#include "ipc_shm.h"
+	#define IPC_METHOD "SHM"
+	
+	// Requirements to build IPCData vary from IPC method to IPC method
+    #define IPCF_IPCDATA(...)   shmIPCData()
+    #define IPCF_IPCDATA_ARGS   
+    
+    // IPCF_SERVE always receives ipcdata_t
+    #define IPCF_SERVE(IPCDATA, QTYANTS)   shmServe()
+
+    // IPCF_CONNECT always receives ipcdata_t
+    #define IPCF_CONNECT(IPCDATA, ANTID)     shmConnect(IPCDATA, ANTID)
+#endif
 
 #include "tools.h"
 #include "ipc.h"
