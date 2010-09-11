@@ -204,6 +204,7 @@ cmd_t newMoveRes(int status);
 cmd_t newMoveReq(int dir);
 
 handler_f* buildAntHandlerArray();
+
 int randDir();
 
 #endif
