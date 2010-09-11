@@ -133,13 +133,18 @@ int main()
 	}
 	
 	
+	board[0][0].obj = OBJ_FOOD;
+	board[1][2].obj = OBJ_BIGFOOD;
+	board[2][1].obj = OBJ_ANT;
+	board[1][1].obj = OBJ_ANTHILL;
+	
 	for(i = 0; i < grid->gridRows; i++)
 	{
 		for(j = 0; j < grid->gridCols; j++)
 		{
 			if(board[i][j].obj == NO_OBJ)
 			{
-				addDoubleAt(i,j,4.55);
+				addDoubleAt(i,j,0.05);
 			}
 			else if(board[i][j].obj == OBJ_FOOD)
 			{
