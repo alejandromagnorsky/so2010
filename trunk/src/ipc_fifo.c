@@ -5,9 +5,9 @@ int initFifos(int qtyAnts){
 		return;	
 
 	char word[20];
-	int i = 0;
+	int i = FIRST_ANT_ID;
 	
-	while(i < qtyAnts){
+	while(i < qtyAnts + FIRST_ANT_ID){
 		sprintf(word, "/tmp/fifo_c_w_%d", i);
 		if(mkfifo(word, PERMISSIONS) < 0){
 			return -1;
@@ -21,11 +21,11 @@ int initFifos(int qtyAnts){
 }
 
 
-ipcdata_t fifoIPCData(int nant){
+ipcdata_t fifoIPCData(int antid){
 	ipcdata_t ansdata = (ipcdata_t) malloc(sizeof(union un_ipcdata_t));
 	if(ansdata != NULL){
-		sprintf((ansdata->fifodata).fifonamew, "/tmp/fifo_c_w_%d", nant);
-		sprintf((ansdata->fifodata).fifonamer, "/tmp/fifo_c_r_%d", nant);
+		sprintf((ansdata->fifodata).fifonamew, "/tmp/fifo_c_w_%d", antid);
+		sprintf((ansdata->fifodata).fifonamer, "/tmp/fifo_c_r_%d", antid);
 	}
 	return ansdata;
 }
@@ -55,7 +55,7 @@ ipc_t fifoConnect(ipcdata_t ipcdata){
 			rcreat = pthread_create(&(ret->thread), NULL, fifoClientLoop, ret);	
 			if(rcreat != 0){
 				ret->status = IPCERR_THREAD;
-				return ret; //ver los free
+				return ret;
 			}
 		}
 	}
@@ -128,7 +128,7 @@ void fifoHandlerWriteServer(ipc_t ipc, msg_writting currMsgW, client_t * clients
 			currMsgW->toWrite = M_HEADER_SIZE + nextMsg->header.len;
 			currMsgW->msglen = currMsgW->toWrite;
 			currMsgW->data = mserial(nextMsg);
-			currMsgW->to = nextMsg->header.to;
+			currMsgW->to = nextMsg->header.to - FIRST_ANT_ID;
 			currMsgW->from = nextMsg->header.from;
 			mdel(nextMsg);
 		}
@@ -234,8 +234,8 @@ void initializeClientsServer(ipc_t ipc, client_t * clients){
 			clients[nclt]->cinfo = (ipcdata_t) malloc(sizeof(union un_ipcdata_t));
 			clients[nclt]->currMsgR = (msg_reading) malloc(sizeof(struct st_msg_reading));
 			clients[nclt]->currMsgR->hdread = clients[nclt]->currMsgR->toRead = 0; 
-			sprintf(clients[nclt]->cinfo->fifodata.fifonamew, "/tmp/fifo_c_r_%d", nclt);
-			sprintf(clients[nclt]->cinfo->fifodata.fifonamer, "/tmp/fifo_c_w_%d", nclt);
+			sprintf(clients[nclt]->cinfo->fifodata.fifonamew, "/tmp/fifo_c_r_%d", nclt + FIRST_ANT_ID);
+			sprintf(clients[nclt]->cinfo->fifodata.fifonamer, "/tmp/fifo_c_w_%d", nclt + FIRST_ANT_ID);
 			clients[nclt]->cinfo->fifodata.fdw = open(clients[nclt]->cinfo->fifodata.fifonamew, O_RDWR | O_NONBLOCK);
 			clients[nclt]->cinfo->fifodata.fdr = open(clients[nclt]->cinfo->fifodata.fifonamer, O_RDONLY | O_NONBLOCK);
 			if(clients[nclt]->cinfo->fifodata.fdw < 0 || clients[nclt]->cinfo->fifodata.fdr < 0){

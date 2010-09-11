@@ -18,6 +18,8 @@
 #include <netinet/in.h>
 #include <netinet/in.h>
 
+#define FIRST_ANT_ID 1
+
 enum {
     IPCSTAT_DISCONNECTED,
     IPCSTAT_CONNECTING,
