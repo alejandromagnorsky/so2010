@@ -17,9 +17,9 @@
 #include "tools.h"
 
 enum {
-	NO_OBJ = -2,
     OBJ_OUT_OF_BOUNDS = -1,
-    OBJ_ANT = 0,
+	NO_OBJ = 0,
+    OBJ_ANT,
     OBJ_FOOD,
     OBJ_BIGFOOD,
     OBJ_ANTHILL
@@ -55,6 +55,13 @@ enum {
     
     CMD_STOP
 };
+
+enum {
+/* Status constants */
+    STATUS_FAILED,
+    STATUS_RETRY,
+    STATUS_OK
+}
 
 #define NUM_CMDS (CMD_STOP + 1)
 
