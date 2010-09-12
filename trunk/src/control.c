@@ -1,7 +1,7 @@
 #include "../include/control.h"
 
 int main(){
-	
+
 }
 
 int launchControl(ipc_t ipc, grid_t gridinfo){
@@ -10,15 +10,15 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 	handler_f* handlers = buildControlHandlerArray();
 	cmd_t * cmdLauncher = createCmdLauncher(ctrl_info->qtyAnt);
 	if(ctrl_info->status != NO_ERROR){
-		deleteControlInfo(ctrl_info, handlers, cmdLauncher);
+		deleteCtrlInfo(ctrl_info);
 		return ctrl_info->status;
 	}
 	if(handlers == NULL){
-		deleteControlInfo(ctrl_info, handlers, cmdLauncher);
+		deleteCtrlInfo(ctrl_info);
 		return CTRL_ERR_MEM;
 	}
 	if(cmdLauncher == NULL){
-		deleteControlInfo(ctrl_info, handlers, cmdLauncher);
+		deleteCtrlInfo(ctrl_info);
 		return CTRL_ERR_MEM;
 	}
 	
@@ -64,8 +64,8 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 	
 	while(antsStatus(ctrl_info, ANT_READY) != ctrl_info->qtyAnt){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
-			ctrl_info->ants[msg->header.from].id = msg->header.from;
-			dispatchCmd(&info, (cmd_t) msg->data, handlers);
+			ctrl_info->ants[mfrom(msg) - FIRST_ANT_ID].id = mfrom(msg);
+			dispatchCmd(&info, (cmd_t) mdata(msg), handlers);
 		}
 	}
 	cmd_t startcmd = newStart();
