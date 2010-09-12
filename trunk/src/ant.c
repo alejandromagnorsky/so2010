@@ -52,7 +52,7 @@ int antLoop(ipc_t ipc) {
             mprintln(message);
             if (cmd = dispatchCmd((void*) ant, (cmd_t) mdata(message), handlers))
                 
-                sendMessage(ipc, ret);
+                sendMessage(ipc, mnew(ipc->id, 1, cmdsize(cmd), (char*) cmd));
             
         }
         
@@ -146,13 +146,17 @@ cmd_t antHandlePickRes(void* antarg, cmd_t cmdarg) {
     cmd_pick_res_t cmd = (cmd_pick_res_t) cmdarg;
     
     switch(cmd->status) {
+        case STATUS_FAILED:
+            ant->smelled = 0;
+            break;
+
+        default:
         case STATUS_OK:
             ant->yelled = 0;
             ant->state = ANT_STATE_CARRYING;
             break;
             
-        case STATUS_FAILED:
-            break;
+
     }
     
     return NULL;
