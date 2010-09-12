@@ -1,8 +1,9 @@
-#ifndef CONTROL_H_
-#define CONTROL_H_
+#ifndef _CONTROL_H_
+#define _CONTROL_H_
 
 #include <stdlib.h>
 #include <stdio.h>
+#include "cmd.h"
 #include "io.h"
 #include "ipc.h"
 
@@ -16,12 +17,17 @@ enum {
 	
 	CTRL_ERR_MEM,
 	CTRL_ERR_FOOD,
-	CTRL_ERR_ANTHILL
+	CTRL_ERR_ANTHILL,
+	CTRL_ERR_TURN
 };
 
 enum {
 	ANT_INITIALIZED,
 	ANT_READY,
+	ANT_DECIDED,
+	ANT_NEEDHELP,
+	ANT_GIVINGHELP,
+	ANT_STOPPED
 };
 
 typedef struct tile_t ** board_t;
@@ -33,12 +39,17 @@ struct st_dir_t{
 
 struct st_ctrl_antinfo{
 	int status;
+	int id;
 	int row;
 	int col;
+	struct st_dir_t dirpointing;
+	cmd_t cmd;
 };
+
 typedef struct st_ctrl_antinfo * ctrl_antinfo_t;
 
 struct st_ctrl_info {
+	ipc_t ipc;
 	int status;
 	int qtyAnt;
 	int rows, cols;
@@ -51,17 +62,28 @@ struct st_ctrl_info {
 typedef struct st_ctrl_info * ctrl_info_t;
 
 
-int launchControl(grid_t gridinfo);
-void deleteLaucnhControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher);
+struct ant_and_ctrl_info_st {
+	ctrl_info_t ctrl_info;
+	int antid;
+};
+
+typedef struct ant_and_ctrl_info_st * ant_and_ctrl_info_t;
+
+int launchControl(ipc_t ipc, grid_t gridinfo);
+void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher);
 
 int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher);
+void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers);
+int playTurn(ctrl_info_t , handler_f*);
+int antsStatus(ctrl_info_t ctrl_info, int status);
 
-ctrl_info_t createCtrlInfo(grid_t gridinfo);
+ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo);
 void deleteCtrlInfo(ctrl_info_t ctrl_info);
+
+void solveConcurrencyDecisions(ctrl_info_t ctrl_info);
 
 board_t createBoard(int rows, int cols);
 void deleteBoard(board_t board, int rows, int cols);
-
 struct st_ctrl_antinfo * createAntInfo(int qtyAnt, grid_t gridinfo);
 void deleteAntInfo(struct st_ctrl_antinfo * antinfo);
 
@@ -72,6 +94,8 @@ handler_f* buildControlHandlerArray();
 void deleteControlHandlerArray(handler_f* ctrlhandlers);
 
 int fillWithFood(ctrl_info_t ctrl_info, int qtySmallFood, int qtyBigFood, int * smallFoods, int * bigFoods);
+
+int thereIsAnAnt(ctrl_info_t ctrl_info, int row, int col);
 
 cmd_t ctrlHandleStart(void * ctrlInfo , cmd_t cmd);
 cmd_t ctrlHandleMove(void * ctrlInfo, cmd_t cmd);
