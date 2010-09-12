@@ -60,8 +60,9 @@ enum {
 /* Status constants */
     STATUS_FAILED,
     STATUS_RETRY,
-    STATUS_OK
-}
+    STATUS_SOLVED,
+    STATUS_OK,
+};
 
 #define NUM_CMDS (CMD_STOP + 1)
 
