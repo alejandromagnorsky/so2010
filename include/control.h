@@ -13,6 +13,9 @@
 #define TRAIL_VALUE 1
 #define DECREASE_FACTOR 0.01
 
+#define POINTS_BIGFOOD 5
+#define POINTS_FOOD 1
+
 enum {
 	NO_ERROR,
 	CTRL_STATE_ZERO,
@@ -28,17 +31,20 @@ enum {
 enum {
 	ANT_INITIALIZED,
 	ANT_READY,
-	ANT_DECIDED,
 	ANT_NEEDHELP,
-	ANT_GIVINGHELP,
+	ANT_MOVING,
+	ANT_DECIDED,
 	ANT_STOPPED
 };
+
 
 struct st_ctrl_antinfo{
 	int status;
 	int id;
 	int row;
 	int col;
+	int carrying;
+	int yelled;
 	struct st_dir_t dirpointing;
 	cmd_t cmd;
 };
@@ -75,10 +81,20 @@ int playTurn(ctrl_info_t , handler_f*);
 int antsStatus(ctrl_info_t ctrl_info, int status);
 void decreaseTrail(ctrl_info_t ctrl_info);
 
+
+int cmpDir(struct st_dir_t * a, struct st_dir_t * b);
+
+
+void solvePickDecisions(ctrl_info_t ctrl_info);
+void solveMoveDecisions(ctrl_info_t ctrl_info);
+void sendYellNot(ctrl_info_t ctrl_info);
+
+int calculatePoints(ctrl_info_t ctrl_info);
+/* Calculates the points of food collected per Turn, and destroy the food */
+
 ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo);
 void deleteCtrlInfo(ctrl_info_t ctrl_info);
 
-void solveConcurrencyDecisions(ctrl_info_t ctrl_info);
 
 board_t createBoard(int rows, int cols);
 void deleteBoard(board_t board, int rows, int cols);

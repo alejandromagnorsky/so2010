@@ -197,7 +197,7 @@ struct cmd_no_t {
     int reason;
 };
 
-cmd_t newYellNot();
+cmd_t newYellNot(int row, int col);
 cmd_t newYellReq();
 cmd_t newYellRes();
 cmd_t newAidReq(int dir);
