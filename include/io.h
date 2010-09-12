@@ -57,5 +57,9 @@ void addStringAt(int col, int row, char * str);
 void refreshGrid(board_t board, grid_t grid);
 /* Refreshes the contents of the board */
 
+int getColor(int color);
+
+void printColorScale();
+
 
 #endif
