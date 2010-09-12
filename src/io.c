@@ -366,46 +366,67 @@ grid_t gnew()
 
 int checkFoodPositions(grid_t grid)
 {
-	int i;
-	//[TODO] chequear comida superpuesta
-	//int ** board = calloc(grid->gridRows, sizeof(int));
+	int i,j;
+	int ** board = calloc(grid->gridRows, sizeof(int));
+	if(board == NULL){
+		return -1;
+	}
 	
-	for(i = 0; i < grid->smallFoodQuant*2; i++)
-	{
-		if(i%2 == 0)
-		{
-			if(grid->smallFoods[i] >= grid->gridCols)
-			{
-				return ERR_FOODPOSITION;
+	for(i = 0; i < grid->gridCols; i++){
+		board[i] = calloc(grid->gridRows, sizeof(int));
+		if(board[i] == NULL){
+			for(j = 0; j < i; j++){
+				free(board[i]);
 			}
-		}
-		else
-		{
-			if(grid->smallFoods[i] >= grid->gridRows)
-			{
-				return ERR_FOODPOSITION;
-			}
+			free(board);
+			return -1;
 		}
 	}
 	
-	for(i = 0; i < grid->bigFoodQuant*2; i++)
+	for(i = 0; i < grid->gridRows; i++)
 	{
-		if(i%2 == 0)
+		for(j = 0; j < grid->gridCols; j++)
 		{
-			if(grid->bigFoods[i] >= grid->gridCols)
-			{
-				return ERR_FOODPOSITION;
-			}
-		}
-		else
-		{
-			if(grid->bigFoods[i] >= grid->gridRows)
-			{
-				return ERR_FOODPOSITION;
-			}
+			board[grid->bigFoods[i]][grid->bigFoods[i+1]] = 0;
+			/* For some reason calloc didn't leave the spaces in 0 */
+			//printf("%d ",board[grid->bigFoods[i]][grid->bigFoods[i+1]]);
 		}
 	}
 	
+	board[grid->anthillCol][grid->anthillRow] = 1;
+	
+	for(i = 0; i < grid->smallFoodQuant*2; i += 2)
+	{
+		if(grid->smallFoods[i] >= grid->gridCols || grid->smallFoods[i+1] >= grid->gridRows)
+		{
+			return ERR_FOODPOSITION;
+		}
+		if(board[grid->smallFoods[i]][grid->smallFoods[i+1]] != 0)
+		{
+			return ERR_FOODPOSITION;
+		}
+		
+		board[grid->smallFoods[i]][grid->smallFoods[i+1]] = 1;
+	}
+	
+	for(i = 0; i < grid->bigFoodQuant*2; i+=2)
+	{
+		if(grid->bigFoods[i] >= grid->gridCols || grid->bigFoods[i+1] >= grid->gridRows)
+		{
+			return ERR_FOODPOSITION;
+		}
+		if(board[grid->bigFoods[i]][grid->bigFoods[i+1]] != 0)
+		{
+			return ERR_FOODPOSITION;
+		}
+		board[grid->bigFoods[i]][grid->bigFoods[i+1]] = 1;
+	}
+	
+	//[TODO] porque me tira error cuando libero??
+	/*for(i = 0; i < grid->gridCols; i++){
+		free(board[i]);
+	}
+	free(board);*/
 	return NO_ERRORS;
 }
 
@@ -429,39 +450,45 @@ int initializeScreen(grid_t grid)
 		init_pair(TEMPPAIR, COLOR_WHITE, COLOR_BLACK);
 		attrset(COLOR_PAIR(TEMPPAIR));
 	}
+	
+	addStringAt(0,0,"Turn number: ");
+	
+	addStringAt(0,20,"Points: ");
 
 	for(i = 0; i < grid->gridRows + 1; i++)
 	{
-		mvaddch(i, 0, '|');
+		mvaddch(i + 2, 0, '|');
 	}
 	
 	for(i = 0; i < grid->gridRows + 1; i++)
 	{
-		mvaddch(i, grid->gridCols + 1, '|');
+		mvaddch(i + 2, grid->gridCols + 1, '|');
 	}
 	
 	for(i = 0; i < grid->gridCols + 1; i++)
 	{
-		mvaddch(0, i, '-');
+		mvaddch(0 + 2, i, '-');
 	}
 	
 	for(i = 0; i < grid->gridCols + 1; i++)
 	{
-		mvaddch(grid->gridRows + 1, i, '-');
+		mvaddch(grid->gridRows + 1 + 2, i, '-');
 	}
 	
-	mvaddch(0, 0, '*');
-	mvaddch(grid->gridRows + 1, grid->gridCols + 1, '*');
-	mvaddch(0, grid->gridCols + 1, '*');
-	mvaddch(grid->gridRows + 1, 0, '*');
+	mvaddch(0 + 2, 0, '*');
+	mvaddch(grid->gridRows + 1 + 2, grid->gridCols + 1, '*');
+	mvaddch(0 + 2, grid->gridCols + 1, '*');
+	mvaddch(grid->gridRows + 1 + 2, 0, '*');
 	
 	msg = "| @ = ant | H = anthill | s = small food | B = big food |";
-	addStringAt(grid->gridRows + 4, 0, msg);
+	addStringAt(grid->gridRows + 4 + 2, 0, msg);
 	
-	msg = "Color scale from 0 to 1: ";
-	addStringAt(grid->gridRows + 5, 0, msg);
+	msg = "Color scale from 0 to 1 for trail values: ";
+	addStringAt(grid->gridRows + 5 + 2, 0, msg);
 	printColorScale();
 	
+	addStringAt(0,13,"0");
+	addStringAt(0,28,"0");
 	
 	/*addCharAt(grid->anthillRow, grid->anthillCol, 'H');
 	
@@ -484,7 +511,7 @@ int initializeScreen(grid_t grid)
 
 void addCharAt(int col, int row, char c)
 {
-	mvaddch(col + 1, row + 1, c);
+	mvaddch(col + 1 + 2, row + 1, c);
 }
 
 void addDoubleAt(int col, int row, double num)
@@ -492,7 +519,7 @@ void addDoubleAt(int col, int row, double num)
 	int color = getColor(lround(num * 5));
 	init_pair(color, COLOR_WHITE, color);
 	
-	move(col + 1, row + 1);
+	move(col + 1 + 2, row + 1);
 	
 	attrset(COLOR_PAIR(color));
 	printw(" ");
@@ -506,7 +533,7 @@ void addStringAt(int col, int row, char * str)
 	printw("%s", str);
 }
 
-void refreshGrid(board_t board, grid_t grid)
+void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 {
 	int i,j;
 	
@@ -514,32 +541,44 @@ void refreshGrid(board_t board, grid_t grid)
 	{
 		for(j = 0; j < grid->gridCols; j++)
 		{
-			if(board[i][j].obj == NO_OBJ)
+			if(ctrlInfo->board[i][j].obj == NO_OBJ)
 			{
 				addCharAt(i,j,' ');
 			}
-			else if(board[i][j].obj == OBJ_FOOD)
+			else if(ctrlInfo->board[i][j].obj == OBJ_FOOD)
 			{
 				addCharAt(i,j,'s');
 			}
-			else if(board[i][j].obj == OBJ_BIGFOOD)
+			else if(ctrlInfo->board[i][j].obj == OBJ_BIGFOOD)
 			{
 				addCharAt(i,j,'B');
 			}
-			else if(board[i][j].obj == OBJ_ANT)
+			else if(ctrlInfo->board[i][j].obj == OBJ_ANT)
 			{
 				addCharAt(i,j,'@');
 			}
-			else if(board[i][j].obj == OBJ_ANTHILL)
+			else if(ctrlInfo->board[i][j].obj == OBJ_ANTHILL)
 			{
 				addCharAt(i,j,'H');
 			}
 			else
 			{
-				addDoubleAt(i,j,board[i][j].trail);
+				addDoubleAt(i,j,ctrlInfo->board[i][j].trail);
 			}
 		}
 	}
+	
+	//[TODO] actualizar turno y puntos
+	
+	for(i = 0; i < 6; i++)
+	{
+		addStringAt(0,13 + i," ");
+		addStringAt(0,28 + i," ");
+	}
+	
+	mvprintw(0,13,"%d",ctrlInfo->turn);
+	mvprintw(0,28,"%d",ctrlInfo->points);
+	
 	getch();
 	refresh();
 }
@@ -579,7 +618,6 @@ void printColorScale()
 	for(i = 0; i < 5; i++)
 	{
 		color = getColor(i);
-		printf("%d",color);
 		init_pair(color+20, COLOR_WHITE, color);
 		attrset(COLOR_PAIR(color+20));
 		printw(" ");

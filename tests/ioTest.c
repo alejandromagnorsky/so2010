@@ -74,7 +74,12 @@ int main()
 	
 	
 	grid = gnew();
-	loadGrid(grid, "ejemploTablero");
+	
+	if(k = loadGrid(grid, "ejemploTablero") != NO_ERRORS)
+	{
+		printf("ERROR CARGANDO GRILLA: %d\n",k);
+		return 0;
+	}
 	
 	rows = grid->gridRows;
 	cols = grid->gridCols;

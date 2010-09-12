@@ -7,6 +7,7 @@
 #include <math.h>
 #include "../include/common.h"
 #include "../include/cmd.h"
+#include "../include/control.h"
 
 #define MAX_FILS 80
 #define MAX_COLS 60
@@ -42,7 +43,6 @@ int checkFoodPositions(grid_t grid);
 int initializeScreen(grid_t grid);
 /* Initializes the screen with the information from the input file */
 
-
 void addCharAt(int col, int row, char c);
 /* Adds the given character in the specified positions, but taking 
 	into account the margins */
@@ -54,12 +54,14 @@ void addDoubleAt(int col, int row, double num);
 void addStringAt(int col, int row, char * str);
 /* Adds the given string in the specified positions */
 	
-void refreshGrid(board_t board, grid_t grid);
+void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid);
 /* Refreshes the contents of the board */
 
 int getColor(int color);
+/* Returns an appropiate color according to a scale */
 
 void printColorScale();
+/* Prints the color scale for the refferences */
 
 
 #endif
