@@ -437,26 +437,30 @@ int initializeScreen(grid_t grid)
 	
 	for(i = 0; i < grid->gridRows + 1; i++)
 	{
-		mvaddch(i, grid->gridCols * 5 + 1, '|');
+		mvaddch(i, grid->gridCols + 1, '|');
 	}
 	
-	for(i = 0; i < grid->gridCols * 5 + 1; i++)
+	for(i = 0; i < grid->gridCols + 1; i++)
 	{
 		mvaddch(0, i, '-');
 	}
 	
-	for(i = 0; i < grid->gridCols * 5 + 1; i++)
+	for(i = 0; i < grid->gridCols + 1; i++)
 	{
 		mvaddch(grid->gridRows + 1, i, '-');
 	}
 	
 	mvaddch(0, 0, '*');
-	mvaddch(grid->gridRows + 1, grid->gridCols * 5 + 1, '*');
-	mvaddch(0, grid->gridCols * 5 + 1, '*');
+	mvaddch(grid->gridRows + 1, grid->gridCols + 1, '*');
+	mvaddch(0, grid->gridCols + 1, '*');
 	mvaddch(grid->gridRows + 1, 0, '*');
 	
 	msg = "| @ = ant | H = anthill | s = small food | B = big food |";
 	addStringAt(grid->gridRows + 4, 0, msg);
+	
+	msg = "Color scale from 0 to 1: ";
+	addStringAt(grid->gridRows + 5, 0, msg);
+	printColorScale();
 	
 	
 	/*addCharAt(grid->anthillRow, grid->anthillCol, 'H');
@@ -480,7 +484,7 @@ int initializeScreen(grid_t grid)
 
 void addCharAt(int col, int row, char c)
 {
-	mvaddch(col + 1, row * 5 + 2, c);
+	mvaddch(col + 1, row + 1, c);
 }
 
 void addDoubleAt(int col, int row, double num)
@@ -488,10 +492,10 @@ void addDoubleAt(int col, int row, double num)
 	int color = getColor(lround(num * 5));
 	init_pair(color, COLOR_WHITE, color);
 	
-	move(col + 1, row * 5 + 1);
+	move(col + 1, row + 1);
 	
 	attrset(COLOR_PAIR(color));
-	printw("%g",num);
+	printw(" ");
 	attroff(COLOR_PAIR(color));
 
 }
@@ -564,5 +568,21 @@ int getColor(int color)
 			break;
 		default:
 			return 0;
+	}
+}
+
+void printColorScale()
+{
+	int i;
+	int color;
+	
+	for(i = 0; i < 5; i++)
+	{
+		color = getColor(i);
+		printf("%d",color);
+		init_pair(color+20, COLOR_WHITE, color);
+		attrset(COLOR_PAIR(color+20));
+		printw(" ");
+		attroff(COLOR_PAIR(color+20));
 	}
 }
