@@ -110,11 +110,8 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 		}
 	}
 	
-	solveConcurrencyDecisions(ctrl_info);
-	
-	if(antsStatus(ctrl_info, ANT_STOPPED) == ctrl_info->qtyAnt){
-		return 0;
-	}
+	solvePickDecisions(ctrl_info);
+	solveMoveDecisions(ctrl_info);
 	
 	//SEND RESPONSES
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
@@ -142,11 +139,48 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 		mdel(msg);
 	}
 	
+	sendYellNot(ctrl_info);
+	
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		ctrl_info->ants[i].status = ANT_READY;
 	}
 	
-	//CALCULATE POINTS
+	return calculatePoints(ctrl_info);
+}
+
+
+void sendYellNot(ctrl_info_t ctrl_info){
+	int i, j;
+	message_t msg;
+	cmd_t cmdnot;
+	for(i=0; i < ctrl_info->qtyAnt; i++){
+		if(ctrl_info->ants[i].yelled){
+			for(j = 0; j < ctrl_info->qtyAnt; j++){
+				cmdnot = newYellNot(ctrl_info->ants[i].row, ctrl_info->ants[i].col);
+				msg = mnew(SERVER_ID, ctrl_info->ants[j].id, sizeof(struct cmd_yell_not_t), (char *)&cmdnot);
+				sendMessage(ctrl_info->ipc, msg);
+			}
+		}
+	}
+}
+
+
+int calculatePoints(ctrl_info_t ctrl_info){
+	int i;
+	int ret = 0;
+	struct st_dir_t antDir;
+	for(i = 0; i < ctrl_info->qtyAnt; i++){
+		antDir.row = ctrl_info->ants[i].row;
+		antDir.col = ctrl_info->ants[i].col;
+		if(cmpDir(&antDir, &ctrl_info->antHill)){
+			if(ctrl_info->ants[i].carrying == OBJ_BIGFOOD){
+				ret += POINTS_BIGFOOD;
+			}else if(ctrl_info->ants[i].carrying == OBJ_FOOD){
+				ret += POINTS_FOOD;
+			}
+			ctrl_info->ants[i].carrying = NO_OBJ;
+		}
+	}
 }
 
 void decreaseTrail(ctrl_info_t ctrl_info){
@@ -158,36 +192,86 @@ void decreaseTrail(ctrl_info_t ctrl_info){
 	}
 }
 
-void solveConcurrencyDecisions(ctrl_info_t ctrl_info){
+void solvePickDecisions(ctrl_info_t ctrl_info){
 	int i, j;
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		if(ctrl_info->ants[i].status == ANT_NEEDHELP){
 			for(j = 0; j < ctrl_info->qtyAnt; j++){
-				if( i != j && (ctrl_info->ants[j].status == ANT_NEEDHELP || ctrl_info->ants[j].status == ANT_GIVINGHELP)){
+				if( i != j && (ctrl_info->ants[j].status == ANT_NEEDHELP)){
 					if(ctrl_info->ants[j].dirpointing.row == ctrl_info->ants[i].row && 
 							ctrl_info->ants[j].dirpointing.col == ctrl_info->ants[i].col){
-						ctrl_info->ants[i].status == ANT_DECIDED;
+						ctrl_info->ants[i].status = ANT_DECIDED;
 						ctrl_info->ants[j].status = ANT_DECIDED;
+						ctrl_info->ants[i].carrying = OBJ_BIGFOOD;
 						ctrl_info->ants[i].cmd = newPickRes(STATUS_OK);
-						if(ctrl_info->ants[j].status == ANT_GIVINGHELP){
-							ctrl_info->ants[j].cmd = newAidRes(STATUS_OK);
-						}else{
-							ctrl_info->ants[j].cmd = newPickRes(STATUS_SOLVED);
+						ctrl_info->ants[j].cmd = newPickRes(STATUS_SOLVED);
 						}
 					}
 				}
 			}
 		}
-	}
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
-		if(ctrl_info->ants[i].status == ANT_NEEDHELP || ctrl_info->ants[i].status == ANT_GIVINGHELP){
-			ctrl_info->ants[i].cmd = ctrl_info->ants[i].status == ANT_NEEDHELP ? newPickRes(STATUS_FAILED) : newAidRes(STATUS_FAILED);
+		if(ctrl_info->ants[i].status == ANT_NEEDHELP){
+			ctrl_info->ants[i].cmd = newPickRes(STATUS_SOLVED);
 			ctrl_info->ants[i].status = ANT_DECIDED;
 		}
 	}
 }
 
+void solveMoveDecisions(ctrl_info_t ctrl_info){
+	int i, j;
+	for(i = 0; i < ctrl_info->qtyAnt; i++){
+		if(ctrl_info->ants[i].status == ANT_MOVING){
+			if(cmpDir(&ctrl_info->ants[i].dirpointing, &ctrl_info->antHill)){
+				ctrl_info->ants[i].status = ANT_DECIDED;
+				ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
+				ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+			}else{
+				for(j = i; j < ctrl_info->qtyAnt; j++){
+					if(ctrl_info->ants[j].status == ANT_MOVING){
+						if(cmpDir(&ctrl_info->ants[i].dirpointing, &ctrl_info->ants[j].dirpointing)){
+							if(ctrl_info->ants[i].carrying == OBJ_BIGFOOD || 
+									(ctrl_info->ants[i].carrying == OBJ_FOOD && ctrl_info->ants[i].carrying != OBJ_BIGFOOD) || 
+									(ctrl_info->ants[i].carrying == NO_OBJ && ctrl_info->ants[i].carrying == NO_OBJ)){
+								ctrl_info->ants[i].cmd = newMoveRes(STATUS_OK);
+								ctrl_info->ants[j].cmd = newMoveRes(STATUS_FAILED);
+								ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
+								ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+								ctrl_info->ants[i].status = ANT_DECIDED;
+								ctrl_info->ants[j].status = ANT_DECIDED;
+							}else{
+								ctrl_info->ants[j].cmd = newMoveRes(STATUS_OK);
+								ctrl_info->ants[i].cmd = newMoveRes(STATUS_FAILED);
+								ctrl_info->ants[j].row = ctrl_info->ants[j].dirpointing.row;
+								ctrl_info->ants[j].col = ctrl_info->ants[j].dirpointing.col;
+								ctrl_info->ants[i].status = ANT_DECIDED;
+								ctrl_info->ants[j].status = ANT_DECIDED;
+							}
+						}else if(ctrl_info->ants[i].dirpointing.row == ctrl_info->ants[j].row && ctrl_info->ants[i].dirpointing.col == ctrl_info->ants[j].col && 
+								ctrl_info->ants[j].dirpointing.row == ctrl_info->ants[i].row && ctrl_info->ants[j].dirpointing.col == ctrl_info->ants[i].col){
+							ctrl_info->ants[i].cmd = newMoveRes(STATUS_OK);
+							ctrl_info->ants[j].cmd = newMoveRes(STATUS_OK);
+							ctrl_info->ants[j].row = ctrl_info->ants[j].dirpointing.row;
+							ctrl_info->ants[j].col = ctrl_info->ants[j].dirpointing.col;
+							ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
+							ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+							ctrl_info->ants[i].status = ANT_DECIDED;
+							ctrl_info->ants[j].status = ANT_DECIDED;
+						}
+					}
+				}
+				//If nobody is pointing to the same place:
+				ctrl_info->ants[i].status = ANT_DECIDED;
+				ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
+				ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+			}
+		}
+	}
+}
 
+int cmpDir(struct st_dir_t * a, struct st_dir_t * b){
+	return a->row == b->row && a->col == b->col;
+}
 
 ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo){
 	ctrl_info_t ret = (ctrl_info_t) malloc(sizeof(struct st_ctrl_info));
@@ -341,7 +425,6 @@ handler_f* buildControlHandlerArray(ctrl_info_t ctrl_info){
 	ctrlHandlers[CMD_MOVE_REQ] = ctrlHandleMove;
 	ctrlHandlers[CMD_SMELL_REQ] = ctrlHandleSmell;
 	ctrlHandlers[CMD_PICK_REQ] = ctrlHandlePick;
-	ctrlHandlers[CMD_AID_REQ] = ctrlHandleAid;
 	ctrlHandlers[CMD_YELL_REQ] = ctrlHandleYell;
 	ctrlHandlers[CMD_STOP] = ctrlHandleStop;
 }
@@ -374,6 +457,7 @@ cmd_t ctrlHandleStart(void * ptrInfo , cmd_t cmd){
 }
 
 
+
 cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	cmd_move_req_t cmdreq = (cmd_move_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
@@ -390,27 +474,15 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 		return NULL;
 	}
 	
-	int i;
-	for(i = 0; i < info->ctrl_info->qtyAnt; i++){
-		if(info->ctrl_info->ants[i].cmd->type == CMD_MOVE_RES &&
-				info->ctrl_info->ants[i].row == nextPos.row && 
-					info->ctrl_info->ants[i].col == nextPos.col){
-			info->ctrl_info->ants[i].status = ANT_DECIDED;
-			info->ctrl_info->ants[i].cmd = newMoveRes(STATUS_FAILED);
-			return NULL;
-		}
+	if(info->ctrl_info->board[nextPos.row][nextPos.col].obj != NO_OBJ){
+		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
+		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
+		return NULL;
 	}
 	
-	struct st_dir_t currPos;
-	currPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row;
-	currPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col;
-	
-	info->ctrl_info->board[currPos.row][currPos.col].trail = TRAIL_VALUE;
-	
-	info->ctrl_info->ants[i].row = nextPos.row;
-	info->ctrl_info->ants[i].col = nextPos.col;
-	info->ctrl_info->ants[i].cmd = newMoveRes(cmdreq->dir);
-	info->ctrl_info->ants[i].status = ANT_DECIDED;
+	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_MOVING;
+	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].dirpointing.row = nextPos.row;
+	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].dirpointing.col = nextPos.col;
 	return NULL;
 }
 
@@ -470,6 +542,7 @@ cmd_t ctrlHandlePick(void * ptrInfo, cmd_t cmd){
 	
 	if(info->ctrl_info->board[foodPos.row][foodPos.col].obj == OBJ_FOOD){
 		info->ctrl_info->board[foodPos.row][foodPos.col].obj = NO_OBJ;
+		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].carrying = OBJ_FOOD;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newPickRes(STATUS_OK);
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		return NULL;
@@ -485,42 +558,12 @@ cmd_t ctrlHandlePick(void * ptrInfo, cmd_t cmd){
 	return NULL;
 }
 
-cmd_t ctrlHandleAid(void * ptrInfo, cmd_t cmd){
-	cmd_aid_req_t cmdreq = (cmd_aid_req_t) cmd;
-	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
-	
-	int mov[8] = {-1,0, 0,1, 1,0, 0,-1};
-	
-	struct st_dir_t foodPos;
-	foodPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
-	foodPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
-	
-	if(foodPos.row >= info->ctrl_info->rows || foodPos.col >= info->ctrl_info->cols){
-		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
-		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newAidRes(STATUS_FAILED);
-		return NULL;
-	}
-	
-	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].dirpointing.row = foodPos.row;
-	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].dirpointing.col = foodPos.col;
-	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_GIVINGHELP;
-	return NULL;
-}
 
 cmd_t ctrlHandleYell(void * ptrInfo, cmd_t cmd){
 	cmd_yell_req_t cmdreq = (cmd_yell_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	cmd_t cmdnot = newYellNot();
-	message_t msg;
-	int i;
-	for(i = 0; i < info->ctrl_info->qtyAnt; i++){
-		if(info->ctrl_info->ants[info->antid - FIRST_ANT_ID].id != info->antid){
-			msg = mnew(0, info->antid, sizeof(struct cmd_yell_not_t), (char *) &cmdnot);
-			sendMessage(info->ctrl_info->ipc, msg);
-			mdel(msg);
-		}
-	}
+	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].yelled = 1;
 	
 	cmd_t cmdres = newYellRes();
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
