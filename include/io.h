@@ -4,12 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ncurses.h>
+#include <math.h>
 #include "../include/common.h"
 #include "../include/cmd.h"
 
-#define MAX_FILS 60
+#define MAX_FILS 80
 #define MAX_COLS 60
 
+#define TEMPPAIR	10
 
 enum {
 	NO_ERRORS,
@@ -49,7 +51,11 @@ void addDoubleAt(int col, int row, double num);
 /* Adds the given number in the specified positions, but taking 
 	into account the margins */
 	
+void addStringAt(int col, int row, char * str);
+/* Adds the given string in the specified positions */
+	
 void refreshGrid(board_t board, grid_t grid);
 /* Refreshes the contents of the board */
+
 
 #endif

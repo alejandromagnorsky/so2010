@@ -72,7 +72,6 @@ int main()
 	int qtySmallFood;
 	int qtyBigFood;
 	
-	struct st_dir_info* ants = calloc(qtyAnt, sizeof(struct st_dir_info));
 	
 	grid = gnew();
 	loadGrid(grid, "ejemploTablero");
@@ -108,10 +107,7 @@ int main()
 		exit(1);
 	}
 	
-	for(i = 0; i < qtyAnt; i++){
-		ants[i].row = grid->anthillRow;
-		ants[i].col = grid->anthillCol;
-	}
+
 	
 	
 	
@@ -133,10 +129,37 @@ int main()
 	}
 	
 	
-	board[0][0].obj = OBJ_FOOD;
-	board[1][2].obj = OBJ_BIGFOOD;
-	board[2][1].obj = OBJ_ANT;
-	board[1][1].obj = OBJ_ANTHILL;
+	board[2][0].obj = 8;
+	board[2][0].trail = 0;
+	board[2][1].obj = 8;
+	board[2][1].trail = 0.1;
+	board[2][2].obj = 8;
+	board[2][2].trail = 0.2;
+	board[2][3].obj = 8;
+	board[2][3].trail = 0.3;
+	board[2][4].obj = 8;
+	board[2][4].trail = 0.4;
+	board[2][5].obj = 8;
+	board[2][5].trail = 0.5;
+	board[2][6].obj = 8;
+	board[2][6].trail = 0.6;
+	board[2][7].obj = 8;
+	board[2][7].trail = 0.7;
+	board[2][8].obj = 8;
+	board[2][8].trail = 0.8;
+	board[2][9].obj = 8;
+	board[2][9].trail = 0.9;
+	board[2][10].obj = 8;
+	board[2][10].trail = 1;
+	
+	
+	board[1][3].obj = OBJ_ANT;
+	board[1][4].obj = OBJ_ANTHILL;
+	board[1][5].obj = OBJ_FOOD;
+	board[1][6].obj = OBJ_BIGFOOD;
+	board[1][7].obj = NO_OBJ;
+	
+	
 	
 	for(i = 0; i < grid->gridRows; i++)
 	{
@@ -144,7 +167,7 @@ int main()
 		{
 			if(board[i][j].obj == NO_OBJ)
 			{
-				addDoubleAt(i,j,0.05);
+				addCharAt(i,j,' ');
 			}
 			else if(board[i][j].obj == OBJ_FOOD)
 			{

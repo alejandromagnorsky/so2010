@@ -367,6 +367,8 @@ grid_t gnew()
 int checkFoodPositions(grid_t grid)
 {
 	int i;
+	//[TODO] chequear comida superpuesta
+	//int ** board = calloc(grid->gridRows, sizeof(int));
 	
 	for(i = 0; i < grid->smallFoodQuant*2; i++)
 	{
@@ -411,9 +413,22 @@ int initializeScreen(grid_t grid)
 {
 	int i;
 	double num;
+	char * msg;
 
 	initscr();
 	noecho();
+	
+	if(has_colors() == FALSE)
+	{	endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+	else
+	{
+		start_color();
+		init_pair(TEMPPAIR, COLOR_WHITE, COLOR_BLACK);
+		attrset(COLOR_PAIR(TEMPPAIR));
+	}
 
 	for(i = 0; i < grid->gridRows + 1; i++)
 	{
@@ -440,6 +455,10 @@ int initializeScreen(grid_t grid)
 	mvaddch(0, grid->gridCols * 5 + 1, '*');
 	mvaddch(grid->gridRows + 1, 0, '*');
 	
+	msg = "| @ = ant | H = anthill | s = small food | B = big food |";
+	addStringAt(grid->gridRows + 4, 0, msg);
+	
+	
 	/*addCharAt(grid->anthillRow, grid->anthillCol, 'H');
 	
 	for(i = 0; i < grid->smallFoodQuant * 2; i+=2)
@@ -453,6 +472,7 @@ int initializeScreen(grid_t grid)
 	}*/
 	// [TODO] sacar el endwin y el getch en caso que sea necesario
 	
+	attroff(COLOR_PAIR(TEMPPAIR));
 	getch();
 	refresh();
 	/*endwin();*/
@@ -465,8 +485,21 @@ void addCharAt(int col, int row, char c)
 
 void addDoubleAt(int col, int row, double num)
 {
+	int color = getColor(lround(num * 5));
+	init_pair(color, COLOR_WHITE, color);
+	
 	move(col + 1, row * 5 + 1);
+	
+	attrset(COLOR_PAIR(color));
 	printw("%g",num);
+	attroff(COLOR_PAIR(color));
+
+}
+
+void addStringAt(int col, int row, char * str)
+{
+	move(col, row);
+	printw("%s", str);
 }
 
 void refreshGrid(board_t board, grid_t grid)
@@ -505,4 +538,31 @@ void refreshGrid(board_t board, grid_t grid)
 	}
 	getch();
 	refresh();
+}
+
+int getColor(int color)
+{
+	switch(color)
+	{
+		case 0:
+			return 3;
+			break;
+		case 1:
+			return 1;
+			break;
+		case 2:
+			return 5;
+			break;
+		case 3:
+			return 6;
+			break;
+		case 4:
+			return 4;
+			break;
+		case 5:
+			return 4;
+			break;
+		default:
+			return 0;
+	}
 }
