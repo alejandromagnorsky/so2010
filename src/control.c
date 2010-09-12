@@ -91,6 +91,8 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	message_t msg;
 	struct ant_and_ctrl_info_st info;
 	
+	decreaseTrail(ctrl_info);
+	
 	//SEND TURN REQUESTS
 	cmd_t cmdTurn = newTurn();
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
@@ -145,6 +147,15 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	}
 	
 	//CALCULATE POINTS
+}
+
+void decreaseTrail(ctrl_info_t ctrl_info){
+	int i,j;
+	for(i = 0; i < ctrl_info->rows; i++){
+		for(j = 0; j < ctrl_info->cols; j++){
+			ctrl_info->board[i][j].trail -= (ctrl_info->board[i][j].trail) == 0 ? 0 : DECREASE_FACTOR;
+		}
+	}
 }
 
 void solveConcurrencyDecisions(ctrl_info_t ctrl_info){
@@ -373,6 +384,12 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	nextPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
 	nextPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
 	
+	if(nextPos.row >= info->ctrl_info->rows && nextPos.col >= info->ctrl_info->cols){
+		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
+		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
+		return NULL;
+	}
+	
 	int i;
 	for(i = 0; i < info->ctrl_info->qtyAnt; i++){
 		if(info->ctrl_info->ants[i].cmd->type == CMD_MOVE_RES &&
@@ -384,9 +401,15 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 		}
 	}
 	
+	struct st_dir_t currPos;
+	currPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row;
+	currPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col;
+	
+	info->ctrl_info->board[currPos.row][currPos.col].trail = TRAIL_VALUE;
+	
 	info->ctrl_info->ants[i].row = nextPos.row;
 	info->ctrl_info->ants[i].col = nextPos.col;
-	info->ctrl_info->ants[i].cmd = newMoveRes(STATUS_OK);
+	info->ctrl_info->ants[i].cmd = newMoveRes(cmdreq->dir);
 	info->ctrl_info->ants[i].status = ANT_DECIDED;
 	return NULL;
 }
