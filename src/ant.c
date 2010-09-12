@@ -73,9 +73,9 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	switch (ant->state) {
 	    case ANT_STATE_SEEKING:
 	        if (ant->smelled) {
-	            for (dir = DIR_NORTH; dir < DIR_NORTHWEST; dir++) {
+	            for (dir = DIR_NORTH; dir <= DIR_NORTHWEST; dir++) {
 	                if (ant->smell[dir].obj == OBJ_FOOD)
-	                    return newPickReq(i);
+	                    return newPickReq(dir);
 	                    
 	        } else
     	        return (rand() % 2) ? newMoveReq(randDir()) : newSmellReq();        

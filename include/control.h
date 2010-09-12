@@ -4,7 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "cmd.h"
-#include "io.h"
+#include "common.h"
+#include "message.h"
 #include "ipc.h"
 
 #define MAX_TURNS 10000
@@ -28,13 +29,6 @@ enum {
 	ANT_NEEDHELP,
 	ANT_GIVINGHELP,
 	ANT_STOPPED
-};
-
-typedef struct tile_t ** board_t;
-
-struct st_dir_t{
-	int row;
-	int col;
 };
 
 struct st_ctrl_antinfo{
