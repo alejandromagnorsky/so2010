@@ -58,13 +58,13 @@ struct st_ctrl_info {
 	int rows, cols;
 	struct st_dir_t antHill;
 	struct st_ctrl_antinfo * ants;
-	int qtyFood;
+	int qtyFoodPoints;
 	board_t board;
+	int points;
+	int turn;
 };
 
-typedef struct st_ctrl_info * ctrl_info_t;
-
-
+// typedef struct st_ctrl_info * ctrl_info_t; EN EL COMMON
 struct ant_and_ctrl_info_st {
 	ctrl_info_t ctrl_info;
 	int antid;
