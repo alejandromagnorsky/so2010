@@ -12,9 +12,9 @@
 
 /* Before including any other headers, some definitions are needed: */
 
-#define IPC_METHOD_SOCKETS
+//#define IPC_METHOD_SOCKETS
 //#define IPC_METHOD_MQS
-//#define IPC_METHOD_FIFOS
+#define IPC_METHOD_FIFOS
 //#define IPC_METHOD_SHMEM
 
 #ifdef IPC_METHOD_SOCKETS
@@ -48,20 +48,6 @@
     #define IPCF_CONNECT(X)     mq_connect(X)
 #endif
     
-#ifdef IPC_METHOD_MQS
-	#include "ipc_queue.h"
-	#define IPC_METHOD "MQS"
-	
-	// Requirements to build IPCData vary from IPC method to IPC method
-    #define IPCF_IPCDATA(...)   mq_ipcdata(__VA_ARGS__)
-    #define IPCF_IPCDATA_ARGS   getpid(), getpid()
-    
-    // IPCF_SERVE always receives ipcdata_t
-    #define IPCF_SERVE(X, Y)    mq_serve(X)
-
-    // IPCF_CONNECT always receives ipcdata_t
-    #define IPCF_CONNECT(X)     mq_connect(X)
-#endif
     
 #ifdef IPC_METHOD_FIFOS
 	#include "ipc_fifo.h"
@@ -84,7 +70,7 @@
 	
 	// Requirements to build IPCData vary from IPC method to IPC method
     #define IPCF_IPCDATA(...)   shmIPCData()
-    #define IPCF_IPCDATA_ARGS   
+    #define IPCF_IPCDATA_ARGS   sid
     
     // IPCF_SERVE always receives ipcdata_t
     #define IPCF_SERVE(IPCDATA, QTYANTS)   shmServe()

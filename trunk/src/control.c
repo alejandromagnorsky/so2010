@@ -34,23 +34,21 @@ void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t *
 
 
 int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher){
-	int turn = 0;
-	int points = 0;
 	int ans;
 	ctrl_info->status = CTRL_STATE_ZERO;
 	
 	reqStartAnts(ctrl_info, handlers);
 	
-	while(turn < MAX_TURNS && ctrl_info->qtyFood > 0){
+	while(ctrl_info->turn < MAX_TURNS && ctrl_info->points < ctrl_info->qtyFoodPoints){
 		if((ans = playTurn(ctrl_info, handlers) < 0)){
 			return CTRL_ERR_TURN;
 		}else{
-			points += ans;
+			ctrl_info->points += ans;
 		}
-		turn++;
+		ctrl_info->turn++;
 	}
-	
-	return points;
+
+	return NO_ERROR;
 }
 
 void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
@@ -60,7 +58,6 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 	struct ant_and_ctrl_info_st info;
 	
 	ctrl_info->status = CTRL_STATE_STARTING;
-	
 	
 	while(antsStatus(ctrl_info, ANT_READY) != ctrl_info->qtyAnt){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
@@ -282,7 +279,9 @@ ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo){
 	ret->rows = gridinfo->gridRows;
 	ret->cols = gridinfo->gridCols;
 	ret->qtyAnt = gridinfo->antsQuant;
-	ret->qtyFood = gridinfo->smallFoodQuant + gridinfo->bigFoodQuant;
+	ret->turn = 0;
+	ret->points = 0;
+	ret->qtyFoodPoints = (gridinfo->smallFoodQuant * POINTS_FOOD) + (gridinfo->bigFoodQuant * POINTS_BIGFOOD);
 	
 	ret->board = createBoard(ret->rows, ret->cols);
 	if(ret->board == NULL){
