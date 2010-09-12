@@ -29,7 +29,4 @@ struct st_grid_t {
 typedef struct st_grid_t* grid_t;
 
 
-typedef struct st_ctrl_info * ctrl_info_t;
-
-
 #endif

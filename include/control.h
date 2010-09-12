@@ -64,7 +64,8 @@ struct st_ctrl_info {
 	int turn;
 };
 
-// typedef struct st_ctrl_info * ctrl_info_t; EN EL COMMON
+typedef struct st_ctrl_info * ctrl_info_t;
+
 struct ant_and_ctrl_info_st {
 	ctrl_info_t ctrl_info;
 	int antid;
