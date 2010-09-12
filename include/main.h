@@ -20,7 +20,7 @@
 #ifdef IPC_METHOD_SOCKETS
     #include "ipc_sock.h"
     #define IPC_METHOD "SOCKETS"
-    struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4548, INADDR_ANY};
+    struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4549, INADDR_ANY};
 
     // Requirements to build IPCData vary from IPC method to IPC method
     #define IPCF_IPCDATA(...)   sockIPCData(__VA_ARGS__)

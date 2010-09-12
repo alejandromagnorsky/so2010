@@ -22,31 +22,33 @@
 enum {
     ANT_STATE_ZERO,     /* Initial state. Simulation is not running. */
     ANT_STATE_SEEKING,  /* Default behaviour. Will smell around. */
-    ANT_STATE_WAITING,  /* Yelled for aid in carrying BIG food. It's BIG. */
-    ANT_STATE_GOING,    /* Heard a naerby yell, and decided to help. */
-    ANT_STATE_AIDING,   /* Got there, looking for the big food. */
+    ANT_STATE_WAITING,  /* Waiting for help with big food */
     ANT_STATE_CARRYING, /* Carrying food back to the anthill. */ 
     ANT_STATE_FINAL     /* Simulation has ended. */
 };
 
-#define NUM_STATES 6
+#define NUM_STATES 5
 
 struct ant_t {
     int state;
 
-    int pickdir;    /* Waiting next to big food in this direction */
     int r, c;       /* Ant's own position */
     int ahr, ahc;   /* Anthill position */
     int mr, mc;     /* Memorized position */
     
-    char smelled;
-    struct tile_t smell[8];
+    char yelled;    /* Did we already yell when we found this food? */
+    char smelled;   /* Flag to remember whether smell data is still valid */
+    struct tile_t smell[NUM_DIRS];
+
+    double interestbase[NUM_DIRS];
+    double interestmult[NUM_DIRS];
 };
 
 typedef struct ant_t* ant_t;
 
 ant_t antNew();
 void antFree();
+int decide(double* base, double* mult);
 
 void antFillHandlerArray(handler_f*);
 
