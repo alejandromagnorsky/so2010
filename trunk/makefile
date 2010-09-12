@@ -15,7 +15,7 @@ SOURCEDIR := src
 HEADERDIR := include
 
 #SOURCES := $(wildcard $(SOURCEDIR)/*.c)
-SRCNAMES := /main /ipc /ipc_sock /ipc_queue /queue /message /tools /ant /cmd
+SRCNAMES := /main /ipc /ipc_sock /ipc_queue /ipc_fifo /queue /message /tools /ant /cmd
 SOURCES := $(SRCNAMES:/%=$(SOURCEDIR)/%.c)
 HEADERS := $(SRCNAMES:/%=$(SOURCEDIR)/%.h)
 OBJECTS := $(SOURCES:%.c=%.o)

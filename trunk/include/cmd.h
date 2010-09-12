@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include "tools.h"
+#include "message.h"
 
 enum {
     OBJ_OUT_OF_BOUNDS = -1,
@@ -58,8 +59,7 @@ enum {
 
 enum {
 /* Status constants */
-    STATUS_FAILED,
-    STATUS_RETRY,
+    STATUS_FAILED = -1,
     STATUS_SOLVED,
     STATUS_OK,
 };
@@ -182,7 +182,7 @@ struct cmd_yell_res_t {
 /* YELL NOTIFICATION: Control tells all the other Ants about the yell. */
 struct cmd_yell_not_t {
     int type;
-    int x, y;
+    int r, c;
 };
 
 struct cmd_stop_t {
@@ -213,6 +213,9 @@ cmd_t newMoveRes(int status);
 cmd_t newMoveReq(int dir);
 
 handler_f* buildHandlerArray();
+
+size_t cmdsize(cmd_t);
+
 cmd_t dispatchCmd(void* obj, cmd_t cmd, handler_f* handlers);
 int randDir();
 

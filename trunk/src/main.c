@@ -11,9 +11,11 @@
 
 #define ANTS 10
 
+int sid;
+
 int main(int argc, char** argv) {
 
-    int sid, status;
+    int status;
     char forking;
     message_t message;
     pid_t pid, cpid;
@@ -54,7 +56,7 @@ int main(int argc, char** argv) {
         do {
             sid++;
             pid = getpid();
-                        
+                       
             if (forking = (sid - 1 < ANTS))
                 forking = ((cpid = fork()) != 0); /* Child will keep forking */
         
@@ -63,7 +65,7 @@ int main(int argc, char** argv) {
         /* We can do our own stuff now */           
         ipc = initClient();
         ipc->id = sid; /* Grasaaaa! */
-
+        
         status = antLoop(ipc);
         exit(status);
         
