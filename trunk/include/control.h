@@ -10,6 +10,9 @@
 
 #define MAX_TURNS 10000
 
+#define TRAIL_VALUE 1
+#define DECREASE_FACTOR 0.01
+
 enum {
 	NO_ERROR,
 	CTRL_STATE_ZERO,
@@ -70,6 +73,7 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher)
 void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers);
 int playTurn(ctrl_info_t , handler_f*);
 int antsStatus(ctrl_info_t ctrl_info, int status);
+void decreaseTrail(ctrl_info_t ctrl_info);
 
 ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo);
 void deleteCtrlInfo(ctrl_info_t ctrl_info);
