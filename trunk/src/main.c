@@ -47,17 +47,7 @@ int main(int argc, char** argv) {
     if (cpid = fork()) {
     
         /* Control code here */
-        while(1) {
-            fflush(stdout);
-            if (message = recvMessage(ipc)) {
-                LOGPID("Control received: ");
-                sendMessage(ipc, mnew(1, mfrom(message),
-                                      sizeof(struct cmd_start_t),
-                                      (char*) newStart()));
-                mprintln(message);
-                mdel(message);
-            }
-        }
+    	launchControl(ipc, grid);
     } else {       
     
         /* Ants here */
@@ -65,7 +55,7 @@ int main(int argc, char** argv) {
             sid++;
             pid = getpid();
                        
-            if (forking = (sid - 1 < ANTS))
+            if (forking = (sid - 1 < grid->antsQuant))
                 forking = ((cpid = fork()) != 0); /* Child will keep forking */
         
         } while (forking);
