@@ -30,6 +30,7 @@ ipc_t shmConnect(ipcdata_t ipcdata, int antid){
 		ret->ipcdata = ipcdata;
 		ret->inbox = qnew();
 		ret->outbox = qnew();
+		ret->stop = 0;
 		
 		rcreat = pthread_create(&(ret->thread), NULL, shmCientLoop, ret);	
 		if(rcreat != 0){
