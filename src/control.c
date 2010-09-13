@@ -67,8 +67,8 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 	
 	while((aux = antsStatus(ctrl_info, ANT_READY)) != ctrl_info->qtyAnt){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
-			if(mfrom(msg) >= ctrl_info->qtyAnt + FIRST_ANT_ID){
-				LOGPID("Receive SPAM\n");
+			if(mfrom(msg) >= ctrl_info->qtyAnt + FIRST_ANT_ID || mfrom(msg) < FIRST_ANT_ID){
+				LOGPID("Receive SPAM. ID: %d\n", mfrom(msg));
 			}else{
 				LOGPID("Receive CMD: %d from: %d\n", ((cmd_t) mdata(msg))->type, mfrom(msg));
 				info.ctrl_info = ctrl_info;
