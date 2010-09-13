@@ -31,6 +31,7 @@ struct q_entry {
 };
 
 ipcdata_t mq_ipcdata(int sendprior, int recvprior);
+/* Returns the data needed for the ipc */
 
 ipc_t mq_connect(ipcdata_t ipcdata);
 /* Fires a thread to connect to a client, returns a ipc_t structure ptr. */

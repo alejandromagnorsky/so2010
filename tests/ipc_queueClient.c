@@ -11,7 +11,7 @@ int main() {
 	ipc_t ipc;
 	ipcdata_t ipcdata;
 	
-	ipcdata = mq_ipcData(CLIENTSENDPRIOR, CLIENTRECVPRIOR);
+	ipcdata = mq_ipcdata(CLIENTSENDPRIOR, CLIENTRECVPRIOR);
 	
 	ipc = mq_connect(ipcdata);
 	

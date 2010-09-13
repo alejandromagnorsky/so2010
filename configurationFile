@@ -1,0 +1,26 @@
+14,10
+5,1
+3
+2
+11,2
+13,2
+3
+1,2
+0,0
+1,0
+
+
+  
+  
+  
+1• Una lınea con la longitud y alto del tablero separados por coma. Ej: 6,8
+  significa un tablero de 6 columnas y 8 filas.
+2• Una lınea con la posicion del hormiguero separada por coma, teniendo en
+  cuenta que la posicion superior izquierda es 0,0. Ej: 3,4 significa que el
+  hormiguero esta en la cuarta columna, quinta fila.
+3• Una lınea con la cantidad de hormigas N. Todas las hormigas empiezan
+  en el hormiguero.
+4• Una lınea con la cantidad de comida chica M, seguida de M lineas con la
+  posicion de cada comida.
+5• Una lınea con la cantidad de comida grande K, seguida de K lıneas con la
+  posicion de cada comida.
