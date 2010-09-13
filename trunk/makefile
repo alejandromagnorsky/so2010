@@ -14,9 +14,9 @@ LDFLAGS := -lpthread
 SOURCEDIR := src
 HEADERDIR := include
 
-#SOURCES := $(wildcard $(SOURCEDIR)/*.c)
-SRCNAMES := /main /ipc /ipc_sock /ipc_queue /ipc_fifo /ipc_shm /queue /message /tools /ant /cmd
-SOURCES := $(SRCNAMES:/%=$(SOURCEDIR)/%.c)
+SOURCES := $(wildcard $(SOURCEDIR)/*.c)
+#SRCNAMES := /main /ipc /ipc_sock /ipc_queue /ipc_fifo /ipc_shm /queue /message /tools /ant /cmd
+#SOURCES := $(SRCNAMES:/%=$(SOURCEDIR)/%.c)
 HEADERS := $(SRCNAMES:/%=$(SOURCEDIR)/%.h)
 OBJECTS := $(SOURCES:%.c=%.o)
 
