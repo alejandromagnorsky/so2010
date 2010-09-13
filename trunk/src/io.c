@@ -492,8 +492,8 @@ int initializeScreen(grid_t grid)
 	// [TODO] sacar el endwin y el getch en caso que sea necesario
 	
 	attroff(COLOR_PAIR(TEMPPAIR));
-	getch();
 	refresh();
+	getch();
 	/*endwin();*/
 	
 	return NO_ERRORS;
@@ -560,8 +560,8 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 	
 	for(i=0; i < ctrlInfo->qtyAnt; i++)
 	{
-		addCharAt(ctrlInfo->ants[i].col,ctrlInfo->ants[i].row,'@');
-	}	
+		addCharAt(ctrlInfo->ants[i].row,ctrlInfo->ants[i].col,'@');
+	}
 	
 	for(i = 0; i < 6; i++)
 	{
@@ -573,6 +573,7 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 	mvprintw(0,28,"%d",ctrlInfo->points);
 	
 	refresh();
+	getch();
 }
 
 int getColor(int color)

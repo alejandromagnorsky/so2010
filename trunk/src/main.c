@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
         
     }
     
+    //[TODO] free grid
 }
 
 ipc_t initServer() {
