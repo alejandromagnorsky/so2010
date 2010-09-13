@@ -31,7 +31,6 @@ int main(int argc, char** argv) {
 		exit(status);
 	}
 	
-
     /* This process will act as IPC server/simulation control */
     
     sid = 1;        /* Control has simulation ID 1 */
@@ -58,10 +57,8 @@ int main(int argc, char** argv) {
             sid++;
             pid = getpid();
             ipc = initClient();
-            
             if (forking = (sid - 1 < grid->antsQuant))
                 forking = ((cpid = fork()) == 0); /* Child will keep forking */
-        
         } while (forking);
         
         /* We can do our own stuff now */                  

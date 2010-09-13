@@ -39,7 +39,7 @@
 	
 	// Requirements to build IPCData vary from IPC method to IPC method
     #define IPCF_IPCDATA(...)   mq_ipcdata(__VA_ARGS__)
-    #define IPCF_IPCDATA_ARGS   getpid(), getpid()
+    #define IPCF_IPCDATA_ARGS   sid, sid
     
     // IPCF_SERVE always receives ipcdata_t
     #define IPCF_SERVE(X, Y)    mq_serve(X)

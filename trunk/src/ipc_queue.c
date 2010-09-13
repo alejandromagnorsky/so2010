@@ -29,6 +29,7 @@ ipc_t mq_connect(ipcdata_t ipcdata)
 		return newIpc;
 	}
 	
+	newIpc->id = ipcdata->queuedata.sendPrior;
 	newIpc->inbox = qnew();
 	newIpc->outbox = qnew();
 	newIpc->stop = 0;
