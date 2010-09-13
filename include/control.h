@@ -8,7 +8,7 @@
 #include "message.h"
 #include "ipc.h"
 
-#define MAX_TURNS 20
+#define MAX_TURNS 100
 
 #define TRAIL_VALUE 1
 #define DECREASE_FACTOR 0.01

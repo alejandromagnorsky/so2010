@@ -10,7 +10,7 @@ int main(int argc, char * argv[]){
 
 	ipc_t client;
 
-	client = fifoConnect(fifoIPCData(antid));
+	client = fifoConnect(fifoIPCData(antid), antid);
 	printf("Cliente iniciado id: %d\n", antid);
 	message_t inmsg, aux;
 	char word[50];
