@@ -171,7 +171,7 @@ manejar los mensajes con prioridades. De esta manera se mantiene siempre una pri
 En el caso del servidor, el sid siempre es 1 (Debido a que si se intentan levantar mensajes con prioridad 0 de la cola, esta devuelve el de menor 
 prioridad, es decir que se toma como prioridad por defecto), y para las hormigas es n + 1.\\
 Cuando se inicia el servidor se dispara un thread que entra en un loop infinito levantando mensajes con la prioridad del servidor e 
-insertándolos en la cola con el número de prioridad a quien está dirigido el mensaje (indicado en la estructura st_msg_t), a no ser que esté 
+insertándolos en la cola con el número de prioridad a quien está dirigido el mensaje (indicado en la estructura st\_msg\_t), a no ser que esté 
 dirigido a él, en ese caso lo inserta en la \textit{inbox} del servidor.\\
 Por otro lado, al iniciarse cada cliente se dispara un nuevo thread, que también entra en un loop infinito, levanta mensajes de la cola 
 con la prioridad del cliente y los inserta en su \textit{inbox}. Este mismo thread a la vez agarra los mensajes de la \textit{outbox} del 
@@ -182,6 +182,17 @@ procesos puedan seguir enviando y recibiendo mensajes normalmente.\\
 Gracias a la propuesta de \textbf{System V} se logró utilizar una única cola de mensajes para comunicar varios procesos.
 
 
+
+
+
+\subsection{Desarrollo de entrada y salida}
+Para mostrar la simulación en pantalla se decidió usar ncurses gracias a la recomendación de la cátedra, lo que facilitó la visualizacion de los 
+datos. Debido a que la terminal con la cual se cuenta solo ofrece 8 colores predefinidos se decidió crear una escala lo más apropiada posible 
+para mostrar los rastros de las hormigas en color en la pantalla. Por este mismo motivo se puede ver una referencia con los valores de la escala 
+en la parte inferior de la pantalla. En esta referencia también se puede ver el significado de los símbolos que aparecen en el tablero.\\
+En cuanto al archivo de configuración, llamado \textit{configurationFile}, se toma en cuenta que está bien formado, es decir que los datos 
+aparecen tal cual como están descriptos en el enunciado. Se asume que no hay líneas en blanco entre una línea de información y otra, y que no 
+hay espacios en blanco al final de cada línea.
 
 
 
