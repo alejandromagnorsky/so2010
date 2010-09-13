@@ -85,7 +85,7 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 	int size = sizeof(struct cmd_start_t);
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		LOGPID("Send CMD_START_T to ant: %d\n", ctrl_info->ants[i].id);
-		msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_start_t), (char *) &startcmd);
+		msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_start_t), (char *) startcmd);
 		sendMessage(ctrl_info->ipc, msg);
 		mdel(msg);
 	}
@@ -112,7 +112,7 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	//SEND TURN REQUESTS
 	cmd_t cmdTurn = newTurn();
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
-		msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_turn_t), (char *) &cmdTurn);
+		msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_turn_t), (char *) cmdTurn);
 		LOGPID("Send CMD_TURN to antid: %d\n", ctrl_info->ants[i].id);
 		sendMessage(ctrl_info->ipc, msg);
 		mdel(msg);
@@ -135,22 +135,22 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		switch(ctrl_info->ants[i].cmd->type){
 		case CMD_MOVE_RES:
-			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_move_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_move_res_t), (char *) ctrl_info->ants[i].cmd);
 			break;
 		case CMD_SMELL_RES:
-			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_smell_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_smell_res_t), (char *) ctrl_info->ants[i].cmd);
 			break;
 		case CMD_PICK_RES:
-			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_pick_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_pick_res_t), (char *) ctrl_info->ants[i].cmd);
 			break;
 		case CMD_AID_RES:
-			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_aid_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_aid_res_t), (char *) ctrl_info->ants[i].cmd);
 			break;
 		case CMD_YELL_RES:
-			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_yell_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_yell_res_t), (char *) ctrl_info->ants[i].cmd);
 			break;
 		case CMD_YELL_NOT:
-			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_yell_not_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_yell_not_t), (char *) ctrl_info->ants[i].cmd);
 			break;
 		}
 		sendMessage(ctrl_info->ipc, msg);
@@ -175,7 +175,7 @@ void sendYellNot(ctrl_info_t ctrl_info){
 		if(ctrl_info->ants[i].yelled){
 			for(j = 0; j < ctrl_info->qtyAnt; j++){
 				cmdnot = newYellNot(ctrl_info->ants[i].row, ctrl_info->ants[i].col);
-				msg = mnew(SERVER_ID, ctrl_info->ants[j].id, sizeof(struct cmd_yell_not_t), (char *)&cmdnot);
+				msg = mnew(SERVER_ID, ctrl_info->ants[j].id, sizeof(struct cmd_yell_not_t), (char *) cmdnot);
 				sendMessage(ctrl_info->ipc, msg);
 			}
 		}
