@@ -160,7 +160,9 @@ fifos utilizadas.
 Para la implementación del IPC con \textbf{Memoria compartida} se utilizó la propuesta de \textbf{System V} para allocar memoria compartida, y 
 2 semáforos binarios o locks.
 Se crearon dos buffers circulares, en uno el proceso \textit{server} escribe los mensajes para los clientes y en el otro lee los mensajes que
-le envían. 
+le envían. En cada acceso a cada buffer, se utiliza un lock para evitar problemas de sincronización.\\
+A su vez cada cliente, lee del buffer donde el server escribe, y escribe en el buffer de donde lee el server, siempre lockeando en los accesos.
+De esta manera se logra una comunicación bidireccional entre un proceso cliente y un proceso server.
 \end{itemize}
 
 

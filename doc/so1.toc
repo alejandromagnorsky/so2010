@@ -7,3 +7,4 @@
 \contentsline {subsection}{\numberline {2.1}Modelado del problema}{6}
 \contentsline {subsection}{\numberline {2.2}Implementaci\IeC {\'o}n de IPCs}{6}
 \contentsline {subsubsection}{\numberline {2.2.1}Fifos}{6}
+\contentsline {subsubsection}{\numberline {2.2.2}Memoria compartida y sem\IeC {\'a}foros}{7}

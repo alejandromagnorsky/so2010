@@ -1,8 +1,5 @@
 #include "../include/control.h"
 
-int main(){
-
-}
 
 int launchControl(ipc_t ipc, grid_t gridinfo){
 	
