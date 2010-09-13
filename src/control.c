@@ -22,7 +22,7 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 		return CTRL_ERR_MEM;
 	}
 	
-	printf("Arranca loop control!\n");
+	printf("Arranca control loop!\n");
 	controlLoop(ctrl_info, handlers, cmdLauncher);
 	printf("Puntos obtenidos: %d\n", ctrl_info->points);
 	
@@ -88,6 +88,7 @@ int antsStatus(ctrl_info_t ctrl_info, int status){
 }
 
 int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
+	printf("Play TURN!\n");
 	int i;
 	message_t msg;
 	struct ant_and_ctrl_info_st info;
@@ -283,6 +284,7 @@ ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo){
 	ret->rows = gridinfo->gridRows;
 	ret->cols = gridinfo->gridCols;
 	ret->qtyAnt = gridinfo->antsQuant;
+	printf("Cantidad de hormigas: %d\n", ret->qtyAnt);
 	ret->turn = 0;
 	ret->points = 0;
 	ret->qtyFoodPoints = (gridinfo->smallFoodQuant * POINTS_FOOD) + (gridinfo->bigFoodQuant * POINTS_BIGFOOD);
@@ -295,15 +297,15 @@ ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo){
 	
 	ret->ants = createAntInfo(ret->qtyAnt, gridinfo);
 	if(ret->ants == NULL){
-		deleteBoard(ret->board, ret->rows, ret->cols);
+		//deleteBoard(ret->board, ret->rows, ret->cols);
 		ret->status = CTRL_ERR_MEM;
 		return ret;
 	}
 	
 	if(fillWithFood(ret, gridinfo->smallFoodQuant, gridinfo->bigFoodQuant, 
 			gridinfo->smallFoods, gridinfo->bigFoods) != NO_ERROR){
-		deleteBoard(ret->board, ret->rows, ret->cols);
-		deleteAntInfo(ret->ants);
+		//deleteBoard(ret->board, ret->rows, ret->cols);
+		//deleteAntInfo(ret->ants);
 		ret->status = CTRL_ERR_FOOD;
 		return ret;
 	}
@@ -405,17 +407,17 @@ int locateAntHill(ctrl_info_t ret, int row, int col){
 
 int fillWithFood(ctrl_info_t ctrl_info, int qtySmallFood, int qtyBigFood, int * smallFoods, int * bigFoods){
 	int i;
-	for(i = 0; i < qtySmallFood; i++){
-		if(smallFoods[i] >= ctrl_info->rows || smallFoods[i+1] >= ctrl_info->cols ){
+	for(i = 0; i < qtySmallFood * 2; i = i + 2){
+		if(smallFoods[i+1] >= ctrl_info->rows || smallFoods[i] >= ctrl_info->cols ){
 			return CTRL_ERR_FOOD;
 		}
-		ctrl_info->board[smallFoods[i]][smallFoods[i + 1]].obj = OBJ_FOOD;
+		ctrl_info->board[smallFoods[i+1]][smallFoods[i]].obj = OBJ_FOOD;
 	}
-	for(i = 0; i < qtyBigFood; i++){
-		if(bigFoods[i] >= ctrl_info->rows || bigFoods[i+1] >= ctrl_info->cols ){
+	for(i = 0; i < qtyBigFood * 2; i = i + 2){
+		if(bigFoods[i+1] >= ctrl_info->cols || bigFoods[i] >= ctrl_info->cols ){
 			return CTRL_ERR_FOOD;
 		}
-		ctrl_info->board[bigFoods[i]][bigFoods[i + 1]].obj = OBJ_BIGFOOD;
+		ctrl_info->board[bigFoods[i+1]][bigFoods[i]].obj = OBJ_BIGFOOD;
 	}
 	return NO_ERROR;
 }
