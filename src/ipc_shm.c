@@ -94,6 +94,8 @@ ipc_t shmServeFail(ipc_t ret, int error){
 }
 
 void shmStopServe(ipc_t server){
+	shmdt(server->ipcdata->shmdata.bufr);
+	shmdt(server->ipcdata->shmdata.bufw);
 	server->stop = 1;
 	qdel(server->inbox);
 	qdel(server->outbox);
