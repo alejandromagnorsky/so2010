@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     
     if (cpid = fork()) {
     
-        /* Control code here */
+        /* Control code here */        
     	int aux;
     	if((aux = launchControl(ipc, grid)) != NO_ERROR){
     		printf("Simulation fail: %d\n", aux );
@@ -56,16 +56,14 @@ int main(int argc, char** argv) {
         do {
             sid++;
             pid = getpid();
-                       
+            ipc = initClient();
+            
             if (forking = (sid - 1 < grid->antsQuant))
-                forking = ((cpid = fork()) != 0); /* Child will keep forking */
+                forking = ((cpid = fork()) == 0); /* Child will keep forking */
         
         } while (forking);
         
-        /* We can do our own stuff now */           
-        ipc = initClient();
-        ipc->id = sid; /* Grasaaaa! */
-        
+        /* We can do our own stuff now */                  
         status = antLoop(ipc);
         exit(status);
         
