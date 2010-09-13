@@ -76,20 +76,25 @@ int main(int argc, char** argv) {
 ipc_t initServer() {
     ipc_t ipc;
     ipcdata_t ipcdata;
+
+#ifndef IPC_METHOD_FIFOS
+#ifndef IPC_METHOD_SHMEM
     
     LOGPID("Creating IPCData for server...\n"); /* Macro defined in tools.h */
-    
     if ((ipcdata = IPCF_IPCDATA(IPCF_IPCDATA_ARGS)) != NULL)
         LOGPID("Created IPCData for server.\n");
     else {
         LOGPID("Failed to create IPCData for server!\n");
         exit(1);
     }
-    
     LOGPID("Attempting to serve...\n");
-    
+#endif
+#endif
+
     ipc = IPCF_SERVE(ipcdata, 10);
     
+#ifndef IPC_METHOD_FIFOS
+#ifndef IPC_METHOD_SHMEM    
     while(ipc->status == IPCSTAT_PREPARING);
 
     LOGPID("Serving attempt status %d (errno %d)\n", ipc->status, ipc->errn);
@@ -101,6 +106,8 @@ ipc_t initServer() {
         LOGPID("Serving attempt failed!\n");
         exit(1);
     }
+#endif
+#endif
     
     return ipc;
     
@@ -121,7 +128,7 @@ ipc_t initClient() {
     
     LOGPID("Attempting to connect...\n");
 
-    ipc = IPCF_CONNECT(ipcdata);
+    ipc = IPCF_CONNECT(ipcdata, sid);
 
     while (ipc->status == IPCSTAT_CONNECTING);
     
