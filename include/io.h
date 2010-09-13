@@ -63,5 +63,7 @@ int getColor(int color);
 void printColorScale();
 /* Prints the color scale for the refferences */
 
+void freeGrid(grid_t grid);
+/* Frees the memory used for the small and big foods and the structure */
 
 #endif
