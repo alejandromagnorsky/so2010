@@ -1,16 +1,15 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2010.8.27)  12 SEP 2010 23:36
+This is pdfTeXk, Version 3.141592-1.40.3 (Web2C 7.5.6) (format=pdflatex 2010.5.9)  13 SEP 2010 01:58
 entering extended mode
- restricted \write18 enabled.
  %&-line parsing enabled.
 **so1.tex
 (./so1.tex
-LaTeX2e <2009/09/24>
-Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+LaTeX2e <2005/12/01>
+Babel <v3.8h> and hyphenation patterns for english, usenglishmax, dumylang, noh
 yphenation, loaded.
 (/usr/share/texmf-texlive/tex/latex/base/article.cls
-Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
+Document Class: article 2005/09/16 v1.4f Standard LaTeX document class
 (/usr/share/texmf-texlive/tex/latex/base/size10.clo
-File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
+File: size10.clo 2005/09/16 v1.4f Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -25,19 +24,19 @@ File: size10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \bibindent=\dimen102
 )
 (/usr/share/texmf-texlive/tex/latex/base/inputenc.sty
-Package: inputenc 2008/03/30 v1.1d Input encoding file
+Package: inputenc 2006/05/05 v1.1b Input encoding file
 \inpenc@prehook=\toks14
 \inpenc@posthook=\toks15
 
 (/usr/share/texmf-texlive/tex/latex/base/utf8.def
-File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
+File: utf8.def 2006/03/30 v1.1i UTF-8 support for inputenc
 Now handling font encoding OML ...
 ... no UTF-8 mapping file for font encoding OML
 Now handling font encoding T1 ...
-... processing UTF-8 mapping file for font encoding T1
+... processing UTF-8 mapping file for font encodingT1
 
 (/usr/share/texmf-texlive/tex/latex/base/t1enc.dfu
-File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
+File: t1enc.dfu 2006/03/30 v1.1i UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00AB (decimal 171)
@@ -184,10 +183,10 @@ File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+2423 (decimal 9251)
 )
 Now handling font encoding OT1 ...
-... processing UTF-8 mapping file for font encoding OT1
+... processing UTF-8 mapping file for font encodingOT1
 
 (/usr/share/texmf-texlive/tex/latex/base/ot1enc.dfu
-File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
+File: ot1enc.dfu 2006/03/30 v1.1i UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00B8 (decimal 184)
@@ -215,10 +214,10 @@ File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+201D (decimal 8221)
 )
 Now handling font encoding OMS ...
-... processing UTF-8 mapping file for font encoding OMS
+... processing UTF-8 mapping file for font encodingOMS
 
 (/usr/share/texmf-texlive/tex/latex/base/omsenc.dfu
-File: omsenc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
+File: omsenc.dfu 2006/03/30 v1.1i UTF-8 support for inputenc
    defining Unicode char U+00A7 (decimal 167)
    defining Unicode char U+00B6 (decimal 182)
    defining Unicode char U+00B7 (decimal 183)
@@ -242,13 +241,13 @@ Now handling font encoding U ...
    defining Unicode char U+2423 (decimal 9251)
 ))
 (/usr/share/texmf-texlive/tex/generic/babel/babel.sty
-Package: babel 2008/07/06 v3.8l The Babel package
+Package: babel 2005/11/23 v3.8h The Babel package
 
 (/usr/share/texmf-texlive/tex/generic/babel/spanish.ldf
-Language: spanish.ldf 2009/01/02 v5.0h Spanish support from the babel system
+Language: spanish.ldf 2005/03/31 v4.2b Spanish support from the babel system
 
 (/usr/share/texmf-texlive/tex/generic/babel/babel.def
-File: babel.def 2008/07/06 v3.8l Babel common definitions
+File: babel.def 2005/11/23 v3.8h Babel common definitions
 \babel@savecnt=\count87
 \U@D=\dimen103
 )
@@ -258,13 +257,12 @@ Package babel Warning: No hyphenation patterns were loaded for
 (babel)                I will use the patterns loaded for \language=0 instead.
 
 \l@spanish = a dialect from \language0
-\es@datefmt=\count88
 \es@quottoks=\toks16
-\es@quotdepth=\count89
-Package babel Info: Making " an active character on input line 492.
-Package babel Info: Making . an active character on input line 585.
-Package babel Info: Making < an active character on input line 630.
-Package babel Info: Making > an active character on input line 630.
+\es@quotdepth=\count88
+Package babel Info: Making . an active character on input line 509.
+Package babel Info: Making " an active character on input line 540.
+Package babel Info: Making < an active character on input line 641.
+Package babel Info: Making > an active character on input line 642.
 )) (/usr/share/texmf-texlive/tex/latex/graphics/graphicx.sty
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
@@ -273,19 +271,19 @@ Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks17
 )
 (/usr/share/texmf-texlive/tex/latex/graphics/graphics.sty
-Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
+Package: graphics 2006/02/20 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
 (/usr/share/texmf-texlive/tex/latex/graphics/trig.sty
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
 (/etc/texmf/tex/latex/config/graphics.cfg
-File: graphics.cfg 2009/08/28 v1.8 graphics configuration of TeX Live
+File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
 )
-Package graphics Info: Driver file: pdftex.def on input line 91.
+Package graphics Info: Driver file: pdftex.def on input line 90.
 
 (/usr/share/texmf-texlive/tex/latex/pdftex-def/pdftex.def
-File: pdftex.def 2009/08/25 v0.04m Graphics/color for pdfTeX
-\Gread@gobject=\count90
+File: pdftex.def 2007/01/08 v0.04d Graphics/color for pdfTeX
+\Gread@gobject=\count89
 ))
 \Gin@req@height=\dimen104
 \Gin@req@width=\dimen105
@@ -310,17 +308,17 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 17.
 LaTeX Font Info:    ... okay on input line 17.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 17.
 LaTeX Font Info:    ... okay on input line 17.
- (/usr/share/texmf/tex/context/base/supp-pdf.mkii
+ (/usr/share/texmf/tex/context/base/supp-pdf.tex
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count91
+\scratchcounter=\count90
 \scratchdimen=\dimen106
 \scratchbox=\box26
-\nofMPsegments=\count92
-\nofMParguments=\count93
+\nofMPsegments=\count91
+\nofMParguments=\count92
 \everyMPshowfont=\toks18
-\MPscratchCnt=\count94
+\MPscratchCnt=\count93
 \MPscratchDim=\dimen107
-\MPnumerator=\count95
+\MPnumerator=\count94
 \everyMPtoPDFconversion=\toks19
 )
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -381,22 +379,21 @@ Overfull \hbox (48.41513pt too wide) in paragraph at lines 143--145
 
 [6 <./so1.png>] [7] (./so1.aux) ) 
 Here is how much of TeX's memory you used:
- 1739 strings out of 495061
- 20532 string characters out of 1182621
- 79022 words of memory out of 3000000
- 4933 multiletter control sequences out of 15000+50000
- 9331 words of font info for 33 fonts, out of 3000000 for 9000
+ 1641 strings out of 95086
+ 19135 string characters out of 1183256
+ 75098 words of memory out of 1500000
+ 4831 multiletter control sequences out of 10000+50000
+ 9331 words of font info for 33 fonts, out of 1200000 for 2000
  28 hyphenation exceptions out of 8191
- 25i,7n,27p,180b,255s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/share/texmf-texlive/fonts/type1/public/a
-msfonts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/
-cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb><
-/usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/t
-exmf-texlive/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-texliv
-e/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on so1.pdf (7 pages, 120646 bytes).
+ 25i,7n,25p,180b,243s stack positions out of 5000i,500n,6000p,200000b,5000s
+</usr/share/texmf-texlive/fonts/type1/bluesky/
+cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmbx12.pfb></usr
+/share/texmf-texlive/fonts/type1/bluesky/cm/cmr10.pfb></usr/share/texmf-texlive
+/fonts/type1/bluesky/cm/cmr12.pfb></usr/share/texmf-texlive/fonts/type1/bluesky
+/cm/cmti10.pfb></usr/share/texmf-texlive/fonts/type1/bluesky/cm/cmtt10.pfb>
+Output written on so1.pdf (7 pages, 83427 bytes).
 PDF statistics:
- 53 PDF objects out of 1000 (max. 8388607)
- 0 named destinations out of 1000 (max. 500000)
+ 52 PDF objects out of 1000 (max. 8388607)
+ 0 named destinations out of 1000 (max. 131072)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
