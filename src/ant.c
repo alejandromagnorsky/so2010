@@ -30,6 +30,8 @@ int antLoop(ipc_t ipc) {
     cmd_t cmd;
     message_t message, ret;
 
+    srand(getpid());
+
     ant = antNew();
     LOGPID("Starting ant %d logic loop.\n", ipc->id);
 

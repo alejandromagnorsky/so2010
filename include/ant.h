@@ -14,6 +14,7 @@
 #include "cmd.h"
 #include "tools.h"
 #include <stdlib.h>
+#include <time.h>
 #include <math.h>
 
 #define COINFLIP() (rand() % 2)
