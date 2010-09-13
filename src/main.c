@@ -47,7 +47,11 @@ int main(int argc, char** argv) {
     if (cpid = fork()) {
     
         /* Control code here */
-    	launchControl(ipc, grid);
+    	int aux;
+    	if((aux = launchControl(ipc, grid)) != NO_ERROR){
+    		printf("Simulation fail: %d\n", aux );
+    	}
+    	printf("Simulation Ended!\n");
     } else {       
     
         /* Ants here */
