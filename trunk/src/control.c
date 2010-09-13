@@ -45,19 +45,19 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher,
 	reqStartAnts(ctrl_info, handlers);
 	
 	while(ctrl_info->turn < MAX_TURNS && ctrl_info->points < ctrl_info->qtyFoodPoints){
-		fprintf(stderr, "[%d] Called playTurn.\n", clock());
+		//fprintf(stderr, "[%d] Called playTurn.\n", clock());
 
 		if((ans = playTurn(ctrl_info, handlers) < 0)) {
 			return CTRL_ERR_TURN;
 		}else{
 			ctrl_info->points += ans;
 		}
-		fprintf(stderr, "[%d] Returned from playTurn.\n", clock());
+		//fprintf(stderr, "[%d] Returned from playTurn.\n", clock());
 		ctrl_info->turn++;
 		
-		fprintf(stderr, "[%d] Called refreshGrid.\n", clock());	
+		//fprintf(stderr, "[%d] Called refreshGrid.\n", clock());	
 		//refreshGrid(ctrl_info, gridinfo);
-		fprintf(stderr, "[%d] Returned from refreshGrid.\n", clock());
+		//fprintf(stderr, "[%d] Returned from refreshGrid.\n", clock());
 	}
 
 	return NO_ERROR;
@@ -84,7 +84,7 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 				info.ctrl_info = ctrl_info;
 				info.antid = mfrom(msg);
 				ctrl_info->ants[mfrom(msg) - FIRST_ANT_ID].id = mfrom(msg);
-				dispatchCmd(&info, (cmd_t)mdata(msg), handlers);
+				dispatchCmd(&info, (cmd_t) mdata(msg), handlers);
 			}
 		}
 	}
@@ -133,7 +133,7 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
 			info.ctrl_info = ctrl_info;
 			info.antid = msg->header.from;
-			LOGPID("Receive CMD_TYPE: %d, from: %d\n", ((cmd_t) msg->data)->type, info.antid);
+			LOGPID("Control: Receive CMD_TYPE: %d, from: %d\n", ((cmd_t) msg->data)->type, info.antid);
 			dispatchCmd(&info, (cmd_t) msg->data, handlers);		
 		}
 	}
@@ -509,12 +509,13 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	nextPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
 	nextPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
 	
-	LOGPID("Control: Current Position: %d, %d\n", info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row, info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col);
+	LOGPID("\n\nControl: Current Position: %d, %d\n", info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row, info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col);
+	LOGPID("Control: Moving to dir: %d\n", cmdreq->dir);
 	LOGPID("Control: Trying to move: %d, %d\n", nextPos.row, nextPos.col);
 	if(nextPos.row >= info->ctrl_info->rows || nextPos.col >= info->ctrl_info->cols ||  nextPos.row < 0 || nextPos.col < 0){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
-		LOGPID("Control: Move Failed\n");
+		LOGPID("Control: Move Failed\n\n");
 		return NULL;
 	}
 	
@@ -522,7 +523,7 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 			info->ctrl_info->board[nextPos.row][nextPos.col].obj != OBJ_ANT){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
-		LOGPID("Control: Move Failed\n");
+		LOGPID("Control: Move Failed\n\n");
 		return NULL;
 	}
 	
@@ -540,8 +541,8 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 	LOGPID("Control: Handle CMD_SMELL, type: %d\n", cmdreq->type);
 	
 	struct st_dir_t currPos;
-	currPos.row = info->ctrl_info->ants[info->antid].row;
-	currPos.col = info->ctrl_info->ants[info->antid].col;
+	currPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row;
+	currPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col;
 	
 	tile_t tileRes = calloc(8, sizeof(struct tile_t));
 	
@@ -549,7 +550,8 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 	
 	int i;
 	for(i = 0; i < 16; i = i + 2){
-		if(currPos.row + mov[i] < info->ctrl_info->rows && currPos.col + mov[i+1] < info->ctrl_info->cols){
+		if(currPos.row + mov[i] < info->ctrl_info->rows && currPos.col + mov[i+1] < info->ctrl_info->cols &&
+				currPos.row + mov[i] >= 0 && currPos.col + mov[i+1] >= 0){
 			if(thereIsAnAnt(info->ctrl_info, currPos.row + mov[i], currPos.col + mov[i+1]) ){
 				tileRes[i/2].obj = OBJ_ANT;
 			}else{
@@ -559,7 +561,7 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 		}else{
 			tileRes[i/2].obj = OBJ_OUT_OF_BOUNDS;
 		}
-		LOGPID("Control: SMELL POS: OBJ:%d, TRAIL:%g\n", tileRes[i/2].obj, tileRes[i/2].trail);
+		LOGPID("Control: OBJ(%d)=%d\n", i/2, tileRes[i/2].obj);
 	}
 	
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newSmellRes(tileRes);
