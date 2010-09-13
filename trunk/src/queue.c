@@ -47,11 +47,11 @@ void qdel(queue_t queue) {
 }
 
 void qlock(queue_t queue) {
-    //pthread_mutex_lock(&(queue->lock));
+    pthread_mutex_lock(&(queue->lock));
 }
 
 void qunlock(queue_t queue) {
-    //pthread_mutex_unlock(&(queue->lock));
+    pthread_mutex_unlock(&(queue->lock));
 }
 
 message_t qget(queue_t queue) {
