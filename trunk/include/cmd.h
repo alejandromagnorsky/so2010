@@ -141,7 +141,7 @@ struct cmd_smell_req_t {
 struct cmd_smell_res_t {
 /* SMELL RESPONSE: Control tells an Ant what's in adjacent tiles. */
     int type;
-    tile_t tiles;
+    struct tile_t tiles[8];
 };
 
 /* PICK REQUEST: Ant tells Control it wants to PICK in a certain direction. */
