@@ -87,9 +87,9 @@ ipc_t initServer() {
         LOGPID("Failed to create IPCData for server!\n");
         exit(1);
     }
+#endif
+#endif
     LOGPID("Attempting to serve...\n");
-#endif
-#endif
 
     ipc = IPCF_SERVE(ipcdata, 10);
     

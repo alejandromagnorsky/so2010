@@ -1,6 +1,7 @@
 \documentclass[a4paper,10pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[spanish]{babel}
+\usepackage[pdftex]{graphicx}
 
 \makeindex
 
@@ -109,11 +110,57 @@ usando las siguientes primitivas de IPC:
       hormiguero está en la cuarta columna, quinta fila.
      \item Una línea con la cantidad de hormigas N. Todas las hormigas empiezan
       en el hormiguero.
-     \item 
-
+     \item Una línea con la cantidad de comida chica M, seguida de M líneas con la
+      posición de cada comida.
+     \item Una línea con la cantidad de comida grande K, seguida de K líneas con la
+      posición de cada comida.
     \end{itemize}
+  \item El programa debe permitir la visualización de la simulación en un tablero en
+   la pantalla, iterando turno a turno.
+  \item Todas las hormigas deben tener la misma programación, es decir, si bien
+  lo que hacen dependerá de su posición y pueden elegir moverse a un lugar al
+  azar, debe haber una unica función con la programación para todas las hormigas
+  individuales.
+  \item La nota del trabajo prático no dependerá de la eficiencia de la simulación,
+   sin embargo, la cátedra proveerá 3 escenarios de prueba y se otorgará un punto
+    extra al equipo que maximice puntajes en estos 3 escenarios.
 
 \end{enumerate}
+
+\newpage
+
+\section{Desarrollo}
+\subsection{Modelado del problema}
+Para el desarrollo de la simulación de hormigas decidimos modelar a cada hormiga como un proceso, el cual dispara un \textit{thread} que se
+encarga de la comunicación de esta hormiga con el \textit{server}. De la misma manera, el \textit{server} es un proceso que dispara un thread
+que se encarga de la comunicación de éste con las hormigas de este mini-universo.\\
+Los \textit{threads} aprovechando que comparten los datos con el proceso que los dispara, se encargarán de recibir y enviar constantemente los 
+mensajes entrantes y salientes, a través de los distintos sistemas de \textbf{IPC}, estos mensajes entrantes y salientes serán debidamente
+encolados o desencolados de las colas \textit{inbox} y \textit{outbox} que posee cada proceso en ejecución.\\
+A continución se coloca una ilustración de un server conectado con dos hormigas:
+
+\begin{center}
+ \includegraphics[scale=0.65]{./so1.png}
+ % so1.png: 603x380 pixel, 72dpi, 21.27x13.41 cm, bb=0 0 603 380
+\end{center}
+
+\subsection{Implementación de IPCs}
+\subsubsection{Fifos}
+Para entablar una comunicación entre procesos mediante el sistema de IPC implementado con \textbf{FIFOS}, se tomaron las siguientes decisiones:
+\begin{itemize}
+ \item Al iniciar el proceso \textit{server} creará en el directorio ``/tmp'', todas las fifos necesarias para entablar comunicación 
+con las \textit{n} hormigas participantes.
+ \item Los nombres de cada fifo corresponden a la siguiente regla: La hormiga con id lógico \textit{n} enviará mensajes a través de la fifo 
+``\verb|/tmp/fifo_c_w_n|'' y recibirá mensajes a través de la fifo ``\verb|/tmp/fifo_c_r_n|''. De esta manera entabla una comunicación
+bidireccional con el \textit{server}.
+  \item Se asume que en el directorio ``/tmp'' no hay fifos creadas con los mismos nombres, el programa se asegura crear y eliminar todas las 
+fifos utilizadas.
+
+\subsubsection{Memoria compartida y semáforos}
+Para la implementación del IPC con \textbf{Memoria compartida} se utilizó la propuesta de \textbf{System V} para allocar memoria compartida, y 
+2 semáforos binarios o locks.
+Se crearon dos buffers circulares, en uno el proceso \textit{server}
+\end{itemize}
 
 
 
