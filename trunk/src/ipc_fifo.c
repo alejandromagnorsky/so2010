@@ -105,6 +105,8 @@ void fifoHandlerWrite(ipc_t ipc, int fdw, msg_writting currMsgW){
 			currMsgW->toWrite = M_HEADER_SIZE + nextMsg->header.len;
 			currMsgW->msglen = currMsgW->toWrite;
 			currMsgW->data = mserial(nextMsg);
+			currMsgW->to = nextMsg->header.to;
+			currMsgW->from = nextMsg->header.from;
 			mdel(nextMsg);
 		}
 	}else{
@@ -128,12 +130,12 @@ void fifoHandlerWriteServer(ipc_t ipc, msg_writting currMsgW, client_t * clients
 			currMsgW->toWrite = M_HEADER_SIZE + nextMsg->header.len;
 			currMsgW->msglen = currMsgW->toWrite;
 			currMsgW->data = mserial(nextMsg);
-			currMsgW->to = nextMsg->header.to - FIRST_ANT_ID;
+			currMsgW->to = nextMsg->header.to;
 			currMsgW->from = nextMsg->header.from;
 			mdel(nextMsg);
 		}
 	}else{
-		fifoHandlerWrite(ipc, clients[currMsgW->to]->cinfo->fifodata.fdw, currMsgW);
+		fifoHandlerWrite(ipc, clients[currMsgW->to - FIRST_ANT_ID]->cinfo->fifodata.fdw, currMsgW);
 	}
 }
 
