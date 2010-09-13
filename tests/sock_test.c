@@ -3,92 +3,141 @@
 **  PRIMER TRABAJO PRACTICO
 **  Simulacion de una colonia de hormigas.
 
-**  File:       sock_test.c
-**  Content:    tests for the socket IPC library.
+**  File:       main.c
+**  Content:    main executable.
 */
 
-#include <stdio.h>
-#include "../include/sock.h"
+#include "../include/main.h"
 
+int sid;
 
-int main() {
+int main(int argc, char** argv) {
 
-    pid_t pid;
-    message_t temp;
+    int status;
+    char forking;
+    message_t message;
+    pid_t pid, cpid;
+    ipc_t ipc;
+    grid_t grid = gnew();
+    
+    LOGPID("Using IPC method: %s.\n", IPC_METHOD);
+    
+    /* Before doing anything else, map data should be loaded! */
+    /* (so as to know the number of ants beforehand, at least */
+    
+	if((status = loadGrid(grid, "configurationFile")) != NO_ERRORS)
+	{
+		LOGPID("An error occurred while loading the configuration file\n ");
+		exit(status);
+	}
+	
+    /* This process will act as IPC server/simulation control */
+    
+    sid = 1;        /* Control has simulation ID 1 */
+    pid = getpid(); /* and it's pid, obviously */
+
+    LOGPID("Control process started.\n");    
+    ipc = initServer();
+
+    /* Good! IPC server working. Let's spawn those ants. */
+    
+    if (cpid = fork()) {
+    
+        /* Control code here */        
+    	int aux;
+    	if((aux = launchControl(ipc, grid)) != NO_ERROR){
+    		LOGPID("Simulation fail: %d\n", aux );
+    	}else{
+    		LOGPID("Simulation ended succesfully!\n");
+    	}
+    } else {       
+    
+        /* Ants here */
+        do {
+            sid++;
+            pid = getpid();
+            ipc = initClient();
+            if (forking = (sid - 1 < grid->antsQuant))
+                forking = ((cpid = fork()) == 0); /* Child will keep forking */
+        } while (forking);
+        
+        /* We can do our own stuff now */                  
+        status = antLoop(ipc);
+        exit(status);
+        
+    }
+    
+    //[TODO] free grid
+}
+
+ipc_t initServer() {
+    ipc_t ipc;
     ipcdata_t ipcdata;
-    ipc_t sipc, cipc;
-    
-    char buffer[100];
 
-    int count = 0;
-    char stop = 0;
+#ifndef IPC_METHOD_FIFOS
+#ifndef IPC_METHOD_SHMEM
     
-    printf("Creating IPCData... ");
-    
-    if ((ipcdata = sockIPCData()) != NULL)
-        printf("ok.\n");
+    LOGPID("Creating IPCData for server...\n"); /* Macro defined in tools.h */
+    if ((ipcdata = IPCF_IPCDATA(IPCF_IPCDATA_ARGS)) != NULL)
+        LOGPID("Created IPCData for server.\n");
     else {
-        printf("failed!");
+        LOGPID("Failed to create IPCData for server!\n");
+        exit(1);
+    }
+#endif
+#endif
+    LOGPID("Attempting to serve...\n");
+
+    ipc = IPCF_SERVE(ipcdata, 10);
+    
+#ifndef IPC_METHOD_FIFOS
+#ifndef IPC_METHOD_SHMEM    
+    while(ipc->status == IPCSTAT_PREPARING);
+
+    LOGPID("Serving attempt status %d (errno %d)\n", ipc->status, ipc->errn);
+    
+    if (ipc->status == IPCSTAT_SERVING)
+        LOGPID("Serving!\n");
+        
+    else {
+        LOGPID("Serving attempt failed!\n");
+        exit(1);
+    }
+#endif
+#endif
+    
+    return ipc;
+    
+}
+
+ipc_t initClient() {
+    ipc_t ipc;
+    ipcdata_t ipcdata;
+
+    LOGPID("Creating IPCData for client...\n"); /* Macro defined in tools.h */
+    
+    if ((ipcdata = IPCF_IPCDATA(IPCF_IPCDATA_ARGS)) != NULL)
+        LOGPID("Created IPCData for client.\n");
+    else {
+        LOGPID("Failed to create IPCData for client!\n");
         exit(1);
     }
     
-    printf("Attempting to serve... ");
+    LOGPID("Attempting to connect...\n");
+
+    ipc = IPCF_CONNECT(ipcdata, sid);
+
+    while (ipc->status == IPCSTAT_CONNECTING);
     
-    sipc = sockServe(ipcdata, 10);
-    
-    while(sipc->status == IPCSTAT_PREPARING);
-        
-    printf("status %d (errno %d) ", sipc->status, sipc->errn);
-    
-    if (sipc->status == IPCSTAT_SERVING)
-        printf("ok! Listening on port %d.\n", ipcdata->sdata.addr.sin_port);
-        
-    if (pid = fork()) {
-    
-        while(!stop) {
-            fflush(stdout);
-            if (temp = qget(sipc->inbox)) {
-            
+    LOGPID("Connect attempt status %d (errno %d)\n", ipc->status, ipc->errn);
 
-                temp->header.to = temp->header.from;
-                temp->header.from = 0;
-
-                qput(sipc->outbox, temp);
-                mdel(temp);
-                
-            }
-        }
+    if (ipc->status == IPCSTAT_CONNECTED)
+        LOGPID("Connected ok!\n");
         
-    } else {
-        printf("Attempting to connect... ");
-
-        cipc = sockConnect(ipcdata);
-
-        while (cipc->status == IPCSTAT_CONNECTING);
-        
-        printf("status %d (errno %d) ", cipc->status, cipc->errn);
-        
-        if (cipc->status == IPCSTAT_CONNECTED);
-            printf("ok!\n");
-
-        qput(cipc->outbox, mnew(1, 0, 5, "c2s-1"));
-        qput(cipc->outbox, mnew(1, 0, 5, "c2s-2"));
-        qput(cipc->outbox, mnew(1, 0, 5, "c2s-3"));
-        
-        while(!stop) {
-
-            if (temp = qget(cipc->inbox)) {
-                
-                printf("Client Got: ");
-                mprintln(temp);
-                temp->header.to = temp->header.from;
-                temp->header.from = 1;
-                printf("Client Sent: ");
-                qput(cipc->outbox, temp);
-                mdel(temp);
-                
-            }
-            
-        }
+    else {
+        LOG("Failed to connect!\n");
+        exit(1);
     }
+    
+    return ipc;
 }

@@ -60,10 +60,9 @@ int antLoop(ipc_t ipc) {
                 sendMessage(ipc, message = mnew(ipc->id, 1, cmdsize(cmd),
                                                (char*) cmd));
                     
-                LOGPID("Ant %d sent: ", ipc->id);
-                mprintln(message);
+                LOGPID("Ant %d sent cmd type %d.\n", ipc->id, ((cmd_t) mdata(message))->type);
                 mdel(message);   
-                free(cmd);                      
+                free(cmd);                   
             }
         }
         
@@ -143,11 +142,20 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleSmellRes(void* antarg, cmd_t cmdarg) {
+	int i;
 	LOGPID("Ant handling smell response command.\n");
     ant_t ant = (ant_t) antarg;
     cmd_smell_res_t cmd = (cmd_smell_res_t) cmdarg;
     
     ant->smelled = 1;
+    
+    for (i = 0; i < 8; i++) {
+        fprintf(stderr, ":%.2f ", cmd->tiles[i].trail);
+        fprintf(stderr, "%d:", cmd->tiles[i].obj);
+        
+    }
+    fprintf(stderr, "\n");
+
     memcpy(ant->smell, cmd->tiles, sizeof(struct tile_t) * NUM_DIRS);
     
     return NULL;

@@ -73,7 +73,7 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 	
 	ctrl_info->status = CTRL_STATE_STARTING;
 
-	LOGPID("Waiting to receive CMD_START_T\n");
+	LOGPID("[%d] Waiting to receive CMD_START_T\n", clock());
 	
 	while((aux = antsStatus(ctrl_info, ANT_READY)) != ctrl_info->qtyAnt){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
@@ -89,7 +89,7 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 		}
 	}
 	
-	LOGPID("Received all CMD_START_T\n");
+	LOGPID("[%d] Received all CMD_START_T\n", clock());
 	
 	cmd_t startcmd = newStart();
 	int size = sizeof(struct cmd_start_t);
@@ -112,7 +112,8 @@ int antsStatus(ctrl_info_t ctrl_info, int status){
 }
 
 int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
-	LOGPID("Play Turn\n");
+    clock_t start;
+	LOGPID("[%d] Turn start\n", start = clock());
 	int i;
 	message_t msg;
 	struct ant_and_ctrl_info_st info;
@@ -172,7 +173,7 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		ctrl_info->ants[i].status = ANT_READY;
 	}
-	
+	LOGPID("[-] Turn end. Took %.2fs.\n", (clock() - start) / (double) CLOCKS_PER_SEC);
 	return calculatePoints(ctrl_info);
 }
 
