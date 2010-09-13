@@ -526,7 +526,7 @@ void addStringAt(int col, int row, char * str)
 void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 {
 	int i,j;
-	
+    //getch();
 	for(i = 0; i < grid->gridRows; i++)
 	{
 		for(j = 0; j < grid->gridCols; j++)
@@ -573,7 +573,6 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 	mvprintw(0,28,"%d",ctrlInfo->points);
 	
 	refresh();
-	getch();
 }
 
 int getColor(int color)

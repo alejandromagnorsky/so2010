@@ -1,5 +1,5 @@
 #include "../include/control.h"
-
+#include <time.h>
 
 int launchControl(ipc_t ipc, grid_t gridinfo){
 	
@@ -37,21 +37,25 @@ void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t *
 
 int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher, grid_t gridinfo){
 	LOGPID("Start control Loop\n");
-	
 	int ans;
 	ctrl_info->status = CTRL_STATE_ZERO;
 	
 	reqStartAnts(ctrl_info, handlers);
 	
 	while(ctrl_info->turn < MAX_TURNS && ctrl_info->points < ctrl_info->qtyFoodPoints){
-		if((ans = playTurn(ctrl_info, handlers) < 0)){
+		fprintf(stderr, "[%d] Called playTurn.\n", clock());
+
+		if((ans = playTurn(ctrl_info, handlers) < 0)) {
 			return CTRL_ERR_TURN;
 		}else{
 			ctrl_info->points += ans;
 		}
+		fprintf(stderr, "[%d] Returned from playTurn.\n", clock());
 		ctrl_info->turn++;
 		
+		fprintf(stderr, "[%d] Called refreshGrid.\n", clock());	
 		//refreshGrid(ctrl_info, gridinfo);
+		fprintf(stderr, "[%d] Returned from refreshGrid.\n", clock());
 	}
 
 	return NO_ERROR;
