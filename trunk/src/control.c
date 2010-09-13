@@ -19,9 +19,11 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 		return CTRL_ERR_MEM;
 	}
 	
-	controlLoop(ctrl_info, handlers, cmdLauncher);
-	printf("Finish with points: %d\n", ctrl_info->points);
+	initializeScreen(gridinfo);
 	
+	controlLoop(ctrl_info, handlers, cmdLauncher, gridinfo);
+	printf("Finish with points: %d\n", ctrl_info->points);
+	endwin();
 	return NO_ERROR;
 }
 
@@ -33,7 +35,7 @@ void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t *
 
 
 
-int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher){
+int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher, grid_t gridinfo){
 	LOGPID("Start control Loop\n");
 	
 	int ans;
@@ -48,6 +50,8 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher)
 			ctrl_info->points += ans;
 		}
 		ctrl_info->turn++;
+		
+		refreshGrid(ctrl_info, gridinfo);
 	}
 
 	return NO_ERROR;

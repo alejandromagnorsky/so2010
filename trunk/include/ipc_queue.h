@@ -59,7 +59,7 @@ message_t mq_getData(ipc_t ipc, int priority);
 void mq_disconnect(ipc_t ipc);
 /* Disconnects and destroys the given ipc_t structure. */
 
-int warn(char * s);
+void warn(char * s);
 /* It prints an error in stderr. */
 
 #endif

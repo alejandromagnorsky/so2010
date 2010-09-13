@@ -422,7 +422,6 @@ int checkFoodPositions(grid_t grid)
 int initializeScreen(grid_t grid)
 {
 	int i;
-	double num;
 	char * msg;
 
 	initscr();
@@ -496,6 +495,8 @@ int initializeScreen(grid_t grid)
 	getch();
 	refresh();
 	/*endwin();*/
+	
+	return NO_ERRORS;
 }
 
 void addCharAt(int col, int row, char c)
@@ -542,10 +543,10 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 			{
 				addCharAt(i,j,'B');
 			}
-			else if(ctrlInfo->board[i][j].obj == OBJ_ANT)
+			/*else if(ctrlInfo->board[i][j].obj == OBJ_ANT)
 			{
 				addCharAt(i,j,'@');
-			}
+			}*/
 			else if(ctrlInfo->board[i][j].obj == OBJ_ANTHILL)
 			{
 				addCharAt(i,j,'H');
@@ -557,7 +558,10 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 		}
 	}
 	
-	//[TODO] actualizar turno y puntos
+	for(i=0; i < ctrlInfo->qtyAnt; i++)
+	{
+		addCharAt(ctrlInfo->ants[i].col,ctrlInfo->ants[i].row,'@');
+	}	
 	
 	for(i = 0; i < 6; i++)
 	{
@@ -568,8 +572,8 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 	mvprintw(0,13,"%d",ctrlInfo->turn);
 	mvprintw(0,28,"%d",ctrlInfo->points);
 	
-	getch();
 	refresh();
+	getch();
 }
 
 int getColor(int color)
