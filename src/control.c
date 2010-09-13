@@ -19,7 +19,7 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 		return CTRL_ERR_MEM;
 	}
 	
-	//initializeScreen(gridinfo);
+	initializeScreen(gridinfo);
 	
 	controlLoop(ctrl_info, handlers, cmdLauncher, gridinfo);
 	addStringAt(gridinfo->gridRows + 5 + 4,0,"Finish with points: ");
@@ -56,7 +56,7 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher,
 		ctrl_info->turn++;
 		
 		//fprintf(stderr, "[%d] Called refreshGrid.\n", clock());	
-		//refreshGrid(ctrl_info, gridinfo);
+		refreshGrid(ctrl_info, gridinfo);
 		//fprintf(stderr, "[%d] Returned from refreshGrid.\n", clock());
 	}
 

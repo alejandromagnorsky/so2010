@@ -150,7 +150,7 @@ void* sockServerLoop(void* ipcarg) {
 
     while (!(ipc->stop)) {
         
-        /* Clients start with IPCSTAT_DISCONNECTED status. A thread is fire to
+        /* Clients start with IPCSTAT_DISCONNECTED status. A thread is fired to
            handle each client, and when it's done, it sets the status back to
            IPCSTAT_DISCONNECTED so that the slot can be reused */
            

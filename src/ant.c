@@ -37,8 +37,8 @@ int antLoop(ipc_t ipc, grid_t grid) {
     srand(getpid());
 
     ant = antNew();
-    ant->ahr = grid->anthillRow;
-    ant->ahc = grid->anthillCol;
+    ant->ahr = ant->r = grid->anthillRow;
+    ant->ahc = ant->c = grid->anthillCol;
     LOGPID("Starting ant %d logic loop.\n", ipc->id);
 
     handlers = buildHandlerArray();
@@ -128,12 +128,12 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
             if ((dist = ant->r - ant->ahr) != 0) {
             
                 dir = (dist > 0 ? DIR_NORTH : DIR_SOUTH);
-                ant->interestbase[dir] = 1000;
+                ant->interestbase[dir] = 150;
                 
             } else if ((dist = ant->c - ant->ahc) != 0) {
             
                 dir = (dist > 0 ? DIR_WEST : DIR_EAST);
-                ant->interestbase[dir] = 1000;
+                ant->interestbase[dir] = 150;
                 
             } else {
                 ant->state = ANT_STATE_SEEKING;
@@ -177,6 +177,7 @@ cmd_t antHandlePickRes(void* antarg, cmd_t cmdarg) {
         default:
         case STATUS_OK:
             ant->yelled = 0;
+            LOGPID("Ant picked food!");
             ant->state = ANT_STATE_CARRYING;
             break;
     }
