@@ -19,7 +19,7 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 		return CTRL_ERR_MEM;
 	}
 	
-	initializeScreen(gridinfo);
+	//initializeScreen(gridinfo);
 	
 	controlLoop(ctrl_info, handlers, cmdLauncher, gridinfo);
 	addStringAt(gridinfo->gridRows + 5 + 4,0,"Finish with points: ");
@@ -56,7 +56,7 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher,
 		ctrl_info->turn++;
 		
 		//fprintf(stderr, "[%d] Called refreshGrid.\n", clock());	
-		refreshGrid(ctrl_info, gridinfo);
+		//refreshGrid(ctrl_info, gridinfo);
 		//fprintf(stderr, "[%d] Returned from refreshGrid.\n", clock());
 	}
 
@@ -73,7 +73,7 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 	
 	ctrl_info->status = CTRL_STATE_STARTING;
 
-	LOGPID("[%d] Waiting to receive CMD_START_T\n", clock());
+	//LOGPID("[%d] Waiting to receive CMD_START_T\n", clock());
 	
 	while((aux = antsStatus(ctrl_info, ANT_READY)) != ctrl_info->qtyAnt){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
@@ -89,7 +89,7 @@ void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
 		}
 	}
 	
-	LOGPID("[%d] Received all CMD_START_T\n", clock());
+	//LOGPID("[%d] Received all CMD_START_T\n", clock());
 	
 	cmd_t startcmd = newStart();
 	int size = sizeof(struct cmd_start_t);
@@ -113,7 +113,7 @@ int antsStatus(ctrl_info_t ctrl_info, int status){
 
 int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
     clock_t start;
-	LOGPID("[%d] Turn start\n", start = clock());
+	//LOGPID("[%d] Turn start\n", start = clock());
 	int i;
 	message_t msg;
 	struct ant_and_ctrl_info_st info;
@@ -135,9 +135,11 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 			info.ctrl_info = ctrl_info;
 			info.antid = msg->header.from;
 			LOGPID("Control: Receive CMD_TYPE: %d, from: %d\n", ((cmd_t) msg->data)->type, info.antid);
-			dispatchCmd(&info, (cmd_t) msg->data, handlers);		
+			dispatchCmd(&info, (cmd_t) msg->data, handlers);	
 		}
 	}
+	
+	LOGPID("\n\n\n   DECICIERON TODOS      \n\n\n");
 	
 	solvePickDecisions(ctrl_info);
 	solveMoveDecisions(ctrl_info);
@@ -591,7 +593,8 @@ cmd_t ctrlHandlePick(void * ptrInfo, cmd_t cmd){
 	foodPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
 	foodPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
 	
-	if(foodPos.row >= info->ctrl_info->rows || foodPos.col >= info->ctrl_info->cols){
+	if(foodPos.row >= info->ctrl_info->rows || foodPos.col >= info->ctrl_info->cols ||
+			foodPos.row < 0 || foodPos.col < 0 || info->ctrl_info->ants[info->antid - FIRST_ANT_ID].carrying != NO_OBJ){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newPickRes(STATUS_FAILED);
 		return NULL;
@@ -602,11 +605,13 @@ cmd_t ctrlHandlePick(void * ptrInfo, cmd_t cmd){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].carrying = OBJ_FOOD;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newPickRes(STATUS_OK);
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
+		LOGPID("Control: LEVANTO COMIDA! status: %d\n", info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status);
 		return NULL;
 	}
 	if(info->ctrl_info->board[foodPos.row][foodPos.col].obj == OBJ_BIGFOOD){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].dirpointing.row = foodPos.row;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].dirpointing.col = foodPos.col;
+		LOGPID("Control: COMIDA GRANDE!\n");
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_NEEDHELP;
 		return NULL;
 	}

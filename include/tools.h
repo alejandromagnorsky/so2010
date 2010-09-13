@@ -25,8 +25,8 @@ void* smemcpy(void* dest, void* src, size_t n);
 #define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
-    #define LOG(...) //fprintf(stdout, __VA_ARGS__)
-    #define LOGPID(...) //(fprintf(stdout, "(%d) ", getpid()), \
+    #define LOG(...) fprintf(stdout, __VA_ARGS__)
+    #define LOGPID(...) (fprintf(stdout, "(%d) ", getpid()), \
                          fprintf(stdout, __VA_ARGS__))
 
 #else

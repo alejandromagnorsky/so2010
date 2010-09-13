@@ -176,8 +176,6 @@ cmd_t antHandlePickRes(void* antarg, cmd_t cmdarg) {
             ant->yelled = 0;
             ant->state = ANT_STATE_CARRYING;
             break;
-            
-
     }
     
     return NULL;
