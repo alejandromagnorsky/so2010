@@ -61,7 +61,7 @@
     #define IPCF_SERVE(IPCDATA, QTYANTS)   fifoServe(QTYANTS)
 
     // IPCF_CONNECT always receives ipcdata_t
-    #define IPCF_CONNECT(IPCDATA, ANTID)     fifoConnect(IPCDATA)
+    #define IPCF_CONNECT(IPCDATA, ANTID)     fifoConnect(IPCDATA, ANTID)
 #endif
     
 
