@@ -107,7 +107,7 @@ void fifoHandlerWrite(ipc_t ipc, int fdw, msg_writting currMsgW){
 			currMsgW->msglen = currMsgW->toWrite;
 			currMsgW->data = mserial(nextMsg);
 			currMsgW->to = nextMsg->header.to;
-			currMsgW->from = nextMsg->header.from;
+			currMsgW->from = ipc->id;
 			mdel(nextMsg);
 		}
 	}else{
