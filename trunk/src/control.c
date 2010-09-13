@@ -22,7 +22,9 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 	initializeScreen(gridinfo);
 	
 	controlLoop(ctrl_info, handlers, cmdLauncher, gridinfo);
-	printf("Finish with points: %d\n", ctrl_info->points);
+	addStringAt(gridinfo->gridRows + 5 + 4,0,"Finish with points: ");
+	printw("%d\n", ctrl_info->points);
+	getch();
 	endwin();
 	return NO_ERROR;
 }

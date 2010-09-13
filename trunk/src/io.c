@@ -478,7 +478,7 @@ int initializeScreen(grid_t grid)
 	addStringAt(0,13,"0");
 	addStringAt(0,28,"0");
 	
-	/*addCharAt(grid->anthillRow, grid->anthillCol, 'H');
+	addCharAt(grid->anthillRow, grid->anthillCol, 'H');
 	
 	for(i = 0; i < grid->smallFoodQuant * 2; i+=2)
 	{
@@ -488,12 +488,12 @@ int initializeScreen(grid_t grid)
 	for(i = 0; i < grid->bigFoodQuant * 2; i+=2)
 	{
 		addCharAt(grid->bigFoods[i+1], grid->bigFoods[i], 'B');
-	}*/
+	}
 	// [TODO] sacar el endwin y el getch en caso que sea necesario
 	
 	attroff(COLOR_PAIR(TEMPPAIR));
 	refresh();
-	getch();
+	//getch();
 	/*endwin();*/
 	
 	return NO_ERRORS;
@@ -563,6 +563,8 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 		addCharAt(ctrlInfo->ants[i].row,ctrlInfo->ants[i].col,'@');
 	}
 	
+	addCharAt(grid->anthillRow,grid->anthillCol,'H');
+	
 	for(i = 0; i < 6; i++)
 	{
 		addStringAt(0,13 + i," ");
@@ -573,7 +575,7 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 	mvprintw(0,28,"%d",ctrlInfo->points);
 	
 	refresh();
-	getch();
+	//getch();
 }
 
 int getColor(int color)
