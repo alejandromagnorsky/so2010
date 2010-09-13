@@ -12,7 +12,7 @@
 #define MAX_FILS 80
 #define MAX_COLS 80
 
-#define TEMPPAIR	10
+#define TEMPPAIR 10
 
 enum {
 	NO_ERRORS,
