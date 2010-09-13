@@ -40,8 +40,6 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher,
 	int ans;
 	ctrl_info->status = CTRL_STATE_ZERO;
 	
-	//initializeScreen(gridinfo);
-	
 	reqStartAnts(ctrl_info, handlers);
 	
 	while(ctrl_info->turn < MAX_TURNS && ctrl_info->points < ctrl_info->qtyFoodPoints){
@@ -501,7 +499,7 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	cmd_move_req_t cmdreq = (cmd_move_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	LOGPID("Control: Handle CMD_MOVE, type: %d\n", cmdreq->type);
+	LOGPID("Control: Handle CMD_MOVE, type: %d, dir: %d\n", cmdreq->type, cmdreq->dir);
 	
 	int mov[8] = {-1,0, 0,1, 1,0, 0,-1};
 	
@@ -509,9 +507,9 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	nextPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
 	nextPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
 	
-	LOGPID("\n\nControl: Current Position: %d, %d\n", info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row, info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col);
-	LOGPID("Control: Moving to dir: %d\n", cmdreq->dir);
-	LOGPID("Control: Trying to move: %d, %d\n", nextPos.row, nextPos.col);
+	//LOGPID("\n\nControl: Current Position: %d, %d\n", info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row, info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col);
+	//LOGPID("Control: Moving to dir: %d\n", cmdreq->dir);
+	//LOGPID("Control: Trying to move: %d, %d\n", nextPos.row, nextPos.col);
 	if(nextPos.row >= info->ctrl_info->rows || nextPos.col >= info->ctrl_info->cols ||  nextPos.row < 0 || nextPos.col < 0){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
