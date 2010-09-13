@@ -472,7 +472,7 @@ cmd_t ctrlHandleStart(void * ptrInfo , cmd_t cmd){
 	cmd_start_t cmdreq = (cmd_start_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	LOGPID("Handle CMD_START, type: %d\n", cmdreq->type);
+	LOGPID("Control: Handle CMD_START, type: %d\n", cmdreq->type);
 	
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].id = info->antid;
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_READY;
@@ -486,7 +486,7 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	cmd_move_req_t cmdreq = (cmd_move_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	LOGPID("Handle CMD_MOVE, type: %d\n", cmdreq->type);
+	LOGPID("Control: Handle CMD_MOVE, type: %d\n", cmdreq->type);
 	
 	int mov[8] = {-1,0, 0,1, 1,0, 0,-1};
 	
@@ -494,7 +494,7 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	nextPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
 	nextPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
 	
-	if(nextPos.row >= info->ctrl_info->rows && nextPos.col >= info->ctrl_info->cols){
+	if(nextPos.row >= info->ctrl_info->rows || nextPos.col >= info->ctrl_info->cols ||  nextPos.row < 0 || nextPos.col < 0){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
 		return NULL;
@@ -517,7 +517,7 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 	cmd_smell_req_t cmdreq = (cmd_smell_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	LOGPID("Handle CMD_SMELL, type: %d\n", cmdreq->type);
+	LOGPID("Control: Handle CMD_SMELL, type: %d\n", cmdreq->type);
 	
 	struct st_dir_t currPos;
 	currPos.row = info->ctrl_info->ants[info->antid].row;
@@ -529,7 +529,7 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 	
 	int i;
 	for(i = 0; i < 16; i = i + 2){
-		if(currPos.row + mov[i] < info->ctrl_info->rows && currPos.col + mov[i+1]){
+		if(currPos.row + mov[i] < info->ctrl_info->rows && currPos.col + mov[i+1] < info->ctrl_info->cols){
 			if(thereIsAnAnt(info->ctrl_info, currPos.row + mov[i], currPos.col + mov[i+1]) ){
 				tileRes[i/2].obj = OBJ_ANT;
 			}else{
@@ -539,6 +539,7 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 		}else{
 			tileRes[i/2].obj = OBJ_OUT_OF_BOUNDS;
 		}
+		LOGPID("Control: SMELL POS: OBJ:%d, TRAIL:%g\n", tileRes[i/2].obj, tileRes[i/2].trail);
 	}
 	
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newSmellRes(tileRes);
@@ -551,7 +552,7 @@ cmd_t ctrlHandlePick(void * ptrInfo, cmd_t cmd){
 	cmd_pick_req_t cmdreq = (cmd_pick_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	LOGPID("Handle CMD_PICK, type: %d\n", cmdreq->type);
+	LOGPID("Control: Handle CMD_PICK, type: %d\n", cmdreq->type);
 	
 	struct st_dir_t currPos;
 	currPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row;
@@ -592,7 +593,7 @@ cmd_t ctrlHandleYell(void * ptrInfo, cmd_t cmd){
 	cmd_yell_req_t cmdreq = (cmd_yell_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
-	LOGPID("Handle CMD_PICK, type: %d\n", cmdreq->type);
+	LOGPID("Control: Handle CMD_PICK, type: %d\n", cmdreq->type);
 	
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].yelled = 1;
 	
@@ -605,7 +606,7 @@ cmd_t ctrlHandleStop(void * ptrInfo, cmd_t cmd){
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_STOPPED;
 	
-	LOGPID("Handle CMD_STOP, type: %d\n", cmd->type);
+	LOGPID("Control: Handle CMD_STOP, type: %d\n", cmd->type);
 	
 	return NULL;
 }
