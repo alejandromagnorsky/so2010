@@ -9,8 +9,6 @@
 
 #include "../include/main.h"
 
-#define ANTS 10
-
 int sid;
 
 int main(int argc, char** argv) {
