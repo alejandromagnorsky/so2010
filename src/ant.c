@@ -118,7 +118,7 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	        } else
                 if (rand() % 3) return newSmellReq();
                 
-            return newMoveReq(decide(ant->interestbase, ant->interestmult));    
+            return newMoveReq(DIR_EAST);    
 	
         case ANT_STATE_CARRYING:
             if ((dist = ant->r - ant->ahr) != 0) {
@@ -136,11 +136,12 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
                 return NULL;
             }
 //            decide(ant->interestbase, ant->interestmult)
-            return newMoveReq(DIR_WEST);
+            return newMoveReq(DIR_EAST);
     }
 }
 
 cmd_t antHandleSmellRes(void* antarg, cmd_t cmdarg) {
+	LOGPID("Ant handling smell response command.\n");
     ant_t ant = (ant_t) antarg;
     cmd_smell_res_t cmd = (cmd_smell_res_t) cmdarg;
     
@@ -151,6 +152,7 @@ cmd_t antHandleSmellRes(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandlePickRes(void* antarg, cmd_t cmdarg) {
+	LOGPID("Ant handling pick response command.\n");
     ant_t ant = (ant_t) antarg;
     cmd_pick_res_t cmd = (cmd_pick_res_t) cmdarg;
     
@@ -172,6 +174,7 @@ cmd_t antHandlePickRes(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleMoveRes(void* antarg, cmd_t cmdarg) {
+	LOGPID("Ant handling move response command.\n");
     ant_t ant = (ant_t) antarg;
     cmd_pick_res_t cmd = (cmd_pick_res_t) cmdarg;
     
@@ -190,6 +193,7 @@ cmd_t antHandleMoveRes(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleYellRes(void* antarg, cmd_t cmdarg) {
+	LOGPID("Ant handling yell response command.\n");
     ant_t ant = (ant_t) antarg;
     ant->yelled = 1;
     
@@ -197,6 +201,7 @@ cmd_t antHandleYellRes(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleYellNot(void* antarg, cmd_t cmdarg) {
+	LOGPID("Ant handling yell notification command.\n");
     int dirr, dirc, distr, distc;
     ant_t ant = (ant_t) antarg;
     cmd_yell_not_t cmd = (cmd_yell_not_t) cmdarg;
@@ -212,6 +217,7 @@ cmd_t antHandleYellNot(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleStop(void* antarg, cmd_t cmdarg) {
+	LOGPID("Ant handling stop command.\n");
     ant_t ant = (ant_t) antarg;
     ant->state = ANT_STATE_FINAL;
     return newStop();
