@@ -40,6 +40,8 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher,
 	int ans;
 	ctrl_info->status = CTRL_STATE_ZERO;
 	
+	//initializeScreen(gridinfo);
+	
 	reqStartAnts(ctrl_info, handlers);
 	
 	while(ctrl_info->turn < MAX_TURNS && ctrl_info->points < ctrl_info->qtyFoodPoints){

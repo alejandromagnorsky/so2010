@@ -31,7 +31,7 @@ anthill: $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 rebuild: clean all
-	
+
 clean:
 	rm -f anthill
 	rm -f $(SOURCEDIR)/*.o
