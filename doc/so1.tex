@@ -155,6 +155,7 @@ con las \textit{n} hormigas participantes.
 bidireccional con el \textit{server}.
   \item Se asume que en el directorio ``/tmp'' no hay fifos creadas con los mismos nombres, el programa se asegura crear y eliminar todas las 
 fifos utilizadas.
+\end{itemize}
 
 \subsubsection{Memoria compartida y semáforos}
 Para la implementación del IPC con \textbf{Memoria compartida} se utilizó la propuesta de \textbf{System V} para allocar memoria compartida, y 
@@ -163,7 +164,23 @@ Se crearon dos buffers circulares, en uno el proceso \textit{server} escribe los
 le envían. En cada acceso a cada buffer, se utiliza un lock para evitar problemas de sincronización.\\
 A su vez cada cliente, lee del buffer donde el server escribe, y escribe en el buffer de donde lee el server, siempre lockeando en los accesos.
 De esta manera se logra una comunicación bidireccional entre un proceso cliente y un proceso server.
-\end{itemize}
+
+\subsubsection{Colas de mensajes}
+Para la versión del sistema que utiliza \textbf{Colas de mensajes} se decidió utilizar \textbf{System V} para poder tener una única cola y 
+manejar los mensajes con prioridades. De esta manera se mantiene siempre una prioridad para cada proceso, siendo esta su sid (simulation id).
+En el caso del servidor, el sid siempre es 1 (Debido a que si se intentan levantar mensajes con prioridad 0 de la cola, esta devuelve el de menor 
+prioridad, es decir que se toma como prioridad por defecto), y para las hormigas es n + 1.\\
+Cuando se inicia el servidor se dispara un thread que entra en un loop infinito levantando mensajes con la prioridad del servidor e 
+insertándolos en la cola con el número de prioridad a quien está dirigido el mensaje (indicado en la estructura st\_msg\_t), a no ser que esté 
+dirigido a él, en ese caso lo inserta en la \textit{inbox} del servidor.\\
+Por otro lado, al iniciarse cada cliente se dispara un nuevo thread, que también entra en un loop infinito, levanta mensajes de la cola 
+con la prioridad del cliente y los inserta en su \textit{inbox}. Este mismo thread a la vez agarra los mensajes de la \textit{outbox} del 
+cliente y los inserta en la cola de mensajes con la prioridad del servidor.\\
+Por último, si se intenta levantar un mensaje de la cola con una prioridad determinada y la cola no tiene ningún mensaje con esta prioridad se 
+decidió que el proceso no se bloquee hasta encontrar dicho mensaje, si no que siga pidiendo mensajes hasta que haya uno, para que el resto de los 
+procesos puedan seguir enviando y recibiendo mensajes normalmente.\\
+Gracias a la propuesta de \textbf{System V} se logró utilizar una única cola de mensajes para comunicar varios procesos.
+
 
 
 
