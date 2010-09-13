@@ -42,7 +42,7 @@ ipc_t sockIPC(ipcdata_t ipcdata);
 ipc_t sockServe(ipcdata_t ipcdata, int nclients);
 /* Creates a serving thread and returns the appropiate ipc_t structre */
 
-ipc_t sockConnect(ipcdata_t);
+ipc_t sockConnect(ipcdata_t, int id);
 /* Establishes a connection and creates/returns an ipc_t structure */
 
 void* sockServerLoop(void* ipcarg);

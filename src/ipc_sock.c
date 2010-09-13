@@ -53,7 +53,7 @@ ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
     ret = sockIPC(ipcdata);
     ret->maxclts = nclients;
     ret->status = IPCSTAT_PREPARING;
-
+    ret->id = 1;
     rcreat = pthread_create(&(ret->thread), NULL, sockServerLoop, ret);
     
     if (rcreat != 0)
@@ -63,7 +63,7 @@ ipc_t sockServe(ipcdata_t ipcdata, int nclients) {
 
 }
 
-ipc_t sockConnect(ipcdata_t ipcdata) {
+ipc_t sockConnect(ipcdata_t ipcdata, int id) {
     
     int rcreat;
     ipc_t ret = (ipc_t) malloc (sizeof(struct st_ipc_t));
@@ -72,6 +72,7 @@ ipc_t sockConnect(ipcdata_t ipcdata) {
     ret->ipcdata = ipcdata; /* [TODO] deep-copying ipcdata sounds better */
     ret->inbox = qnew();
     ret->outbox = qnew();
+    ret->id = id;
     
     rcreat = pthread_create(&(ret->thread), NULL, sockClientLoop, ret);
     

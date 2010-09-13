@@ -31,14 +31,14 @@ int antLoop(ipc_t ipc) {
     message_t message, ret;
 
     ant = antNew();
-    LOGPID("Starting ant logic loop.\n");
+    LOGPID("Starting ant %d logic loop.\n", ipc->id);
 
     handlers = buildHandlerArray();
     antFillHandlerArray(handlers);
 
     sendMessage(ipc, message = mnew(ipc->id, 1, sizeof(struct cmd_start_t),
                                     (char*) (cmd = newStart())));
-    
+
     mdel(message);
     free(cmd);
     
