@@ -367,50 +367,36 @@ grid_t gnew()
 int checkFoodPositions(grid_t grid)
 {
 	int i,j;
-	int ** board = calloc(grid->gridRows, sizeof(int));
+	int ** board = calloc(grid->gridRows, sizeof(int *));
 	if(board == NULL){
 		return -1;
 	}
 	
 	for(i = 0; i < grid->gridRows; i++){
 		board[i] = calloc(grid->gridCols, sizeof(int));
-		/*if(board[i] == NULL){
+		if(board[i] == NULL){
 			for(j = 0; j < i; j++){
 				free(board[i]);
 			}
 			free(board);
 			return -1;
-		}*/
+		}
 	}
-	
-	printf("%d\n", board[0][0]);
 	
 	board[grid->anthillRow][grid->anthillCol] = 1;
 	
-	for(i = 0; i < grid->gridRows; i++)
-	{
-		for(j = 0; j < grid->gridCols; j++)
-		{
-			//board[i][j] = 0;
-			/* For some reason calloc didn't leave the spaces in 0 */
-			printf("%d ",board[i][j]);
-		}
-		printf("\n");
-	}
-	
-	
-	/*for(i = 0; i < grid->smallFoodQuant*2; i += 2)
+	for(i = 0; i < grid->smallFoodQuant*2; i += 2)
 	{
 		if(grid->smallFoods[i] >= grid->gridCols || grid->smallFoods[i+1] >= grid->gridRows)
 		{
 			return ERR_FOODPOSITION;
 		}
-		if(board[grid->smallFoods[i]][grid->smallFoods[i+1]] != 0)
+		if(board[grid->smallFoods[i+1]][grid->smallFoods[i]] != 0)
 		{
 			return ERR_FOODPOSITION;
 		}
 		
-		board[grid->smallFoods[i]][grid->smallFoods[i+1]] = 1;
+		board[grid->smallFoods[i+1]][grid->smallFoods[i]] = 1;
 	}
 	
 	for(i = 0; i < grid->bigFoodQuant*2; i+=2)
@@ -419,18 +405,17 @@ int checkFoodPositions(grid_t grid)
 		{
 			return ERR_FOODPOSITION;
 		}
-		if(board[grid->bigFoods[i]][grid->bigFoods[i+1]] != 0)
+		if(board[grid->bigFoods[i+1]][grid->bigFoods[i]] != 0)
 		{
 			return ERR_FOODPOSITION;
 		}
-		board[grid->bigFoods[i]][grid->bigFoods[i+1]] = 1;
+		board[grid->bigFoods[i+1]][grid->bigFoods[i]] = 1;
 	}
 	
-	//[TODO] porque me tira error cuando libero??
-	/*for(i = 0; i < grid->gridCols; i++){
+	for(i = 0; i < grid->gridRows; i++){
 		free(board[i]);
 	}
-	free(board);*/
+	free(board);
 	return NO_ERRORS;
 }
 
@@ -627,4 +612,11 @@ void printColorScale()
 		printw(" ");
 		attroff(COLOR_PAIR(color+20));
 	}
+}
+
+void freeGrid(grid_t grid)
+{
+	free(grid->smallFoods);
+	free(grid->bigFoods);
+	free(grid);
 }

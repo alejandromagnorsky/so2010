@@ -202,6 +202,12 @@ int main()
 	getch();
 	endwin();
 	
+	for(i = 0; i < grid->gridRows; i++){
+		free(board[i]);
+	}
+	free(board);
+	
+	freeGrid(grid);
 	
 	
 	/*for(i = 0; i < grid->gridRows; i++)
@@ -240,5 +246,6 @@ int main()
 			}
 		}
 	}*/
+	
 }
 
