@@ -47,9 +47,10 @@ int main(int argc, char** argv) {
         /* Control code here */        
     	int aux;
     	if((aux = launchControl(ipc, grid)) != NO_ERROR){
-    		printf("Simulation fail: %d\n", aux );
+    		LOGPID("Simulation fail: %d\n", aux );
+    	}else{
+    		LOGPID("Simulation ended succesfully!\n");
     	}
-    	printf("Simulation Ended!\n");
     } else {       
     
         /* Ants here */
