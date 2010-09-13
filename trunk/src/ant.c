@@ -61,9 +61,6 @@ int antLoop(ipc_t ipc) {
 
                 sendMessage(ipc, message = mnew(ipc->id, 1, cmdsize(cmd),
                                                (char*) cmd));
-
-                if (cmd->type == CMD_MOVE_REQ)
-                    LOGPID("Ant %d MOVING IN DIRECTION %d\n", ipc->id, ((cmd_move_req_t) cmd)->dir);
                     
                 LOGPID("Ant %d sent: ", ipc->id);
                 mprintln(message);
@@ -258,7 +255,7 @@ int decide(double* base, double* mult) {
         
         if (random <= accum)
             return (i & 1) ? (i + 1) % NUM_DIRS : i;
-        
+
     }
     
     return 150; /* ? */

@@ -22,7 +22,7 @@ message_t mnew(int from, int to, size_t len, char* data) {
         new->data = (char*) (new + 1);
         
         if (data != NULL)
-            strncpy(new->data, data, len);
+            memcpy(new->data, data, len);
         else
             memset(new->data, 'A', len);
 
