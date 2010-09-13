@@ -14,8 +14,8 @@
 
 //#define IPC_METHOD_SOCKETS
 //#define IPC_METHOD_MQS
-#define IPC_METHOD_FIFOS
-//#define IPC_METHOD_SHMEM
+//#define IPC_METHOD_FIFOS
+#define IPC_METHOD_SHMEM
 
 #ifdef IPC_METHOD_SOCKETS
     #include "ipc_sock.h"
@@ -30,7 +30,7 @@
     #define IPCF_SERVE(X, Y)    sockServe((X), (Y))
 
     // IPCF_CONNECT always receives ipcdata_t
-    #define IPCF_CONNECT(X)     sockConnect(X)
+    #define IPCF_CONNECT(X,Y)     sockConnect(X)
 #endif
 
 #ifdef IPC_METHOD_MQS
@@ -45,7 +45,7 @@
     #define IPCF_SERVE(X, Y)    mq_serve(X)
 
     // IPCF_CONNECT always receives ipcdata_t
-    #define IPCF_CONNECT(X)     mq_connect(X)
+    #define IPCF_CONNECT(X,Y)     mq_connect(X)
 #endif
     
     
@@ -61,16 +61,17 @@
     #define IPCF_SERVE(IPCDATA, QTYANTS)   fifoServe(QTYANTS)
 
     // IPCF_CONNECT always receives ipcdata_t
-    #define IPCF_CONNECT(IPCDATA)     fifoConnect(IPCDATA)
+    #define IPCF_CONNECT(IPCDATA, ANTID)     fifoConnect(IPCDATA)
 #endif
     
-#ifdef IPC_METHOD_SHM
+
+#ifdef IPC_METHOD_SHMEM
 	#include "ipc_shm.h"
 	#define IPC_METHOD "SHM"
 	
 	// Requirements to build IPCData vary from IPC method to IPC method
     #define IPCF_IPCDATA(...)   shmIPCData()
-    #define IPCF_IPCDATA_ARGS   sid
+    #define IPCF_IPCDATA_ARGS   
     
     // IPCF_SERVE always receives ipcdata_t
     #define IPCF_SERVE(IPCDATA, QTYANTS)   shmServe()
