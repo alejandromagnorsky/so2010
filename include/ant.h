@@ -15,6 +15,7 @@
 #include "tools.h"
 #include <stdlib.h>
 #include <time.h>
+#include "common.h"
 #include <math.h>
 
 #define COINFLIP() (rand() % 2)
@@ -37,6 +38,7 @@ struct ant_t {
     int ahr, ahc;   /* Anthill position */
     int mr, mc;     /* Memorized position */
     
+    int moved;
     char yelled;    /* Did we already yell when we found this food? */
     char smelled;   /* Flag to remember whether smell data is still valid */
     struct tile_t smell[NUM_DIRS];

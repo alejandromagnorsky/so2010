@@ -26,7 +26,7 @@ void antFree(ant_t ant) {
     free(ant);
 }
 
-int antLoop(ipc_t ipc) {
+int antLoop(ipc_t ipc, grid_t grid) {
 
     char stop;
     handler_f* handlers;
@@ -37,6 +37,8 @@ int antLoop(ipc_t ipc) {
     srand(getpid());
 
     ant = antNew();
+    ant->ahr = grid->anthillRow;
+    ant->ahc = grid->anthillCol;
     LOGPID("Starting ant %d logic loop.\n", ipc->id);
 
     handlers = buildHandlerArray();
@@ -99,6 +101,7 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	                switch(ant->smell[dir].obj) {
 	                
 	                    case OBJ_FOOD:
+	                        fprintf(stderr, "\nFOOOOOOD SMALL\n");
     	                    return newPickReq(dir);
     	                    
 	                    case OBJ_BIGFOOD:
@@ -113,31 +116,31 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	                        break;
 	                }
 
-	                ant->interestmult[dir] += ant->smell[dir].trail * 10;
+	                ant->interestmult[dir] = 1 - ant->smell[dir].trail;
 	            }
 	            
 	        } else
-                if (rand() % 3) return newSmellReq();
+                return newSmellReq();
                                    
-            return newMoveReq(decide(ant->interestbase, ant->interestmult));    
+            return newMoveReq(ant->moved = decide(ant->interestbase, ant->interestmult));    
 	
         case ANT_STATE_CARRYING:
             if ((dist = ant->r - ant->ahr) != 0) {
             
                 dir = (dist > 0 ? DIR_NORTH : DIR_SOUTH);
-                ant->interestbase[dir] = 150;
+                ant->interestbase[dir] = 1000;
                 
             } else if ((dist = ant->c - ant->ahc) != 0) {
             
                 dir = (dist > 0 ? DIR_WEST : DIR_EAST);
-                ant->interestbase[dir] = 150;
+                ant->interestbase[dir] = 1000;
                 
             } else {
                 ant->state = ANT_STATE_SEEKING;
-                return NULL;
+                //return NULL;
             }
 //            decide(ant->interestbase, ant->interestmult)
-            return newMoveReq(decide(ant->interestbase, ant->interestmult));
+            return newMoveReq(ant->moved = decide(ant->interestbase, ant->interestmult));
     }
 }
 
@@ -189,10 +192,19 @@ cmd_t antHandleMoveRes(void* antarg, cmd_t cmdarg) {
     switch(cmd->status) {
     
         case STATUS_OK:
+            /* hora de tirar grasadas */
+            switch(ant->moved) {
+                case DIR_NORTH: ant->r--; break;
+                case DIR_SOUTH: ant->r++; break;
+                case DIR_EAST: ant->c++; break;
+                case DIR_WEST: ant->c--; break;
+            }
+            
             ant->smelled = 0;
             break;
             
         case STATUS_FAILED:
+            ant->smelled = 0;
             break;
     
     }
