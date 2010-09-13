@@ -22,7 +22,7 @@ void* smemcpy(void* dest, void* src, size_t n);
    Helps clear the syntax in deserialization methods (e.g. see mdeserial). */
 
 
-#define LOGGING_ENABLED
+//#define LOGGING_ENABLED
 
 #ifdef LOGGING_ENABLED
     #define LOG(...) fprintf(stderr, __VA_ARGS__)

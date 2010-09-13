@@ -217,7 +217,6 @@ cmd_t antHandleYellRes(void* antarg, cmd_t cmdarg) {
 	LOGPID("Ant handling yell response command.\n");
     ant_t ant = (ant_t) antarg;
     ant->yelled = 1;
-    
     return NULL;
 }
 

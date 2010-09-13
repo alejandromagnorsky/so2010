@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
     
 	if((status = loadGrid(grid, "configurationFile")) != NO_ERRORS)
 	{
-		LOGPID("An error occurred while loading the configuration file\n ");
+		printf("An error occurred while loading the configuration file\n");
 		exit(status);
 	}
 	
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 
     LOGPID("Control process started.\n");    
     ipc = initServer();
-
+    
     /* Good! IPC server working. Let's spawn those ants. */
     
     if (cpid = fork()) {
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
         /* Control code here */        
     	int aux;
     	if((aux = launchControl(ipc, grid)) != NO_ERROR){
-    		LOGPID("Simulation fail: %d\n", aux );
+    		printf("Simulation fail: %d\n", aux );
     	}else{
     		LOGPID("Simulation ended succesfully!\n");
     	}
@@ -67,7 +67,7 @@ int main(int argc, char** argv) {
         
     }
     
-    //[TODO] free grid
+    freeGrid(grid);
 }
 
 ipc_t initServer() {

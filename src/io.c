@@ -475,6 +475,13 @@ int initializeScreen(grid_t grid)
 	addStringAt(grid->gridRows + 5 + 2, 0, msg);
 	printColorScale();
 	
+	msg = "Color for an ant which yelled: ";
+	addStringAt(grid->gridRows + 5 + 3, 0, msg);
+	init_pair(41, COLOR_WHITE, COLOR_GREEN);
+	attrset(COLOR_PAIR(41));
+	printw("@");
+	attroff(COLOR_PAIR(41));
+	
 	addStringAt(0,13,"0");
 	addStringAt(0,28,"0");
 	
@@ -563,7 +570,17 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 	
 	for(i=0; i < ctrlInfo->qtyAnt; i++)
 	{
-		addCharAt(ctrlInfo->ants[i].row,ctrlInfo->ants[i].col,'@');
+		if(ctrlInfo->ants[i].yelled == 1)
+		{
+			init_pair(40, COLOR_WHITE, COLOR_GREEN);
+			attrset(COLOR_PAIR(40));
+			addCharAt(ctrlInfo->ants[i].row,ctrlInfo->ants[i].col,'@');
+			attroff(COLOR_PAIR(40));
+		}
+		else
+		{
+			addCharAt(ctrlInfo->ants[i].row,ctrlInfo->ants[i].col,'@');
+		}
 	}
 	
 	addCharAt(grid->anthillRow,grid->anthillCol,'H');
