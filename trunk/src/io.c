@@ -372,30 +372,34 @@ int checkFoodPositions(grid_t grid)
 		return -1;
 	}
 	
-	for(i = 0; i < grid->gridCols; i++){
-		board[i] = calloc(grid->gridRows, sizeof(int));
-		if(board[i] == NULL){
+	for(i = 0; i < grid->gridRows; i++){
+		board[i] = calloc(grid->gridCols, sizeof(int));
+		/*if(board[i] == NULL){
 			for(j = 0; j < i; j++){
 				free(board[i]);
 			}
 			free(board);
 			return -1;
-		}
+		}*/
 	}
+	
+	printf("%d\n", board[0][0]);
+	
+	board[grid->anthillRow][grid->anthillCol] = 1;
 	
 	for(i = 0; i < grid->gridRows; i++)
 	{
 		for(j = 0; j < grid->gridCols; j++)
 		{
-			board[grid->bigFoods[i]][grid->bigFoods[i+1]] = 0;
+			//board[i][j] = 0;
 			/* For some reason calloc didn't leave the spaces in 0 */
-			//printf("%d ",board[grid->bigFoods[i]][grid->bigFoods[i+1]]);
+			printf("%d ",board[i][j]);
 		}
+		printf("\n");
 	}
 	
-	board[grid->anthillCol][grid->anthillRow] = 1;
 	
-	for(i = 0; i < grid->smallFoodQuant*2; i += 2)
+	/*for(i = 0; i < grid->smallFoodQuant*2; i += 2)
 	{
 		if(grid->smallFoods[i] >= grid->gridCols || grid->smallFoods[i+1] >= grid->gridRows)
 		{

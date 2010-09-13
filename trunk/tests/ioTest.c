@@ -157,12 +157,13 @@ int main()
 	board[2][10].obj = 8;
 	board[2][10].trail = 1;
 	
-	
 	board[1][3].obj = OBJ_ANT;
 	board[1][4].obj = OBJ_ANTHILL;
 	board[1][5].obj = OBJ_FOOD;
 	board[1][6].obj = OBJ_BIGFOOD;
 	board[1][7].obj = NO_OBJ;
+	
+	//board[14][78].obj = OBJ_ANT;
 	
 	
 	
