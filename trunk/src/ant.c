@@ -53,8 +53,6 @@ int antLoop(ipc_t ipc) {
     while(!stop) {
 
         if (message = recvMessage(ipc)) {
-            LOGPID("Ant %d received: ", ipc->id);
-            mprintln(message);
             LOGPID("Ant %d received cmd type %d.\n", ipc->id, ((cmd_t) mdata(message))->type);
             if (cmd = dispatchCmd((void*) ant, (cmd_t) mdata(message), handlers)) {
                 mdel(message);
@@ -121,11 +119,7 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	            
 	        } else
                 if (rand() % 3) return newSmellReq();
-                
-                LOGPID("");
-                for (i = 0; i < NUM_DIRS; i++)
-                    LOG("%.2f ", ant->interestbase[i] * ant->interestmult[i]);
-                    
+                                   
             return newMoveReq(decide(ant->interestbase, ant->interestmult));    
 	
         case ANT_STATE_CARRYING:
@@ -238,9 +232,6 @@ int decide(double* base, double* mult) {
     double interest[NUM_DIRS];
     
     for (i = 0; i < NUM_DIRS; i++)
-        printf("%.2f ", base[i] * mult[i]);
-    
-    for (i = 0; i < NUM_DIRS; i++)
         interest[i] = base[i] * mult[i];
     
     /* We'll try to simulate a real given random distribution */    
@@ -258,7 +249,7 @@ int decide(double* base, double* mult) {
 
     }
     
-    return 150; /* ? */
+    return 0; /* ? */
 }
 
 void antFillHandlerArray(handler_f* handlers) {
