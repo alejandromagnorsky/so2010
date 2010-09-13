@@ -58,7 +58,8 @@ int antLoop(ipc_t ipc) {
 
                 LOGPID("Ant %d sent: ", ipc->id);
                 mprintln(message);
-                mdel(message);                         
+                mdel(message);   
+                free(cmd);                      
             }
         }
         

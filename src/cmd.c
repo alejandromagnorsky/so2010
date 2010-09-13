@@ -101,7 +101,7 @@ cmd_t newStop() {
 cmd_t newSmellRes(tile_t tiles) {
     cmd_smell_res_t ret = (cmd_smell_res_t) malloc(sizeof(struct cmd_smell_res_t));
     ret->type = CMD_SMELL_RES;
-    ret->tiles = tiles;
+    memcpy(ret->tiles, tiles, sizeof(struct tile_t) * 8);
     
     return (cmd_t) ret;
 }
