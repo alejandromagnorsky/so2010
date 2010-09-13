@@ -135,8 +135,8 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
                 ant->state = ANT_STATE_SEEKING;
                 return NULL;
             }
-            
-            return newMoveReq(decide(ant->interestbase, ant->interestmult));
+//            decide(ant->interestbase, ant->interestmult)
+            return newMoveReq(DIR_WEST);
     }
 }
 
