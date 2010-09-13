@@ -9,7 +9,7 @@
 
 CC := gcc
 CFLAGS := -c -g
-LDFLAGS := -lpthread -lncurses
+LDFLAGS := -lpthread -lncurses -lm
 
 SOURCEDIR := src
 HEADERDIR := include
