@@ -11,8 +11,12 @@
 #include <stdio.h>
 
 ant_t antNew() {
+    int i;
     ant_t ret = (ant_t) calloc(1, sizeof(struct ant_t));
-	    
+
+    for (i = 0; i < NUM_DIRS; i++)
+        ret->interestbase[i] = ret->interestmult[i] = 1.0;
+
     ret->state = ANT_STATE_ZERO;
     
     return ret;
@@ -58,6 +62,9 @@ int antLoop(ipc_t ipc) {
                 sendMessage(ipc, message = mnew(ipc->id, 1, cmdsize(cmd),
                                                (char*) cmd));
 
+                if (cmd->type == CMD_MOVE_REQ)
+                    LOGPID("Ant %d MOVING IN DIRECTION %d\n", ipc->id, ((cmd_move_req_t) cmd)->dir);
+                    
                 LOGPID("Ant %d sent: ", ipc->id);
                 mprintln(message);
                 mdel(message);   
@@ -82,7 +89,7 @@ cmd_t antHandleStart(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
-    int dir, dist;
+    int dir, dist, i;
 	ant_t ant = (ant_t) antarg;
 	LOGPID("Ant handling turn command.\n");
 	
@@ -111,14 +118,18 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	                        ant->interestbase[dir] = 50;
 	                        break;
 	                }
-	                
-	                ant->interestmult[dir] /= ant->smell[dir].trail;
+
+	                ant->interestmult[dir] += ant->smell[dir].trail * 10;
 	            }
 	            
 	        } else
                 if (rand() % 3) return newSmellReq();
                 
-            return newMoveReq(DIR_EAST);    
+                LOGPID("");
+                for (i = 0; i < NUM_DIRS; i++)
+                    LOG("%.2f ", ant->interestbase[i] * ant->interestmult[i]);
+                    
+            return newMoveReq(decide(ant->interestbase, ant->interestmult));    
 	
         case ANT_STATE_CARRYING:
             if ((dist = ant->r - ant->ahr) != 0) {
@@ -136,7 +147,7 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
                 return NULL;
             }
 //            decide(ant->interestbase, ant->interestmult)
-            return newMoveReq(DIR_EAST);
+            return newMoveReq(decide(ant->interestbase, ant->interestmult));
     }
 }
 
@@ -230,6 +241,9 @@ int decide(double* base, double* mult) {
     double interest[NUM_DIRS];
     
     for (i = 0; i < NUM_DIRS; i++)
+        printf("%.2f ", base[i] * mult[i]);
+    
+    for (i = 0; i < NUM_DIRS; i++)
         interest[i] = base[i] * mult[i];
     
     /* We'll try to simulate a real given random distribution */    
@@ -243,7 +257,7 @@ int decide(double* base, double* mult) {
         accum += interest[i];
         
         if (random <= accum)
-            return (i + 1) % NUM_DIRS;        
+            return (i & 1) ? (i + 1) % NUM_DIRS : i;
         
     }
     
