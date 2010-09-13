@@ -10,7 +10,7 @@
 #include "../include/control.h"
 
 #define MAX_FILS 80
-#define MAX_COLS 60
+#define MAX_COLS 80
 
 #define TEMPPAIR	10
 
