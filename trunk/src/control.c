@@ -7,19 +7,19 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 	handler_f* handlers = buildControlHandlerArray();
 	cmd_t * cmdLauncher = createCmdLauncher(ctrl_info->qtyAnt);
 	if(ctrl_info->status != NO_ERROR){
-		printf("ERRORS WITH CTRL INFO\n");
+		LOGPID("ERRORS WITH CTRL INFO\n");
 		return ctrl_info->status;
 	}
 	if(handlers == NULL){
-		printf("ERRORS WITH CTRL HANDLERS\n");
+		LOGPID("ERRORS WITH CTRL HANDLERS\n");
 		return CTRL_ERR_MEM;
 	}
 	if(cmdLauncher == NULL){
-		printf("ERRORS WITH CTRL MEM\n");
+		LOGPID("ERRORS WITH CTRL MEM\n");
 		return CTRL_ERR_MEM;
 	}
 	
-	initializeScreen(gridinfo);
+	//initializeScreen(gridinfo);
 	
 	controlLoop(ctrl_info, handlers, cmdLauncher, gridinfo);
 	printf("Finish with points: %d\n", ctrl_info->points);
@@ -51,7 +51,7 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher,
 		}
 		ctrl_info->turn++;
 		
-		refreshGrid(ctrl_info, gridinfo);
+		//refreshGrid(ctrl_info, gridinfo);
 	}
 
 	return NO_ERROR;
@@ -215,6 +215,7 @@ void decreaseTrail(ctrl_info_t ctrl_info){
 }
 
 void solvePickDecisions(ctrl_info_t ctrl_info){
+	LOGPID("Control: Solving Move Decisions\n");
 	int i, j;
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		if(ctrl_info->ants[i].status == ANT_NEEDHELP){
@@ -259,6 +260,7 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 								ctrl_info->ants[j].cmd = newMoveRes(STATUS_FAILED);
 								ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
 								ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+								LOGPID("Control: MOVE SUCCESSFUL\n");
 								ctrl_info->ants[i].status = ANT_DECIDED;
 								ctrl_info->ants[j].status = ANT_DECIDED;
 							}else{
@@ -266,6 +268,7 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 								ctrl_info->ants[i].cmd = newMoveRes(STATUS_FAILED);
 								ctrl_info->ants[j].row = ctrl_info->ants[j].dirpointing.row;
 								ctrl_info->ants[j].col = ctrl_info->ants[j].dirpointing.col;
+								LOGPID("Control: MOVE SUCCESSFUL\n");
 								ctrl_info->ants[i].status = ANT_DECIDED;
 								ctrl_info->ants[j].status = ANT_DECIDED;
 							}
@@ -277,6 +280,7 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 							ctrl_info->ants[j].col = ctrl_info->ants[j].dirpointing.col;
 							ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
 							ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+							LOGPID("Control: MOVE SUCCESSFUL\n");
 							ctrl_info->ants[i].status = ANT_DECIDED;
 							ctrl_info->ants[j].status = ANT_DECIDED;
 						}
@@ -286,6 +290,7 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 				ctrl_info->ants[i].status = ANT_DECIDED;
 				ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
 				ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
+				LOGPID("Control: MOVE SUCCESSFUL\n");
 			}
 		}
 	}
@@ -304,7 +309,7 @@ ctrl_info_t createCtrlInfo(ipc_t ipc, grid_t gridinfo){
 	ret->rows = gridinfo->gridRows;
 	ret->cols = gridinfo->gridCols;
 	ret->qtyAnt = gridinfo->antsQuant;
-	printf("Cantidad de hormigas: %d\n", ret->qtyAnt);
+	LOG("Cantidad de hormigas: %d\n", ret->qtyAnt);
 	ret->turn = 0;
 	ret->points = 0;
 	ret->qtyFoodPoints = (gridinfo->smallFoodQuant * POINTS_FOOD) + (gridinfo->bigFoodQuant * POINTS_BIGFOOD);
@@ -498,15 +503,20 @@ cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	nextPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row + mov[cmdreq->dir];
 	nextPos.col = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col + mov[cmdreq->dir+1];
 	
+	LOGPID("Control: Current Position: %d, %d\n", info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row, info->ctrl_info->ants[info->antid - FIRST_ANT_ID].col);
+	LOGPID("Control: Trying to move: %d, %d\n", nextPos.row, nextPos.col);
 	if(nextPos.row >= info->ctrl_info->rows || nextPos.col >= info->ctrl_info->cols ||  nextPos.row < 0 || nextPos.col < 0){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
+		LOGPID("Control: Move Failed\n");
 		return NULL;
 	}
 	
-	if(info->ctrl_info->board[nextPos.row][nextPos.col].obj != NO_OBJ){
+	if(info->ctrl_info->board[nextPos.row][nextPos.col].obj != NO_OBJ &&
+			info->ctrl_info->board[nextPos.row][nextPos.col].obj != OBJ_ANT){
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_DECIDED;
 		info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newMoveRes(STATUS_FAILED);
+		LOGPID("Control: Move Failed\n");
 		return NULL;
 	}
 	
