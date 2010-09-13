@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
         } while (forking);
         
         /* We can do our own stuff now */                  
-        status = antLoop(ipc);
+        status = antLoop(ipc, grid);
         exit(status);
         
     }
