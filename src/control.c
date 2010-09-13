@@ -8,36 +8,34 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 	cmd_t * cmdLauncher = createCmdLauncher(ctrl_info->qtyAnt);
 	if(ctrl_info->status != NO_ERROR){
 		printf("ERRORS WITH CTRL INFO\n");
-		//deleteCtrlInfo(ctrl_info);
 		return ctrl_info->status;
 	}
 	if(handlers == NULL){
 		printf("ERRORS WITH CTRL HANDLERS\n");
-		//deleteCtrlInfo(ctrl_info);
 		return CTRL_ERR_MEM;
 	}
 	if(cmdLauncher == NULL){
 		printf("ERRORS WITH CTRL MEM\n");
-		//deleteCtrlInfo(ctrl_info);
 		return CTRL_ERR_MEM;
 	}
 	
-	printf("Arranca control loop!\n");
 	controlLoop(ctrl_info, handlers, cmdLauncher);
-	printf("Puntos obtenidos: %d\n", ctrl_info->points);
+	printf("Finish with points: %d\n", ctrl_info->points);
 	
 	return NO_ERROR;
 }
 
 void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher){
-	//deleteCtrlInfo(ctrl_info);
-	//deleteControlHandlerArray(handlers);
-	//deleteCmdLauncher(cmdLauncher);
+	deleteCtrlInfo(ctrl_info);
+	deleteControlHandlerArray(handlers);
+	deleteCmdLauncher(cmdLauncher);
 }
 
 
 
 int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher){
+	LOGPID("Start control Loop\n");
+	
 	int ans;
 	ctrl_info->status = CTRL_STATE_ZERO;
 	
@@ -56,39 +54,55 @@ int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher)
 }
 
 void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers){
-	int i, antsPrepared = 0;
+	
+	
+	int i, aux, antsPrepared = 0;
 	message_t msg;
 	
 	struct ant_and_ctrl_info_st info;
 	
 	ctrl_info->status = CTRL_STATE_STARTING;
+
+	LOGPID("Waiting to receive CMD_START_T\n");
 	
-	while(antsStatus(ctrl_info, ANT_READY) != ctrl_info->qtyAnt){
+	while((aux = antsStatus(ctrl_info, ANT_READY)) != ctrl_info->qtyAnt){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
-			ctrl_info->ants[mfrom(msg) - FIRST_ANT_ID].id = mfrom(msg);
-			dispatchCmd(&info, (cmd_t) mdata(msg), handlers);
+			if(mfrom(msg) >= ctrl_info->qtyAnt + FIRST_ANT_ID){
+				LOGPID("Receive SPAM\n");
+			}else{
+				LOGPID("Receive CMD: %d from: %d\n", ((cmd_t) mdata(msg))->type, mfrom(msg));
+				info.ctrl_info = ctrl_info;
+				info.antid = mfrom(msg);
+				ctrl_info->ants[mfrom(msg) - FIRST_ANT_ID].id = mfrom(msg);
+				dispatchCmd(&info, (cmd_t)mdata(msg), handlers);
+			}
 		}
 	}
+	
+	LOGPID("Received all CMD_START_T\n");
+	
 	cmd_t startcmd = newStart();
 	int size = sizeof(struct cmd_start_t);
-	for(i = FIRST_ANT_ID; i < ctrl_info->qtyAnt + FIRST_ANT_ID; i++){
-		message_t msg = mnew(0, i, sizeof(struct cmd_start_t), (char *) &startcmd);
+	for(i = 0; i < ctrl_info->qtyAnt; i++){
+		LOGPID("Send CMD_START_T to ant: %d\n", ctrl_info->ants[i].id);
+		msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_start_t), (char *) &startcmd);
 		sendMessage(ctrl_info->ipc, msg);
 		mdel(msg);
 	}
+	
 	ctrl_info->status = CTRL_STATE_READY;
 }
 
 int antsStatus(ctrl_info_t ctrl_info, int status){
 	int i, ret = 0;
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
-		ret += (ctrl_info[i].status) == status ? 1 : 0;
+		ret += (ctrl_info->ants[i].status) == status ? 1 : 0;
 	}
 	return ret;
 }
 
 int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
-	printf("Play TURN!\n");
+	LOGPID("Play Turn\n");
 	int i;
 	message_t msg;
 	struct ant_and_ctrl_info_st info;
@@ -98,7 +112,8 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	//SEND TURN REQUESTS
 	cmd_t cmdTurn = newTurn();
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
-		msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_turn_t), (char *) &cmdTurn);
+		msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_turn_t), (char *) &cmdTurn);
+		LOGPID("Send CMD_TURN to antid: %d\n", ctrl_info->ants[i].id);
 		sendMessage(ctrl_info->ipc, msg);
 		mdel(msg);
 	}
@@ -108,6 +123,7 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 		if((msg = recvMessage(ctrl_info->ipc)) != NULL){
 			info.ctrl_info = ctrl_info;
 			info.antid = msg->header.from;
+			LOGPID("Receive CMD_TYPE: %d, from: %d\n", ((cmd_t) msg->data)->type, info.antid);
 			dispatchCmd(&info, (cmd_t) msg->data, handlers);		
 		}
 	}
@@ -119,22 +135,22 @@ int playTurn(ctrl_info_t ctrl_info, handler_f * handlers){
 	for(i = 0; i < ctrl_info->qtyAnt; i++){
 		switch(ctrl_info->ants[i].cmd->type){
 		case CMD_MOVE_RES:
-			msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_move_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_move_res_t), (char *) &ctrl_info->ants[i].cmd);
 			break;
 		case CMD_SMELL_RES:
-			msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_smell_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_smell_res_t), (char *) &ctrl_info->ants[i].cmd);
 			break;
 		case CMD_PICK_RES:
-			msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_pick_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_pick_res_t), (char *) &ctrl_info->ants[i].cmd);
 			break;
 		case CMD_AID_RES:
-			msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_aid_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_aid_res_t), (char *) &ctrl_info->ants[i].cmd);
 			break;
 		case CMD_YELL_RES:
-			msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_yell_res_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_yell_res_t), (char *) &ctrl_info->ants[i].cmd);
 			break;
 		case CMD_YELL_NOT:
-			msg = mnew(0, ctrl_info->ants[i].id, sizeof(struct cmd_yell_not_t), (char *) &ctrl_info->ants[i].cmd);
+			msg = mnew(SERVER_ID, ctrl_info->ants[i].id, sizeof(struct cmd_yell_not_t), (char *) &ctrl_info->ants[i].cmd);
 			break;
 		}
 		sendMessage(ctrl_info->ipc, msg);
@@ -382,7 +398,6 @@ struct st_ctrl_antinfo * createAntInfo(int qtyAnt, grid_t gridinfo){
 		for(i = 0; i < qtyAnt; i++){
 			ants[i].row = gridinfo->anthillRow;
 			ants[i].col = gridinfo->anthillCol;
-			ants[i].id = i + FIRST_ANT_ID;
 			ants[i].status = ANT_INITIALIZED;
 		}
 	}
@@ -432,6 +447,8 @@ handler_f* buildControlHandlerArray(ctrl_info_t ctrl_info){
 	ctrlHandlers[CMD_PICK_REQ] = ctrlHandlePick;
 	ctrlHandlers[CMD_YELL_REQ] = ctrlHandleYell;
 	ctrlHandlers[CMD_STOP] = ctrlHandleStop;
+	
+	return ctrlHandlers;
 }
 
 
@@ -455,6 +472,8 @@ cmd_t ctrlHandleStart(void * ptrInfo , cmd_t cmd){
 	cmd_start_t cmdreq = (cmd_start_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
+	LOGPID("Handle CMD_START, type: %d\n", cmdreq->type);
+	
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].id = info->antid;
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_READY;
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].cmd = newStart();
@@ -466,6 +485,8 @@ cmd_t ctrlHandleStart(void * ptrInfo , cmd_t cmd){
 cmd_t ctrlHandleMove(void * ptrInfo, cmd_t cmd){
 	cmd_move_req_t cmdreq = (cmd_move_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
+	
+	LOGPID("Handle CMD_MOVE, type: %d\n", cmdreq->type);
 	
 	int mov[8] = {-1,0, 0,1, 1,0, 0,-1};
 	
@@ -496,6 +517,7 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 	cmd_smell_req_t cmdreq = (cmd_smell_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
+	LOGPID("Handle CMD_SMELL, type: %d\n", cmdreq->type);
 	
 	struct st_dir_t currPos;
 	currPos.row = info->ctrl_info->ants[info->antid].row;
@@ -528,6 +550,8 @@ cmd_t ctrlHandleSmell(void * ptrInfo, cmd_t cmd){
 cmd_t ctrlHandlePick(void * ptrInfo, cmd_t cmd){
 	cmd_pick_req_t cmdreq = (cmd_pick_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
+	
+	LOGPID("Handle CMD_PICK, type: %d\n", cmdreq->type);
 	
 	struct st_dir_t currPos;
 	currPos.row = info->ctrl_info->ants[info->antid - FIRST_ANT_ID].row;
@@ -568,6 +592,8 @@ cmd_t ctrlHandleYell(void * ptrInfo, cmd_t cmd){
 	cmd_yell_req_t cmdreq = (cmd_yell_req_t) cmd;
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	
+	LOGPID("Handle CMD_PICK, type: %d\n", cmdreq->type);
+	
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].yelled = 1;
 	
 	cmd_t cmdres = newYellRes();
@@ -578,5 +604,8 @@ cmd_t ctrlHandleYell(void * ptrInfo, cmd_t cmd){
 cmd_t ctrlHandleStop(void * ptrInfo, cmd_t cmd){
 	ant_and_ctrl_info_t info = (ant_and_ctrl_info_t) ptrInfo;
 	info->ctrl_info->ants[info->antid - FIRST_ANT_ID].status = ANT_STOPPED;
+	
+	LOGPID("Handle CMD_STOP, type: %d\n", cmd->type);
+	
 	return NULL;
 }
