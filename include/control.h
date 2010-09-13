@@ -76,7 +76,7 @@ typedef struct ant_and_ctrl_info_st * ant_and_ctrl_info_t;
 int launchControl(ipc_t ipc, grid_t gridinfo);
 void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher);
 
-int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher);
+int controlLoop(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher, grid_t gridinfo);
 void reqStartAnts(ctrl_info_t ctrl_info, handler_f * handlers);
 int playTurn(ctrl_info_t , handler_f*);
 int antsStatus(ctrl_info_t ctrl_info, int status);

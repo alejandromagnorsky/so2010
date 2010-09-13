@@ -73,13 +73,12 @@ ipc_t mq_serve(ipcdata_t ipcdata)
 void * mq_serverLoop(void* ipcarg)
 {
 	ipc_t ipc;
-	int i;
 	ipc = (ipc_t) ipcarg;
 	message_t msg;
 	
 	if(ipc->status == IPCSTAT_DISCONNECTED)
 	{
-		return;
+		return NULL;
 	}
 	
 	ipc->status = IPCSTAT_SERVING;
@@ -113,19 +112,18 @@ void * mq_serverLoop(void* ipcarg)
     
     mq_disconnect(ipc);
     free(msg);
-    return;
+    return NULL;
 }
 
 void * mq_clientLoop(void* ipcarg)
 {
 	ipc_t ipc;
-	int i;
 	ipc = (ipc_t) ipcarg;
 	message_t msg;
 	
 	if(ipc->status == IPCSTAT_DISCONNECTED)
 	{
-		return;
+		return NULL;
 	}
 	
 	ipc->status = IPCSTAT_CONNECTED;
@@ -150,7 +148,7 @@ void * mq_clientLoop(void* ipcarg)
     
     mq_disconnect(ipc);
     free(msg);
-    return;
+    return NULL;
 }
 
 int init_queue(void)
@@ -179,7 +177,7 @@ int mq_sendData(ipc_t ipc, message_t msg, int priority)
 		return (-1);
 	}
 	
-	if(queue_id = init_queue() == -1)
+	if((queue_id = init_queue()) == -1)
 	{
 		ipc->status = IPCERR_MSGGETFAILED;
 		return (-1);
@@ -240,7 +238,7 @@ void mq_disconnect(ipc_t ipc)
 	return;
 }
 
-int warn(char * s)
+void warn(char * s)
 {
 	fprintf(stderr, "warning: %s\n", s);
 }
