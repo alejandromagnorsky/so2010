@@ -49,7 +49,7 @@ int initFifos(int nClients);
 ipcdata_t fifoIPCData(int nant);
 /* Generates an ipcdata_t with the corresponding fifo's name to write and read */
 
-ipc_t fifoConnect(ipcdata_t ipcdata);
+ipc_t fifoConnect(ipcdata_t ipcdata, int antid);
 /* Fires a thread to connect to a server */
 
 ipc_t fifoServe(int nclients);

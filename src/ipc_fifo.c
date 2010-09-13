@@ -30,7 +30,7 @@ ipcdata_t fifoIPCData(int antid){
 	return ansdata;
 }
 
-ipc_t fifoConnect(ipcdata_t ipcdata){
+ipc_t fifoConnect(ipcdata_t ipcdata, int antid){
 		
 	ipc_t ret = (ipc_t) malloc(sizeof(struct st_ipc_t));
 	int rcreat = 0;
@@ -44,6 +44,7 @@ ipc_t fifoConnect(ipcdata_t ipcdata){
 		ret->ipcdata = ipcdata;
 		ret->inbox = qnew();
 		ret->outbox = qnew();
+		ret->id = antid;
 
 		ret->ipcdata->fifodata.fdw = open(ret->ipcdata->fifodata.fifonamew, O_RDWR | O_NONBLOCK);
 		ret->ipcdata->fifodata.fdr = open(ret->ipcdata->fifodata.fifonamer, O_RDONLY | O_NONBLOCK);
