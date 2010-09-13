@@ -80,6 +80,7 @@
     #define IPCF_CONNECT(IPCDATA, ANTID)     shmConnect(IPCDATA, ANTID)
 #endif
 
+#include "io.h"
 #include "tools.h"
 #include "ipc.h"
 #include "message.h"

@@ -20,11 +20,19 @@ int main(int argc, char** argv) {
     message_t message;
     pid_t pid, cpid;
     ipc_t ipc;
+    grid_t grid = gnew();
     
     LOGPID("Using IPC method: %s.\n", IPC_METHOD);
     
     /* Before doing anything else, map data should be loaded! */
     /* (so as to know the number of ants beforehand, at least */
+    
+	if((status = loadGrid(grid, "configurationFile")) != NO_ERRORS)
+	{
+		LOGPID("An error occurred while loading the configuration file\n ");
+		exit(status);
+	}
+	
 
     /* This process will act as IPC server/simulation control */
     

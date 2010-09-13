@@ -11,7 +11,7 @@ int main(){
 	ipcdata_t ipcdata;
 	ipc_t ipc;
 	
-	ipcdata = mq_ipcData(SERVERKEY ,SERVERKEY);
+	ipcdata = mq_ipcdata(SERVERKEY ,SERVERKEY);
 	ipc = mq_serve(ipcdata);
 	
 	message_t msg;
