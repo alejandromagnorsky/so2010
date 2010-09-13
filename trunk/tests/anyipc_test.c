@@ -18,7 +18,7 @@
 
 #ifdef IPC_METHOD_SOCKETS
     #include "../include/ipc_sock.h"
-    struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4548, INADDR_ANY};
+    struct sockaddr_in DEFAULT_ADDR = {AF_INET, 4545, INADDR_ANY};
 
     // Requirements to build IPCData vary from IPC method to IPC method
     #define IPCF_IPCDATA(...)   sockIPCData(__VA_ARGS__)
@@ -28,7 +28,7 @@
     #define IPCF_SERVE(X, Y)    sockServe((X), (Y))
 
     // IPCF_CONNECT always receives ipcdata_t
-    #define IPCF_CONNECT(X)     sockConnect(X)
+    #define IPCF_CONNECT(X, Y)     sockConnect(X, Y)
 #endif
 
 #ifdef IPC_METHOD_MQS
@@ -91,7 +91,7 @@ int main(int argc, char** argv) {
                 /* Swap from and to, so that the message is routed: */
                 
                 temp->header.to = temp->header.from;
-                temp->header.from = getpid();
+                temp->header.from = 0;
 
                 sendMessage(sipc, temp);
                 LOG("(%d) Server sent: ", spid);
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
         LOG("Client: pid %d.\n", cpid = getpid());
         LOG("Attempting to connect... ");
 
-        cipc = IPCF_CONNECT(ipcdata2);
+        cipc = IPCF_CONNECT(ipcdata2, 1);
 
         while (cipc->status == IPCSTAT_CONNECTING);
         
@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
             exit(1);
         }
 
-        sendMessage(cipc, temp = mnew(getpid(), getppid(), 5, "ping!"));
+        sendMessage(cipc, temp = mnew(1, 0, 5, "ping!"));
         mdel(temp);
         
         while(!stop) {
@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
                 
                 /* Bounce the message! */
                 temp->header.to = temp->header.from;
-                temp->header.from = getpid();
+                temp->header.from = 1;
                 
                 LOG("(%d) Client sent: ", spid);
                 mprintln(temp);
