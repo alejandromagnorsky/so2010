@@ -264,6 +264,7 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 									(ctrl_info->ants[i].carrying == NO_OBJ && ctrl_info->ants[i].carrying == NO_OBJ)){
 								ctrl_info->ants[i].cmd = newMoveRes(STATUS_OK);
 								ctrl_info->ants[j].cmd = newMoveRes(STATUS_FAILED);
+								ctrl_info->board[ctrl_info->ants[i].row][ctrl_info->ants[i].col].trail = TRAIL_VALUE;
 								ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
 								ctrl_info->ants[i].col = ctrl_info->ants[i].dirpointing.col;
 								LOGPID("Control: MOVE SUCCESSFUL\n");
@@ -272,6 +273,7 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 							}else{
 								ctrl_info->ants[j].cmd = newMoveRes(STATUS_OK);
 								ctrl_info->ants[i].cmd = newMoveRes(STATUS_FAILED);
+								ctrl_info->board[ctrl_info->ants[j].row][ctrl_info->ants[j].col].trail = TRAIL_VALUE;
 								ctrl_info->ants[j].row = ctrl_info->ants[j].dirpointing.row;
 								ctrl_info->ants[j].col = ctrl_info->ants[j].dirpointing.col;
 								LOGPID("Control: MOVE SUCCESSFUL\n");
@@ -282,6 +284,8 @@ void solveMoveDecisions(ctrl_info_t ctrl_info){
 								ctrl_info->ants[j].dirpointing.row == ctrl_info->ants[i].row && ctrl_info->ants[j].dirpointing.col == ctrl_info->ants[i].col){
 							ctrl_info->ants[i].cmd = newMoveRes(STATUS_OK);
 							ctrl_info->ants[j].cmd = newMoveRes(STATUS_OK);
+							ctrl_info->board[ctrl_info->ants[i].row][ctrl_info->ants[i].col].trail = TRAIL_VALUE;
+							ctrl_info->board[ctrl_info->ants[j].row][ctrl_info->ants[j].col].trail = TRAIL_VALUE;
 							ctrl_info->ants[j].row = ctrl_info->ants[j].dirpointing.row;
 							ctrl_info->ants[j].col = ctrl_info->ants[j].dirpointing.col;
 							ctrl_info->ants[i].row = ctrl_info->ants[i].dirpointing.row;
