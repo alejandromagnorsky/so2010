@@ -49,13 +49,13 @@ int antLoop(ipc_t ipc) {
         if (message = recvMessage(ipc)) {
             LOGPID("Ant %d received: ", ipc->id);
             mprintln(message);
-            
-            if (cmd = dispatchCmd((void*) ant, (cmd_t) mdata(message), handlers)){
+            LOGPID("Ant %d received cmd type %d.\n", ipc->id, ((cmd_t) mdata(message))->type);
+            if (cmd = dispatchCmd((void*) ant, (cmd_t) mdata(message), handlers)) {
                 mdel(message);
 
                 sendMessage(ipc, message = mnew(ipc->id, 1, cmdsize(cmd),
                                                (char*) cmd));
-                                               
+
                 LOGPID("Ant %d sent: ", ipc->id);
                 mprintln(message);
                 mdel(message);                         
