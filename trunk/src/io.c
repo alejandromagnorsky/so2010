@@ -551,10 +551,13 @@ void refreshGrid(ctrl_info_t ctrlInfo, grid_t grid)
 			{
 				addCharAt(i,j,'H');
 			}
-			else
+			//else
+			//{
+			if(ctrlInfo->board[i][j].trail != 0)
 			{
 				addDoubleAt(i,j,ctrlInfo->board[i][j].trail);
 			}
+			//}
 		}
 	}
 	
