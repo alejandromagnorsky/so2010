@@ -7,25 +7,32 @@ int launchControl(ipc_t ipc, grid_t gridinfo){
 	handler_f* handlers = buildControlHandlerArray();
 	cmd_t * cmdLauncher = createCmdLauncher(ctrl_info->qtyAnt);
 	if(ctrl_info->status != NO_ERROR){
-		deleteCtrlInfo(ctrl_info);
+		printf("ERRORS WITH CTRL INFO\n");
+		//deleteCtrlInfo(ctrl_info);
 		return ctrl_info->status;
 	}
 	if(handlers == NULL){
-		deleteCtrlInfo(ctrl_info);
+		printf("ERRORS WITH CTRL HANDLERS\n");
+		//deleteCtrlInfo(ctrl_info);
 		return CTRL_ERR_MEM;
 	}
 	if(cmdLauncher == NULL){
-		deleteCtrlInfo(ctrl_info);
+		printf("ERRORS WITH CTRL MEM\n");
+		//deleteCtrlInfo(ctrl_info);
 		return CTRL_ERR_MEM;
 	}
 	
+	printf("Arranca loop control!\n");
 	controlLoop(ctrl_info, handlers, cmdLauncher);
+	printf("Puntos obtenidos: %d\n", ctrl_info->points);
+	
+	return NO_ERROR;
 }
 
 void deleteLaunchControlInfo(ctrl_info_t ctrl_info, handler_f* handlers, cmd_t * cmdLauncher){
-	deleteCtrlInfo(ctrl_info);
-	deleteControlHandlerArray(handlers);
-	deleteCmdLauncher(cmdLauncher);
+	//deleteCtrlInfo(ctrl_info);
+	//deleteControlHandlerArray(handlers);
+	//deleteCmdLauncher(cmdLauncher);
 }
 
 
