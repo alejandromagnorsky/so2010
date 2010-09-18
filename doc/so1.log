@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2010.8.27)  13 SEP 2010 03:07
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2010.9.17)  18 SEP 2010 00:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -379,24 +379,37 @@ Overfull \hbox (48.41513pt too wide) in paragraph at lines 143--145
  [] 
  []
 
-[6 <./so1.png>] [7] [8] (./so1.aux) ) 
+[6 <./so1.png>] [7] [8]
+Overfull \hbox (2.56728pt too wide) in paragraph at lines 216--230
+\OT1/cmr/m/n/10 das las hormi-gas, es-tas con-tes-tar^^San con CMD[]MOVE[]REQ, 
+CMD[]SMELL[]REQ,
+ []
+
+
+Overfull \hbox (24.26561pt too wide) in paragraph at lines 216--230
+\OT1/cmr/m/n/10 ente fun-ci^^Son \OT1/cmr/m/it/10 han-dler \OT1/cmr/m/n/10 las 
+cuales mod-i-ficar^^San el es-ta-do de la hormi-ga a ANT[]DECIDED,
+ []
+
+[9] [10] [11] (./so1.aux) ) 
 Here is how much of TeX's memory you used:
- 1741 strings out of 495061
- 20558 string characters out of 1182621
- 79022 words of memory out of 3000000
- 4935 multiletter control sequences out of 15000+50000
+ 1742 strings out of 495061
+ 20566 string characters out of 1182621
+ 81022 words of memory out of 3000000
+ 4936 multiletter control sequences out of 15000+50000
  9331 words of font info for 33 fonts, out of 3000000 for 9000
  28 hyphenation exceptions out of 8191
- 25i,7n,27p,180b,255s stack positions out of 5000i,500n,10000p,200000b,50000s
-</usr/share/texmf-texlive/fonts/type1/publ
-ic/amsfonts/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts
-/cm/cmbx12.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.p
-fb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/sha
-re/texmf-texlive/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-te
-xlive/fonts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on so1.pdf (8 pages, 125679 bytes).
+ 25i,7n,27p,184b,255s stack positions out of 5000i,500n,10000p,200000b,50000s
+</usr/share/texmf-texlive/fonts/type1/public/amsfont
+s/cm/cmbx10.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmbx12
+.pfb></usr/share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/
+share/texmf-texlive/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-
+texlive/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/share/texmf-texlive/font
+s/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texmf-texlive/fonts/type1/pub
+lic/amsfonts/cm/cmtt10.pfb>
+Output written on so1.pdf (11 pages, 141545 bytes).
 PDF statistics:
- 56 PDF objects out of 1000 (max. 8388607)
+ 69 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 
