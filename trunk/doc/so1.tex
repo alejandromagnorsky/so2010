@@ -144,11 +144,12 @@ A continución se coloca una ilustración de un server conectado con dos hormiga
  % so1.png: 603x380 pixel, 72dpi, 21.27x13.41 cm, bb=0 0 603 380
 \end{center}
 
+\newpage
 \subsection{Implementación de IPCs}
 \subsubsection{Fifos}
 Para entablar una comunicación entre procesos mediante el sistema de IPC implementado con \textbf{FIFOS}, se tomaron las siguientes decisiones:
 \begin{itemize}
- \item Al iniciar el proceso \textit{server} creará en el directorio ``/tmp'', todas las fifos necesarias para entablar comunicación 
+ \item Al iniciar el proceso, el \textit{server} creará en el directorio ``/tmp'', todas las fifos necesarias para entablar comunicación 
 con las \textit{n} hormigas participantes.
  \item Los nombres de cada fifo corresponden a la siguiente regla: La hormiga con id lógico \textit{n} enviará mensajes a través de la fifo 
 ``\verb|/tmp/fifo_c_w_n|'' y recibirá mensajes a través de la fifo ``\verb|/tmp/fifo_c_r_n|''. De esta manera entabla una comunicación
@@ -157,13 +158,6 @@ bidireccional con el \textit{server}.
 fifos utilizadas.
 \end{itemize}
 
-\subsubsection{Memoria compartida y semáforos}
-Para la implementación del IPC con \textbf{Memoria compartida} se utilizó la propuesta de \textbf{System V} para allocar memoria compartida, y 
-2 semáforos binarios o locks.
-Se crearon dos buffers circulares, en uno el proceso \textit{server} escribe los mensajes para los clientes y en el otro lee los mensajes que
-le envían. En cada acceso a cada buffer, se utiliza un lock para evitar problemas de sincronización.\\
-A su vez cada cliente, lee del buffer donde el server escribe, y escribe en el buffer de donde lee el server, siempre lockeando en los accesos.
-De esta manera se logra una comunicación bidireccional entre un proceso cliente y un proceso server.
 
 \subsubsection{Colas de mensajes}
 Para la versión del sistema que utiliza \textbf{Colas de mensajes} se decidió utilizar \textbf{System V} para poder tener una única cola y 
@@ -181,11 +175,22 @@ decidió que el proceso no se bloquee hasta encontrar dicho mensaje, si no que s
 procesos puedan seguir enviando y recibiendo mensajes normalmente.\\
 Gracias a la propuesta de \textbf{System V} se logró utilizar una única cola de mensajes para comunicar varios procesos.
 
+\subsubsection{Memoria compartida y semáforos}
+Para la implementación del IPC con \textbf{Memoria compartida} se utilizó la propuesta de \textbf{System V} para allocar memoria compartida, y 
+2 semáforos binarios o locks.
+Se crearon dos buffers circulares, en uno el proceso \textit{server} escribe los mensajes para los clientes y en el otro lee los mensajes que
+le envían. En cada acceso a cada buffer, se utiliza un lock para evitar problemas de sincronización.\\
+A su vez cada cliente, lee del buffer donde el server escribe, y escribe en el buffer de donde lee el server, siempre lockeando en los accesos.
+De esta manera se logra una comunicación bidireccional entre un proceso cliente y un proceso server.
 
+\subsubsection{Sockets}
 
+% PARTE DE SANTI
 
+\newpage
+\subsection{Desarrollo y decisiones de la lógica de simulación}
 
-\subsection{Desarrollo de entrada y salida}
+\subsubsection{Desarrollo de entrada y salida}
 Para mostrar la simulación en pantalla se decidió usar ncurses gracias a la recomendación de la cátedra, lo que facilitó la visualizacion de los 
 datos. Debido a que la terminal con la cual se cuenta solo ofrece 8 colores predefinidos se decidió crear una escala lo más apropiada posible 
 para mostrar los rastros de las hormigas en color en la pantalla. Por este mismo motivo se puede ver una referencia con los valores de la escala 
@@ -194,6 +199,45 @@ En cuanto al archivo de configuración, llamado \textit{configurationFile}, se t
 aparecen tal cual como están descriptos en el enunciado. Se asume que no hay líneas en blanco entre una línea de información y otra, y que no 
 hay espacios en blanco al final de cada línea.
 
+
+\subsubsection{Lógica del Servidor}
+El servidor será el encargado de responder a los comandos enviados por las hormigas, para ello, posee un arreglo de punteros a función, el cuál utiliza
+el tipo de comando recibido como índice de ese arreglo, localizando la función \textit{handler} de ese comando en \textbf{$O(1)$}; esta característica es
+una gran ventaja, ya que hace a la lógica totalmente escalable, y asegura su futura eficiencia.
+Para la simulación de las hormigas, el server recibe los siguientes tipos de comandos:
+\begin{itemize}
+ \item CMD\_START
+ \item CMD\_MOVE\_REQ
+ \item CMD\_SMELL\_REQ
+ \item CMD\_PICK\_REQ
+ \item CMD\_YELL\_REQ
+ \item CMD\_STOP
+\end{itemize}
+Cuando la lógica de server comienza, espera que todas las hormigas le envíen CMD\_START, y de esta manera se van marcando en estado ANT\_READY 
+en un arreglo de hormigas.
+Cuando todas se encuentran en ANT\_READY, comienza la simulación propiamente dicha, envíando el server el comando CMD\_TURN a todas las hormigas,
+estas contestarán con CMD\_MOVE\_REQ, CMD\_SMELL\_REQ, CMD\_PICK\_REQ ó CMD\_YELL\_REQ, y cada una pasará por su correspondiente función 
+\textit{handler} las cuales modificarán el estado de la hormiga a ANT\_DECIDED, si el turno no require de ningún procesamiento más, y sino, como en el
+caso de CMD\_MOVE\_REQ o CMD\_PICK\_REQ utilizarán estados intermedios, para luego de haber procesado todas las decisiones, resolver los problemas
+de concurrencia, y dejar a la hormiga en el estado ANT\_DECIDED.\\
+Cuando todas las hormigas se encuentren en el estado ANT\_DECIDED, el server pasará a enviar los comandos de respuesta a cada hormiga, los cuales
+ya se encuentran alojados en el arreglo de información que guarda internamente.\\
+En el caso de CMD\_YELL\_REQ, enviará la respuesta CMD\_YELL\_RES a la hormiga que envío el comando, y dejará marcado en el arreglo de información, que
+se les debe avisar a las demás hormigas de los sucedido, esto lo hace luego de enviar las respuestas a las hormigas, enviando CMD\_YELL\_NOT.\\
+Esta lógica se repetirá hasta cumplirse los 10000 turnos, o haberse acabado la comida del mundo. Cuando esto suceda, el server enviará a las hormigas
+CMD\_STOP, y esperará hasta que estas le respondan con el mismo mensaje, marcando esto en el arreglo de información, cuando todas hayan respondido,
+se detiene al thread de comunicación, y se destruyen la memoria y demás partes utilizadas para los IPCs, para luego terminar con la simulación.
+
+\subsubsection{Lógica de la Hormiga}
+
+% PARTE DE SANTI
+
+\newpage
+\section{Conclusiones}
+Al finalizar el Trabajo Especial, concluímos en que, nuestra API de IPCs brindaba ventajas que la simulación pedida no requería, por ejemplo, el envío
+de mensajes de tamaño variable y la lógica de comunicación no bloqueante. Trabajo que nos demoró mas tiempo de lo esperado, pero que no consideramos
+en vano, ya que nos enfrentó a nuevos desafíos que logramos superar; por este motivo se nos retrasó el desarrollo de la lógica de simulación, por lo que
+no logramos desarrollar una hormigas muy inteligentes. Sin embargo, creemos haber ganado más de lo perdido.
 
 \bigskip
 \end{document}
