@@ -97,7 +97,7 @@ int main(int argc, char** argv) {
                 LOG("(%d) Server sent: ", spid);
                 mprintln(temp);
 
-                mdel(temp);                
+                mdel(temp);    
             }
         }
         

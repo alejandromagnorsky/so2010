@@ -13,8 +13,8 @@
 /* Before including any other headers, some definitions are needed: */
 
 //#define IPC_METHOD_SOCKETS
-#define IPC_METHOD_MQS
-//#define IPC_METHOD_FIFOS
+//#define IPC_METHOD_MQS
+#define IPC_METHOD_FIFOS
 //#define IPC_METHOD_SHMEM
 
 #ifdef IPC_METHOD_SOCKETS

@@ -127,6 +127,7 @@ void fifoHandlerWriteServer(ipc_t ipc, msg_writting currMsgW, client_t * clients
 	message_t nextMsg;
 	if(currMsgW->toWrite == 0){
 		nextMsg = qget(ipc->outbox);
+		
 		if(nextMsg != NULL){
 			currMsgW->toWrite = M_HEADER_SIZE + nextMsg->header.len;
 			currMsgW->msglen = currMsgW->toWrite;
@@ -216,7 +217,7 @@ void* fifoServerLoop(void* ipcarg){
 		for(nclt = 0; nclt < ipc->maxclts; nclt++){
 			FD_SET(clients[nclt]->cinfo->fifodata.fdr, &readfds);
 		}
-		select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
+		//select(FD_SETSIZE, &readfds, NULL, NULL, NULL);
 		for(nclt = 0; nclt < ipc->maxclts; nclt++){
 			if(FD_ISSET(clients[nclt]->cinfo->fifodata.fdr, &readfds)){
 				currClient = clients[nclt];
