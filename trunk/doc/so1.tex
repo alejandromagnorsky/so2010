@@ -186,8 +186,11 @@ De esta manera se logra una comunicación bidireccional entre un proceso cliente
 \subsubsection{Sockets}
 
 La implementación del sistema con sockets utiliza el modelo de comunicación orientado a conexiones, estableciendo la comunicación entre todos los procesos hormiga y el servidor-control de simulación. Se utilizaron sockets de la familia de direcciones INET, bajo protocolo TCP.
+
 Al iniciarse el thread de comunicación en el servidor, un socket no-bloqueante escucha en una dirección pública, conocida por todos los procesos del programa, y dispara un nuevo thread cada vez que llega una solicitud de conexión.
+
 Los threads controlan el envío y la recepción de datos de cada cliente, vaciando una outbox propia y populando una inbox, también propia (ambas colas thread-safe, multi-producer y multi-consumer). El thread principal de comunicaciones, a su vez, traslada los mensajes entrantes de las inbox de cada cliente a una cola general de mensajes de entrada que el thread de control de simulación puede acceder. En el sentido inverso, cuando el control decide enviar un mensaje, lo encola en una bandeja de salida general y el thread de servicio se encarga de llevar el mensaje a la bandeja de salida individual del cliente correspondiente.
+
 En todo momento se utilizan sockets no bloqueantes, iterando sobre una máquina de estados que recibe los headers y datos de los mensajes, en forma busy. Entendemos que la baja performance que resultó tener esta implementación tiene su origen en esta decisión de diseño cuestionable: ninguno de los múltiples threads y procesos del programa bloquea o duerme, de manera que el cambio constante de contexto y el acceso permanente a objetos protegidos por exlcusión mutua reducen el ritmo de ejecución de forma muy notoria.
 
 \newpage
@@ -230,10 +233,6 @@ se les debe avisar a las demás hormigas de los sucedido, esto lo hace luego de 
 Esta lógica se repetirá hasta cumplirse los 10000 turnos, o haberse acabado la comida del mundo. Cuando esto suceda, el server enviará a las hormigas
 CMD\_STOP, y esperará hasta que estas le respondan con el mismo mensaje, marcando esto en el arreglo de información, cuando todas hayan respondido,
 se detiene al thread de comunicación, y se destruyen la memoria y demás partes utilizadas para los IPCs, para luego terminar con la simulación.
-
-\subsubsection{Lógica de la Hormiga}
-
-% PARTE DE SANTI
 
 \newpage
 \section{Conclusiones}

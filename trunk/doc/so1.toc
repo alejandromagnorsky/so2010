@@ -13,5 +13,4 @@
 \contentsline {subsection}{\numberline {2.3}Desarrollo y decisiones de la l\IeC {\'o}gica de simulaci\IeC {\'o}n}{9}
 \contentsline {subsubsection}{\numberline {2.3.1}Desarrollo de entrada y salida}{9}
 \contentsline {subsubsection}{\numberline {2.3.2}L\IeC {\'o}gica del Servidor}{9}
-\contentsline {subsubsection}{\numberline {2.3.3}L\IeC {\'o}gica de la Hormiga}{10}
 \contentsline {section}{\numberline {3}Conclusiones}{11}
