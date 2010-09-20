@@ -187,6 +187,7 @@ De esta manera se logra una comunicación bidireccional entre un proceso cliente
 
 % PARTE DE SANTI
 
+\newpage
 \subsection{Desarrollo y decisiones de la lógica de simulación}
 
 \subsubsection{Desarrollo de entrada y salida}

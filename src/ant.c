@@ -85,7 +85,7 @@ cmd_t antHandleStart(void* antarg, cmd_t cmdarg) {
 }
 
 cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
-    int dir, dist, i;
+    int dir, distr, distc, i;
 	ant_t ant = (ant_t) antarg;
 	LOGPID("Ant handling turn command.\n");
 	
@@ -97,18 +97,18 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
 	            /* Smell memory is still valid */
 	            
 	            for (dir = DIR_NORTH; dir < DIR_NORTHWEST; dir++) {
-	            
+	                
+	                ant->interestbase[dir] = 0;
+	                
 	                switch(ant->smell[dir].obj) {
 	                
 	                    case OBJ_FOOD:
-	                        fprintf(stderr, "\nFOOOOOOD SMALL\n");
     	                    return newPickReq(dir);
     	                    
 	                    case OBJ_BIGFOOD:
                             return (ant->yelled) ? newPickReq(dir) : newYellReq();
 
-	                    case OBJ_ANT:    
-	                        ant->interestbase[dir] = 0;
+	                    case OBJ_ANT:
 	                        break;
 	                        
 	                    default:
@@ -125,21 +125,23 @@ cmd_t antHandleTurn(void* antarg, cmd_t cmdarg) {
             return newMoveReq(ant->moved = decide(ant->interestbase, ant->interestmult));    
 	
         case ANT_STATE_CARRYING:
-            if ((dist = ant->r - ant->ahr) != 0) {
+            LOGPID("carrying to anthill. %d %d to %d %d",
+                    ant->r, ant->c, ant->ahr, ant->ahc);
+            if ((distr = ant->r - ant->ahr) != 0) {
             
-                dir = (dist > 0 ? DIR_NORTH : DIR_SOUTH);
-                ant->interestbase[dir] = 150;
+                if (rand() % 4) return newMoveReq(distr < 0 ? DIR_SOUTH : DIR_NORTH);
                 
-            } else if ((dist = ant->c - ant->ahc) != 0) {
-            
-                dir = (dist > 0 ? DIR_WEST : DIR_EAST);
-                ant->interestbase[dir] = 150;
                 
-            } else {
-                ant->state = ANT_STATE_SEEKING;
-                //return NULL;
             }
-//            decide(ant->interestbase, ant->interestmult)
+            if ((distc = ant->c - ant->ahc) != 0) {
+            
+                return newMoveReq(distc < 0 ? DIR_EAST : DIR_WEST);
+                
+            }
+            
+            if (distr == 0 && distc == 0)
+                ant->state = ANT_STATE_SEEKING;
+
             return newMoveReq(ant->moved = decide(ant->interestbase, ant->interestmult));
     }
 }
@@ -191,23 +193,24 @@ cmd_t antHandleMoveRes(void* antarg, cmd_t cmdarg) {
     cmd_pick_res_t cmd = (cmd_pick_res_t) cmdarg;
     
     switch(cmd->status) {
-    
-        case STATUS_OK:
+               
+        case STATUS_FAILED:
+            ant->smelled = 0;
+            break;
+            
+        default:
             /* hora de tirar grasadas */
             switch(ant->moved) {
+
                 case DIR_NORTH: ant->r--; break;
                 case DIR_SOUTH: ant->r++; break;
                 case DIR_EAST: ant->c++; break;
                 case DIR_WEST: ant->c--; break;
+
             }
-            
+            LOGPID("actualizada la pos a %d %d", ant->r, ant->c);            
             ant->smelled = 0;
-            break;
-            
-        case STATUS_FAILED:
-            ant->smelled = 0;
-            break;
-    
+            break;    
     }
     
     return NULL;
