@@ -37,5 +37,6 @@ void _enablePaging(pdir_t page_directory);
    the structure with the given information */
 pdentry_t   _pd_createEntry(void* address);
 void        _pd_togglePresent(pdentry_t*);
+void _startPaging();
 
 #endif
