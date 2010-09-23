@@ -15,4 +15,5 @@ typedef int pdentry_t;
    the structure with the given information */
 pdentry_t   _pd_createEntry(void* address);
 void        _pd_togglePresent(pdentry_t*);
+void		_enablePaging();
 #endif

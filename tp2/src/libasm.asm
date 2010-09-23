@@ -9,6 +9,7 @@ GLOBAL	_int_14_hand, _int_15_hand, _int_16_hand, _int_17_hand
 GLOBAL	_int_18_hand, _int_19_hand, _int_1A_hand, _int_1B_hand
 GLOBAL	_int_1C_hand, _int_1D_hand, _int_1E_hand, _int_1F_hand
 GLOBAL  _mascaraPIC1,_mascaraPIC2,_Cli,_Sti
+GLOBAL	_read_cr0, _setPG
 GLOBAL  _debug
 
 EXTERN  int_20, int_21, int_80, int_00, fault_handler
@@ -303,6 +304,25 @@ isr_common_stub:
 	popa
 	add esp, 8     ; Cleans up the pushed error code and pushed ISR number
 	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
+	
+;-------------------------------------------------------------------------------
+;	Functions for enabling paging
+
+_read_cr0:
+	mov 	eax, cr0
+	retn
+
+_setPG:
+	push	ebp
+	mov		ebp, esp
+	mov		eax, [ebp+8]
+	mov 	cr0, eax
+	mov	esp,ebp
+	pop	ebp
+	retn
+
+;-------------------------------------------------------------------------------
+
 
 ; Debug para el BOCHS, detiene la ejecució; Para continuar colocar en el BOCHSDBG: set $eax=0
 ;
