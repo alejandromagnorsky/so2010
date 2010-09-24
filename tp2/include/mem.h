@@ -11,7 +11,7 @@
 /* The predecessor page will be the Kernel Table, to do Indentity Mapping*/
 #define KERNEL_TABLE_POS (unsigned int*) 0x3FE000 
 
-typedef (unsigned int*) pdir_t;
+typedef unsigned int* pdir_t;
 
 #define SETBIT(X, P, V) (V ? ((1 << (P)) | (X)) : (~(1 << (P)) & X))
 #define SET_PRESENT(X,V) SETBIT(X,0,V)
