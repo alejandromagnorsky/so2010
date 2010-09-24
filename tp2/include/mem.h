@@ -11,7 +11,6 @@
 /* The predecessor page will be the Kernel Table, to do Indentity Mapping*/
 #define KERNEL_TABLE_POS (unsigned int*) 0x3FE000 
 
-typedef unsigned int* pdir_t;
 
 #define SETBIT(X, P, V) (V ? ((1 << (P)) | (X)) : (~(1 << (P)) & X))
 #define SET_PRESENT(X,V) SETBIT(X,0,V)
@@ -19,6 +18,7 @@ typedef unsigned int* pdir_t;
 #define SET_SUPERVISOR(X,V) SETBIT(X,2,V)
 
 typedef int pdentry_t;
+typedef pdentry_t* pdir_t;
 
 /* Creates the page directory with the firsts 4MB using Identity Mapping.
  * Fill the Page directory with the Kernel Table.
