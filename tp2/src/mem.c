@@ -29,11 +29,12 @@ void _pd_togglePresent(pdentry_t* entry) {
 
 
 void _startPaging(){
-	pdir_t page_directory = _setCR3(_pd_createEmptyDirectoryPage());
+	pdir_t page_directory = _pd_createEmptyDirectoryPage();
+	//_setCR3(page_directory);
 	page_directory[0] = _kernelTable();
 	SET_PRESENT(page_directory[0]);
-	_setCR3(pdir_t page_directory);
-	_enablePaging(pdir_t page_directory);
+	_setCR3(page_directory);
+	_enablePaging(page_directory);
 }
 
 pdir_t _pd_createEmptyDirectoryPage(){
@@ -68,4 +69,9 @@ void _enablePaging(pdir_t page_directory){
 	asm volatile("mov %%cr0, %0": "=b"(cr0));
 	cr0 |= 0x80000000;
 	asm volatile("mov %0, %%cr0":: "b"(cr0));
+}
+
+void* _reqpage(void)
+{
+	
 }
