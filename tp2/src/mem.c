@@ -1,77 +1,82 @@
 #include "../include/mem.h"
 
+/* Private memory functions */
+void _pd_createDirectoryTbl();
+void _setCR3();
+void _enablePaging();
+void _setEntry(pentry_t * entry, int address);
+
+/* Directory Table */
+static ptbl_t directoryTbl;
+
+
+/* Namespace structure */
 struct {
-    
-    pdentry_t (*createEntry) (void*);
-    void (*togglePresent) (pdentry_t*);
-    
-} PageDirectory = { _pd_createEntry,
-                    _pd_togglePresent
-				};
-
-struct {
-    
-    void (*start) (pdentry_t*);
-    
-} Paging = { _startPaging};
+	void (*start)();
+    pentry_t (*createEntry) (void*);
+    void (*togglePresent) (pentry_t*);
+} Paging = {_startPaging,
+			_pd_createEntry,
+			_pd_togglePresent
+		};
 
 
 
-pdentry_t _pd_createEntry(void* address) {
+void _setEntry(pentry_t * entry, int address){
+	address &= 0xFFFFF000;
+	*entry = address;
+}
+
+pentry_t _pd_createEntry(void* address) {
     return ((int) address << 12) & 0xFFFFF000;
 }
 
-void _pd_togglePresent(pdentry_t* entry) {
+void _pd_togglePresent(pentry_t * entry) {
     *entry ^= 1;
-    
     return;
 }
 
 
 void _startPaging(){
-	pdir_t page_directory = _pd_createEmptyDirectoryPage();
-	//_setCR3(page_directory);
-	page_directory[0] = _kernelTable();
-	SET_PRESENT(page_directory[0]);
-	_setCR3(page_directory);
-	_enablePaging(page_directory);
+	_pd_createDirectoryTbl();
+	_setCR3();
+	_enablePaging();
 }
 
-pdir_t _pd_createEmptyDirectoryPage(){
-	pdir_t page_directory = PD_DIR_POS;
-	int i = 0;
+void _pd_createDirectoryTbl(){
+	directoryTbl = (ptbl_t) KERNEL_AREA - PAGESIZE;
+	ptbl_t tbl;
+	int i = 0, j = 0;
+	address_t address = 0;
+	
 	for(i = 0; i < NENTRIES; i++)
 	{
-	    page_directory[i] = 0; 
-	    SET_PRESENT(page_directory[i], 0);
-	    SET_RDWR(page_directory[i]);
-	    SET_SUPERVISOR(page_directory[i]);
+		tbl = (ptbl_t) KERNEL_AREA + i * PAGESIZE;
+		_setEntry(&directoryTbl[i], (address_t) tbl);
+		i == 0 ? (directoryTbl[i] |= 0x03) : (directoryTbl[i] |= 0x02);
+		directoryTbl[i] |= 0x02;
+		for(j = 0; j < NENTRIES; j++){
+			_setEntry(&tbl[j], address);
+			i == 0 ? (tbl[j] |= 0x03) : (tbl[j] |= 0x02);
+			address += PAGESIZE;
+		}
 	}
 }
 
-pdir_t _kernelTable(){
-	pdir_t kernel_table = KERNEL_TABLE_POS;
-	int i = 0;
-	for(i = 0; i < NENTRIES; i++){
-		page_directory[i] = i * PAGESIZE;
-	    SET_PRESENT(page_directory[i], 1);
-	    SET_RDWR(page_directory[i], 1);
-	    SET_SUPERVISOR(page_directory[i], 1);
-	}
+
+void _setCR3(){
+	//Set the page_directory address in CR3
+	asm volatile("MOVL 	%0, %%CR3" : : "b" (directoryTbl));
 }
 
-void _setCR3(pdir_t page_directory){
-	asm volatile("mov %0, %%cr3":: "b"(page_directory));
-}
-
-void _enablePaging(pdir_t page_directory){
-	unsigned int cr0;
-	asm volatile("mov %%cr0, %0": "=b"(cr0));
-	cr0 |= 0x80000000;
-	asm volatile("mov %0, %%cr0":: "b"(cr0));
+void _enablePaging(){
+	asm volatile("MOVL	%CR0, %EAX"); 			//Get the value of CR0.
+	asm volatile("OR		$0x80000000, %EAX");// Set PG bit.
+	asm volatile("MOVL 	%EAX, %CR0");			//Set CR0 value.
 }
 
 void* _reqpage(void)
 {
 	
 }
+

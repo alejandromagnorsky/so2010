@@ -202,7 +202,10 @@ kmain()
 /* Habilito IRQ0 e IRQ1 (Timer Tick y Teclado) */
         _mascaraPIC1(0xFC);
         _mascaraPIC2(0xFF);
+	_Sti();
 
+	_Cli();
+		_startPaging();
 	_Sti();
 	shellloop();
 
@@ -211,7 +214,6 @@ kmain()
 shellloop(){
   	while(1)
         {
-           // printf("%d %d %d\n", 3, SETBIT(3, 0, 0), SETBIT(3, 2, 1));
 		    shell();
         }
 }
