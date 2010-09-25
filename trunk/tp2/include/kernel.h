@@ -9,6 +9,7 @@
 #include "keyboard.h"
 #include "shell.h"
 #include "screen.h"
+#include "mem.h"
 
 /********************************** 
 **
