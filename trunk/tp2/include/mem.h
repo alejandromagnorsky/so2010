@@ -16,6 +16,9 @@ typedef pentry_t * ptbl_t;
 
 #define SETBIT(X, P, V) (V ? ((1 << (P)) | (X)) : (~(1 << (P)) & X))
 
+#define P_RW_SV 0x07
+#define NP_RW_SV 0x06
+
 /* Creates the page directory with the firsts 4MB using Identity Mapping.
  * Fill the Page directory with the Kernel Table.
  * And sets the CR3 registry.
