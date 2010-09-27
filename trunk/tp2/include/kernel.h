@@ -38,6 +38,8 @@ long int _sys_getTicks();
 /************************************************
 ** External namespaces:
 *************************************************/
+extern struct driver_t KeyboardDriver;
+extern struct driver_t ScreenDriver;
 extern struct PagingNamespace Paging;
 
 #endif

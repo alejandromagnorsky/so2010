@@ -14,7 +14,7 @@
 ** I/O primitives (should NOT be used directly):
 *************************************************/
 
-void _memcpy(void* from, void* to, int nbytes);
+void _memcpy(void* from, void* to, size_t nbytes);
 
 unsigned char _inport(unsigned char port);
 void _outport(unsigned char port, unsigned char c);
@@ -24,7 +24,14 @@ void _outport(unsigned char port, unsigned char c);
 ** Device I/O functions:
 *************************************************/
 
-/* Direct interaction: */
+/* Driver abstraction layer */
+/* agregado para SO, es un wrapper medio mentiroso */
+size_t _kb_write(int devcode, void* from, size_t nbytes);
+size_t _kb_read(int devcode, void* to, size_t nbytes);
+
+size_t _screen_write(int devcode, void* from, size_t nbytes);
+
+/* Generic direct interaction: */
 device_t _dget(system_t, int index);
 size_t _dread(device_t, void* to, size_t nbytes);
 size_t _dwrite(device_t, void* from, size_t nbytes);
@@ -48,5 +55,7 @@ void printf(char* fstr, ...);
 unsigned char getchar();
 int sscanf(char* str, char* fmt, ...);
 int scanf(char* fstr, ...);
+
+extern struct system_t System;
 
 #endif
