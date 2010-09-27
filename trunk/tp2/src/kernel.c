@@ -47,7 +47,7 @@ struct system_t System = {     0,               /* Tick count */
                                    _sys_tellw,
                                    _sys_exec
                                };
-                             
+                               
 //system_t System = &_system_data;
 
 
@@ -121,6 +121,7 @@ void fault_handler(struct regs *r)
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
 	System.addTick();
+	
 }
 
 /* Routine for IRQ1: keyboard */

@@ -9,10 +9,10 @@ GLOBAL	_int_14_hand, _int_15_hand, _int_16_hand, _int_17_hand
 GLOBAL	_int_18_hand, _int_19_hand, _int_1A_hand, _int_1B_hand
 GLOBAL	_int_1C_hand, _int_1D_hand, _int_1E_hand, _int_1F_hand
 GLOBAL  _mascaraPIC1,_mascaraPIC2,_Cli,_Sti
-GLOBAL	_read_cr0, _setPG
+GLOBAL	_task_load_state_, _task_save_state_
 GLOBAL  _debug
 
-EXTERN  int_20, int_21, int_80, int_00, fault_handler
+EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_getNextTask
 
 SECTION .text
 
@@ -219,19 +219,20 @@ _int_1F_hand:
     jmp isr_common_stub     
     
 _int_20_hand:				; Handler de INT 20 ( Timer tick)
-        push    ds
-        push    es                      ; Se salvan los registros
-        pusha                           ; Carga de DS y ES con el valor del selector
-        mov     ax, 10h			; a utilizar.
-        mov     ds, ax
-        mov     es, ax                  
-        call    int_20                 
-        mov	al,20h			; Envio de EOI generico al PIC
-	out	20h,al
+	push	ds
+	push	es				; Se salvan los registros
+	pusha					; Carga de DS y ES con el valor del selector
+	mov		ax, 10h			; a utilizar.
+	mov		ds, ax
+	mov		es, ax                  
+	call	int_20                 
+	mov		al,20h			; Envio de EOI generico al PIC;
+	out		20h,al
+	call	_task_getNextTask
 	popa                            
-        pop     es
-        pop     ds
-        iret
+	pop		es
+	pop		ds
+	iret
 
 _int_21_hand:
 	cli
@@ -304,22 +305,61 @@ isr_common_stub:
 	popa
 	add esp, 8     ; Cleans up the pushed error code and pushed ISR number
 	iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
-	
+
 ;-------------------------------------------------------------------------------
-;	Functions for enabling paging
+; Functions for context changing
 
-_read_cr0:
-	mov 	eax, cr0
-	retn
 
-_setPG:
-	push	ebp
-	mov		ebp, esp
-	mov		eax, [ebp+8]
-	mov 	cr0, eax
-	mov	esp,ebp
-	pop	ebp
-	retn
+;_int_20_hand:					;  INT 20 handler ( Timer tick)
+;	cli
+;	push	ds
+;	push	es
+;	pushad
+;
+;	mov		ax, 10h
+;	mov		ds, ax
+;	mov		es, ax                  
+;	call	int_20
+;
+;	mov 	al,20h			; Sending EOI to the PIC
+;	out		20h,al
+;
+;	push	esp				; Parameter from GetNextTask
+;
+;	call	getNextTask
+;		
+;	pop		esp				; Recovering previous push
+;	mov 	esp,eax			; Load the ESP with the corresponging stack
+;
+;	popad
+;	pop		es
+;	pop		ds
+;
+;	sti
+;	iret
+
+
+_task_save_state_:
+;	mov		eax, [ebp]
+;	push	eax
+	pushad
+	pushfd
+	ret
+
+_task_load_state_:
+	mov		esp, [ebp + 8]
+	popfd
+	popad
+;	pop		eip
+	ret
+	
+_scheduler:						; Changing a process
+	push ebp
+	mov ebp, esp
+	int 0x20
+	mov esp, ebp
+	pop ebp
+	ret
 
 ;-------------------------------------------------------------------------------
 

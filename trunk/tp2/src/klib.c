@@ -96,3 +96,89 @@ int _sys_exec(int (*f) (char*), char* args) {
     MOVFROM_EAX(ret)
     return ret;
 }
+
+
+
+
+struct TaskNamespace Task = {
+    (void*) 0,
+    _task_setPriority,
+    _task_setRank,
+    _task_setStatus,
+    _task_getPriority,
+    _task_getRank,
+    _task_getStatus,
+    _task_getNextTask,
+    _task_getTaskById
+};
+
+
+/* Basic getters/setters: */
+
+void _task_setPriority (task_t task, int tpriority) {
+    if (task != NULL && tpriority >= PRIORITY_LOW && tpriority <= PRIORITY_MAX)
+        task->tpriority = tpriority;
+        
+    return;
+}
+
+void _task_setRank (task_t task, int trank) {
+    if (task != NULL && trank >= RANK_SERVER && trank <= RANK_NORMAL)
+        task->trank = trank;
+
+    return;
+}
+
+void _task_setStatus (task_t task, int tstatus) {
+    if (task != NULL && tstatus >= STATUS_READY && tstatus <= STATUS_RUNNING)
+        task->tstatus = tstatus;
+
+    return;
+}
+
+int _task_getPriority (task_t task) {
+    return task->tpriority;
+}
+
+int _task_getRank (task_t task) {
+    return task->trank;
+}
+
+int _task_getStatus (task_t task) {
+    return task->tstatus;
+}
+
+void _task_getNextTask() {
+	
+	task_t oldTask; /* obtener la tarea que se esta corriendo */
+	task_t newTask; /* obtener la nueva tarea segun el scheduler */
+	
+	//if(oldTask->tid != newTask->tid)
+	//{
+		/* bajar las pages de la vieja task */
+		//_task_save_state_();
+		//_task_load_state_(newTask->stack);
+		
+		/* subir las pages de la nueva task */
+//	}
+	
+	return;
+}
+
+task_t _task_getTaskById(int tid) {
+	int i;
+	
+	//if(tid == 0)
+	//{
+		/* return idle process */
+	//}
+	
+	/*for( i = 0; i < NUM_TASKS; i++)
+	{
+		if(system_t->tasks[i]->tid == tid)
+		{
+			return system_t->tasks[i];
+		}
+	}*/
+
+}
