@@ -32,6 +32,8 @@ enum {
     DEVICE_KEYBOARD
 };
 
+#define DEVICE_TTY(X) (DEVICE_KEYBOARD + (X) + 1)
+
 enum {
     SYSTEM_CALL_READ = 0,
     SYSTEM_CALL_WRITE,
@@ -95,6 +97,14 @@ struct system_t {
     
     void (*addTick) ();
     long int (*getTicks) ();
+    
+    size_t (*write) (int devcode, void* from, size_t nbytes);
+    size_t (*read)  (int devcode, void* to, size_t nbytes);
+    size_t (*seekr) (int devcode, int offset, int from);
+    size_t (*seekw) (int devcode, int offset, int from);
+    size_t (*tellr) (int devcode);
+    size_t (*tellw) (int devcode);
+    int    (*exec)  (int (*f) (char*), char* args);
 };
 
 typedef struct system_t* system_t;
@@ -157,10 +167,11 @@ typedef struct system_t* system_t;
                                              :"=m" (X)          \
                                             );                                             
 
-size_t write(int devcode, void* from, int nbytes);
-size_t read(int devcode, void* to, int nbytes);
-size_t seekr(int devcode, int offset, int from);
-size_t seekw(int devcode, int offset, int from);
-size_t tellr(int devcode);
-size_t tellw(int devcode);
+size_t _sys_write(int devcode, void* from, size_t nbytes);
+size_t _sys_read(int devcode, void* to, size_t nbytes);
+size_t _sys_seekr(int devcode, int offset, int from);
+size_t _sys_seekw(int devcode, int offset, int from);
+size_t _sys_tellr(int devcode);
+size_t _sys_tellw(int devcode);
+int _sys_exec(int (*f) (char*), char* args);
 #endif

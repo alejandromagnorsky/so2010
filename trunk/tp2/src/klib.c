@@ -4,7 +4,7 @@
 ** System data structure manipulation:
 *************************************************/
 
-size_t write(int devcode, void* from, int nbytes) {
+size_t _sys_write(int devcode, void* from, size_t nbytes) {
     size_t ret;
     
     MOVTO_AL(SYSTEM_CALL_WRITE);
@@ -18,7 +18,7 @@ size_t write(int devcode, void* from, int nbytes) {
     return ret;
 }
 
-size_t read(int devcode, void* to, int nbytes) {
+size_t _sys_read(int devcode, void* to, size_t nbytes) {
     size_t ret;
     
     MOVTO_AL(SYSTEM_CALL_READ);
@@ -32,7 +32,7 @@ size_t read(int devcode, void* to, int nbytes) {
     return ret;
 }
 
-size_t seekr(int devcode, int offset, int from) {
+size_t _sys_seekr(int devcode, int offset, int from) {
     size_t ret;
 
     MOVTO_AL(SYSTEM_CALL_SEEKR);
@@ -46,7 +46,7 @@ size_t seekr(int devcode, int offset, int from) {
     return ret;
 }
 
-size_t seekw(int devcode, int offset, int from) {
+size_t _sys_seekw(int devcode, int offset, int from) {
     size_t ret;
     
     MOVTO_AL(SYSTEM_CALL_SEEKW);
@@ -60,7 +60,7 @@ size_t seekw(int devcode, int offset, int from) {
     return ret;
 }
 
-size_t tellr(int devcode) {
+size_t _sys_tellr(int devcode) {
     size_t ret;
     
     MOVTO_AL(SYSTEM_CALL_TELLR);
@@ -72,7 +72,7 @@ size_t tellr(int devcode) {
     return ret;
 }
 
-size_t tellw(int devcode) {
+size_t _sys_tellw(int devcode) {
     size_t ret;
     
     MOVTO_AL(SYSTEM_CALL_TELLW);
@@ -84,7 +84,7 @@ size_t tellw(int devcode) {
     return ret;
 }
 
-int exec(int (*f) (char*), char* args) {
+int _sys_exec(int (*f) (char*), char* args) {
     int ret;
     
     MOVTO_AL(SYSTEM_CALL_EXEC);

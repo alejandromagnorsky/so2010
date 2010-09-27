@@ -16,9 +16,9 @@ size_t video_write(device_t dev, void* from, size_t nbytes){
 		case '\t':
 			if(dev->wpos % 8 == 0)
 			  for(i=0; i<4; i++)
-			    write(dev->id, &zero, 1);
+			    System.write(dev->id, &zero, 1);
 			while(dev->wpos % 8 > 0)
-			      write(dev->id, &zero, 1);
+			    System.write(dev->id, &zero, 1);
 			break;
 		case '\n':
 			wpos = dev->wpos;
@@ -28,7 +28,7 @@ size_t video_write(device_t dev, void* from, size_t nbytes){
 				colpos = wpos % 160;
 				for( i = colpos; i < 160; i++){
 					if(i % 2 == 0)						
-						write(DEVICE_SCREEN, &zero, 1);
+						System.write(DEVICE_SCREEN, &zero, 1);
 				}
 			}
 			break;
@@ -81,6 +81,6 @@ void scroll(device_t dev){
 	
 	dev->wpos = 3840;
 	while(dev->wpos < 4000)
-		write(dev->id, &zero, 1);
+		System.write(dev->id, &zero, 1);
 	dev->wpos = 3840;
 }
