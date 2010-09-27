@@ -19,6 +19,28 @@
 
 #define QUANTUM 1
 
+#define STACK_SIZE 1024
+#define	MAX_TASK_NAME	20
+
+enum {
+    RANK_SERVER,
+    RANK_NORMAL
+};
+
+enum {
+    PRIORITY_LOW,
+    PRIORITY_MEDIUM,
+    PRIORITY_HIGH,
+    PRIORITY_MAX
+};
+
+enum {
+    STATUS_READY,
+    STATUS_WAITING,
+    STATUS_DEAD,
+    STATUS_RUNNING /* ? */
+};
+
 typedef int (*program) (char*);
 
 enum {
@@ -31,6 +53,24 @@ enum {
     DEVICE_SCREEN = 0,
     DEVICE_KEYBOARD
 };
+
+struct task_t {
+    int tid;
+    int trank, tpriority;
+    int tstatus;
+    char tname[MAX_TASK_NAME];
+    
+    void* stack;
+        
+    struct {
+        int devcode;
+        int wpos;
+        int rpos;
+    } odevs[10];    
+    
+};
+
+typedef struct task_t* task_t;
 
 #define DEVICE_TTY(X) (DEVICE_KEYBOARD + (X) + 1)
 
@@ -174,4 +214,33 @@ size_t _sys_seekw(int devcode, int offset, int from);
 size_t _sys_tellr(int devcode);
 size_t _sys_tellw(int devcode);
 int _sys_exec(int (*f) (char*), char* args);
+
+
+
+struct TaskNamespace {
+    task_t (*new) (int tid, int trank, int tpriority);
+    
+    void (*setPriority) (task_t, int);
+    void (*setRank)    (task_t, int);
+    void (*setStatus)   (task_t, int);
+    
+    int (*getPriority) (task_t);
+    int (*getRank)    (task_t);
+    int (*getStatus)   (task_t);
+    void (*getNextTask) ();
+    task_t (*getTaskById) (int);
+};
+
+void _task_saveState   (task_t);
+void _task_loadState   (task_t);
+
+void _task_setPriority (task_t, int);
+void _task_setRank    (task_t, int);
+void _task_setStatus   (task_t, int);
+
+int _task_getPriority (task_t);
+int _task_getRank    (task_t);
+int _task_getStatus   (task_t);
+void _task_getNextTask 	();
+task_t _task_getTaskById (int tid);
 #endif
