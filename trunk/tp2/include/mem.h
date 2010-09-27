@@ -34,4 +34,11 @@ void        _pd_togglePresent(pentry_t*);
 
 void*		_reqpage(void);
 
+struct PagingNamespace {
+	void (*start)();
+    pentry_t (*createEntry) (void*);
+    void (*togglePresent) (pentry_t*);
+    
+};
+
 #endif

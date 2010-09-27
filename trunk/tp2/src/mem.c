@@ -11,14 +11,11 @@ static ptbl_t directoryTbl;
 
 
 /* Namespace structure */
-struct {
-	void (*start)();
-    pentry_t (*createEntry) (void*);
-    void (*togglePresent) (pentry_t*);
-} Paging = {_startPaging,
-			_pd_createEntry,
-			_pd_togglePresent
-		};
+struct PagingNamespace Paging =
+{     _startPaging,
+	  _pd_createEntry,
+	  _pd_togglePresent
+};
 
 
 

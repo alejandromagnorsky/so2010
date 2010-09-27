@@ -5,36 +5,69 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
+#include "defs.h"
+
+#define STACK_SIZE 1024
+
 enum {
     RANK_SERVER,
     RANK_NORMAL
-}
+};
 
 enum {
-    PRIORITY_MAX,
-    PRIORITY_HIGH,
+    PRIORITY_LOW,
     PRIORITY_MEDIUM,
-    PRIORITY_LOW
-}
+    PRIORITY_HIGH,
+    PRIORITY_MAX
+};
+
+enum {
+    STATUS_READY,
+    STATUS_WAITING,
+    STATUS_DEAD,
+    STATUS_RUNNING /* ? */
+};
 
 struct task_t {
     int tid;
-    int tclass, tpriority;
+    int trank, tpriority;
+    int tstatus;
     
-    struct {
-        int eax, ebx, ecx, edx,
-            sp, cs, ds, ip;
-    } regs;
+    void* stack;
         
     struct {
         int devcode;
-        size_t wpos;
-        size_t rpos;
-    } odevs[10];
+        int wpos;
+        int rpos;
+    } odevs[10];    
     
-    
-}
+};
 
 typedef struct task_t* task_t;
+
+struct TaskNamespace {
+    task_t (*new) (int tid, int trank, int tpriority);
+    void (*loadState)   (task_t);
+    void (*saveState)   (task_t);
+    
+    void (*setPriority) (task_t, int);
+    void (*setRank)    (task_t, int);
+    void (*setStatus)   (task_t, int);
+    
+    int (*getPriority) (task_t);
+    int (*getRank)    (task_t);
+    int (*getStatus)   (task_t);
+};
+
+void _task_saveState   (task_t);
+void _task_loadState   (task_t);
+
+void _task_setPriority (task_t, int);
+void _task_setRank    (task_t, int);
+void _task_setStatus   (task_t, int);
+
+int _task_getPriority (task_t);
+int _task_getRank    (task_t);
+int _task_getStatus   (task_t);
 
 #endif

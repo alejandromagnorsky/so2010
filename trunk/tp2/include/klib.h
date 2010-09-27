@@ -67,6 +67,8 @@ struct stSystemData {
     device_t    device[10]; /* Device array */
 
     int         atty;       /* Currently active terminal. Not implemented. */
+    void (*addTick) ();
+    long int (*getTicks) ();
 };
 
 typedef struct stSystemData* system_t;
@@ -74,10 +76,6 @@ typedef struct stSystemData* system_t;
 /************************************************
 ** Kernel functions and macros library:
 *************************************************/
-
-/* System data structure manipulation: */
-void _saddTick(system_t sys);
-long int _sgetTicks(system_t sys);
 
 /* System calls */
 #define THROW_INT80 __asm__ __volatile__ ("int $0x80;")

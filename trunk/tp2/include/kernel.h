@@ -32,7 +32,12 @@ typedef enum eUSER {U_KERNEL=0, U_NORMAL} tUSERS;
 ** Macros for system functions:
 *************************************************/
 
-#define addTick() _saddTick(system)
-#define getTicks() _sgetTicks(system)
+void _sys_addTick();
+long int _sys_getTicks();
+
+/************************************************
+** External namespaces:
+*************************************************/
+extern struct PagingNamespace Paging;
 
 #endif
