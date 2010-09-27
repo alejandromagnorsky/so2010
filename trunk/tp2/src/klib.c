@@ -173,12 +173,12 @@ task_t _task_getTaskById(int tid) {
 		/* return idle process */
 	//}
 	
-	for( i = 0; i < NUM_TASKS; i++)
+	/*for( i = 0; i < NUM_TASKS; i++)
 	{
 		if(system_t->tasks[i]->tid == tid)
 		{
 			return system_t->tasks[i];
 		}
-	}
+	}*/
 
 }
