@@ -178,7 +178,7 @@ void int_80() {
 kmain() 
 {
 
-        int i,num, r;
+    int i,num, r;
 
 /* Borra la pantalla. */ 
 	k_clear_screen();
@@ -207,6 +207,7 @@ kmain()
 	_Cli();
 		_startPaging();
 	_Sti();
+	
 	shellloop();
 
 }

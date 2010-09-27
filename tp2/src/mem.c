@@ -51,14 +51,16 @@ void _pd_createDirectoryTbl(){
 	
 	for(i = 0; i < NENTRIES; i++)
 	{
+		address = 0;
 		tbl = (ptbl_t) KERNEL_AREA + i * PAGESIZE;
 		_setEntry(&directoryTbl[i], (address_t) tbl);
-		i == 0 ? (directoryTbl[i] |= 0x03) : (directoryTbl[i] |= 0x02);
-		directoryTbl[i] |= 0x02;
-		for(j = 0; j < NENTRIES; j++){
-			_setEntry(&tbl[j], address);
-			i == 0 ? (tbl[j] |= 0x03) : (tbl[j] |= 0x02);
-			address += PAGESIZE;
+		i == 0 ? (directoryTbl[i] |= P_RW_SV) : (directoryTbl[i] |= NP_RW_SV);
+		if(i == 0){
+			for(j = 0; j < NENTRIES; j++){
+				_setEntry(&tbl[j], address);
+				i == 0 ? (tbl[j] |= P_RW_SV) : (tbl[j] |= NP_RW_SV);
+				address += PAGESIZE;
+			}
 		}
 	}
 }
