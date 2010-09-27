@@ -9,28 +9,34 @@ int tickpos = -2;
 ** Global system data structure initialization:
 *************************************************/
 
-struct stDeviceData _kBuffer_data = { DEVICE_KEYBOARD,   /* Device ID */
+struct device_t _sys_kbuffer = { DEVICE_KEYBOARD,        /* Device ID */
                                       "keyboard",        /* Device name */
+                                      &KeyboardDriver,   /* Device driver */
                                       &keyBuff,          /* Mem starting addr */
+                                      BUFFER_SIZE,       /* Mem area size */
+                                      
                                       0,                 /* Current wposition */
 				                      0,                 /* Current rposition */
-                                      BUFFER_SIZE        /* Mem area size */
                                     };
-				   
-struct stDeviceData _screen_data = {	DEVICE_SCREEN,     /* Device ID */
+
+struct device_t _sys_screen = {	DEVICE_SCREEN,             /* Device ID */
 										"screen",          /* Device name */
+										&ScreenDriver,     /* Device driver */
 										(void*) 0xb8000,   /* Mem starting addr */
+										BUFFER_SIZE,       /* Mem area size */
+										
 										0,                 /* Current wposition */
 										0,                 /* Current rposition */
-										BUFFER_SIZE,       /* Mem area size */
 									};
-                    
 
-struct stSystemData System = {     0,               /* Tick count */
+
+struct system_t System = {     0,               /* Tick count */
                                    2,               /* Number of devices */
-                                   {(device_t) &_screen_data,
-                                    &_kBuffer_data},/* Device array */
-                                   0,                /* Active terminal index */                               
+                                   {&_sys_screen,
+                                    &_sys_kbuffer },/* Device array */
+                                   0,                /* Active terminal index */
+                                   NULL,
+                                   {},                               
                                    _sys_addTick,
                                    _sys_getTicks,
                                };
@@ -143,32 +149,44 @@ void int_80() {
     switch(syscall) {
     
         case SYSTEM_CALL_WRITE:
-            ret = _dwrite(System.device[ebx], (void*) ecx, edx);                
+            if (System.device[ebx]->driver->write)
+                ret = System.device[ebx]->driver->write(ebx, (void*) ecx, edx);
+                
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_READ:
-            ret = _dread(System.device[ebx], (void*) ecx, edx);
+            if (System.device[ebx]->driver->read)
+                ret = System.device[ebx]->driver->read(ebx, (void*) ecx, edx);
+                
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_SEEKR:
-            ret = _dseekr(System.device[ebx], ecx, edx);
+            if (System.device[ebx]->driver->seekr)
+                ret = System.device[ebx]->driver->seekr(ebx, ecx, edx);
+                
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_SEEKW:
-            ret = _dseekw(System.device[ebx], ecx, edx);
+            if (System.device[ebx]->driver->seekw)
+                ret = System.device[ebx]->driver->seekw(ebx, ecx, edx);
+                
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_TELLR:
-            ret = _dtellr(System.device[ebx]);
+            if (System.device[ebx]->driver->tellr)
+                ret = System.device[ebx]->driver->tellr(ebx);
+                
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_TELLW:
-            ret = _dtellw(System.device[ebx]);
+            if (System.device[ebx]->driver->tellw)
+                ret = System.device[ebx]->driver->tellw(ebx);
+                
             MOVTO_EAX(ret);
             break;
             
@@ -216,7 +234,7 @@ kmain()
 //    Paging.start();
 
 	_Sti();
-	
+
 	shellloop();
 
 }

@@ -16,6 +16,9 @@
 #define uint16  unsigned short int
 #define uint32  unsigned int
 
+#define size_t int
+#define ssize_t unsigned short
+
 #define forever for(;;)
 #define skip    if(0)
 

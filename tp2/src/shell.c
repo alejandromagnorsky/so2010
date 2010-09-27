@@ -4,8 +4,6 @@
 
 #define NUM_COMMANDS 6
 
-extern struct stSystemData _system_data;
-
 static struct {
     char line[LINEBUF_LEN];
     int pos;

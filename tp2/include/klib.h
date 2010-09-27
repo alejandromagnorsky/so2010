@@ -1,16 +1,25 @@
 #ifndef _KLIB_H_
 #define _KLIB_H_
 
+#include "defs.h"
+#include "task.h"
+
 /************************************************
 ** Constants and definitions:
 *************************************************/
 #pragma pack(1)
+
 #define LINEBUF_LEN 100
-#define NULL 0
+
+#define KERNEL_DEVICES 2
+#define USER_DEVICES 10
+#define NUM_TTYS 4
+
+#define NUM_TASKS 10
+
+#define QUANTUM 1
 
 typedef int (*program) (char*);
-typedef int size_t;
-typedef short int ssize_t;
 
 enum {
     DEVICE_START,
@@ -33,17 +42,31 @@ enum {
     SYSTEM_CALL_EXEC
 };
 
-struct stDeviceData {
-    int  id;
-    char name[11];
-
-    void* addr;     /* Starting address of the device's memory area */
-    size_t wpos;        /* Current writing position */
-    size_t rpos;	/* Current Reading position */
-    size_t size;       /* Size of the device's memory area */
+struct driver_t {
+    size_t (*write) (int devcode, void* from, int nbytes);
+    size_t (*read)  (int devcode, void* to, int nbytes);
+    size_t (*seekr) (int devcode, int offset, int from);
+    size_t (*seekw) (int devcode, int offset, int from);
+    size_t (*tellr) (int devcode);
+    size_t (*tellw) (int devcode);
 };
 
-typedef struct stDeviceData* device_t;
+typedef struct driver_t* driver_t;
+
+struct device_t {
+    int  id;
+    char name[11];
+    
+    driver_t driver;
+
+    void* addr;     /* Starting address of the device's memory area */
+    size_t size;    /* Size of the device's memory area */
+    
+    size_t wpos;    /* Current writing position */
+    size_t rpos;	/* Current Reading position */
+};
+
+typedef struct device_t* device_t;
 /*
 struct stScreenDeviceData {
     int  id;
@@ -59,19 +82,22 @@ struct stScreenDeviceData {
 
 //typedef struct stScreenDeviceData* device_screen_t;
 
-
-struct stSystemData {
+struct system_t {
     long int    ticks;      /* Tick count since system boot */
     
     int         ndevices;   /* Number of devices */
-    device_t    device[10]; /* Device array */
+    device_t    device[KERNEL_DEVICES + USER_DEVICES + NUM_TTYS]; /* Device array */
 
-    int         atty;       /* Currently active terminal. Not implemented. */
+    int         atty;       /* Currently active terminal device index. */
+    
+    task_t          task;
+    struct task_t   tasks[NUM_TASKS];
+    
     void (*addTick) ();
     long int (*getTicks) ();
 };
 
-typedef struct stSystemData* system_t;
+typedef struct system_t* system_t;
 
 /************************************************
 ** Kernel functions and macros library:

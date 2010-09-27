@@ -33,6 +33,32 @@ void _outport(unsigned char port, unsigned char c) {
 }
 
 
+
+/************************************************
+** Driver abstraction layer:
+*************************************************/
+
+struct driver_t KeyboardDriver = {
+    _kb_write,
+    _kb_read, /* the rest is null as well */
+};
+
+size_t _kb_read(int devcode, void* to, size_t nbytes) {
+    return _dread(System.device[devcode], to, nbytes);
+}
+
+size_t _kb_write(int devcode, void* from, size_t nbytes) {
+    return _dwrite(System.device[devcode], from, nbytes);
+}
+
+struct driver_t ScreenDriver = {
+    _screen_write
+};
+
+size_t _screen_write(int devcode, void* from, size_t nbytes) {
+    return _dwrite(System.device[devcode], from, nbytes);
+}
+
 /************************************************
 ** Device interface:
 *************************************************/
