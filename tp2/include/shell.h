@@ -21,4 +21,6 @@ int help(char* line);
 int startx(char * line);
 int clear(char * line);
 int echo(char * );
+
+extern struct system_t System;
 #endif

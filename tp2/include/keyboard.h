@@ -84,4 +84,6 @@ void updateLeds();
 int isKeyNumPad(unsigned char ascii);
 unsigned char accentuate(unsigned char ascii);
 
+
+extern struct system_t System;
 #endif

@@ -268,7 +268,7 @@ escapedKey(unsigned int scan_code){
 			break;
 		case KP_DIV:
 			ascii = '/';
-			write(DEVICE_KEYBOARD, &ascii, 1);
+			System.write(DEVICE_KEYBOARD, &ascii, 1);
 			break;
 		case KP_EN:break;
 	}

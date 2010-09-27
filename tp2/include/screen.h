@@ -9,4 +9,6 @@ void move_cursor(int position);
 void move_cursor_rc(int row, int col);
 void scroll(device_t dev);
 
+
+extern struct system_t System;
 #endif

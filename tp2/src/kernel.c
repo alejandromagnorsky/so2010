@@ -39,6 +39,13 @@ struct system_t System = {     0,               /* Tick count */
                                    {},                               
                                    _sys_addTick,
                                    _sys_getTicks,
+                                   _sys_write,
+                                   _sys_read,
+                                   _sys_seekr,
+                                   _sys_seekw,
+                                   _sys_tellr,
+                                   _sys_tellw,
+                                   _sys_exec
                                };
                              
 //system_t System = &_system_data;
@@ -125,10 +132,11 @@ void int_21(){
     MOVFROM_AL(scan);
 	
 	keyEntry keyPressed = scan2ascii(scan);
-	if(keyPressed->type == PRINTABLE_KEY){
+	if(keyPressed->type == PRINTABLE_KEY) {
 		ascii = keyPressed->ascii;
-		write(DEVICE_KEYBOARD, &ascii, 1);
-	}else if(keyPressed->type == SPECIAL_KEY){
+		System.write(DEVICE_KEYBOARD, &ascii, 1);
+		
+	} else if(keyPressed->type == SPECIAL_KEY) {
 		escapedKey(keyPressed->scan_code);
 	}  
      

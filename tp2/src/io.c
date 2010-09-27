@@ -220,7 +220,7 @@ size_t _dseekr(device_t dev, int offset, int from) {
 void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
-    write(DEVICE_SCREEN, ch, 1);
+    System.write(DEVICE_SCREEN, ch, 1);
 }
 
 void puts(char* str) {
@@ -362,7 +362,7 @@ char printable(char c) {
 unsigned char getchar() {
     unsigned char c;
     /* Block until an ascii character is read: */   
-    while ( (read(DEVICE_KEYBOARD, &c, 1) == 0) );
+    while ( (System.read(DEVICE_KEYBOARD, &c, 1) == 0) );
     return c;
 }
 

@@ -92,7 +92,7 @@ int run_command(){
 	for (i = 0; i < NUM_COMMANDS; i++) {
 	    if (streq(command.name, commands[i].name)) {
 	        clearCommand();
-	        return exec(commands[i].function, command.args);
+	        return System.exec(commands[i].function, command.args);
 	    }
 	}
 
