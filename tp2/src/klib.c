@@ -4,14 +4,6 @@
 ** System data structure manipulation:
 *************************************************/
 
-void _saddTick(system_t sys) {
-    sys->ticks++;
-}
-
-long int _sgetTicks(system_t sys) {
-    return sys->ticks;
-}
-
 size_t write(int devcode, void* from, int nbytes) {
     size_t ret;
     

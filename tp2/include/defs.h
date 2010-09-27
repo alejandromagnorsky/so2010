@@ -6,6 +6,19 @@
 #ifndef _defs_
 #define _defs_
 
+#define NULL 0
+
+#define TRUE    1
+#define FALSE   0
+
+#define bool    unsigned char
+#define uint8   unsigned char
+#define uint16  unsigned short int
+#define uint32  unsigned int
+
+#define forever for(;;)
+#define skip    if(0)
+
 #define byte unsigned char
 #define word short int
 #define dword int

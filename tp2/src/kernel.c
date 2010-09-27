@@ -3,7 +3,7 @@
 DESCR_INT idt[0xFF];			/* IDT de 10 entradas*/
 IDTR idtr;				/* IDTR */
 unsigned char keyBuff[BUFFER_SIZE];
-int tickpos=-2;
+int tickpos = -2;
 
 /************************************************
 ** Global system data structure initialization:
@@ -26,15 +26,25 @@ struct stDeviceData _screen_data = {	DEVICE_SCREEN,     /* Device ID */
 									};
                     
 
-struct stSystemData _system_data = {   0,               /* Tick count */
-                                       2,               /* Number of devices */
-                                       {(device_t) &_screen_data,
-                                        &_kBuffer_data},/* Device array */
-                                       0                /* Active terminal index */                               
-                                   };
+struct stSystemData System = {     0,               /* Tick count */
+                                   2,               /* Number of devices */
+                                   {(device_t) &_screen_data,
+                                    &_kBuffer_data},/* Device array */
+                                   0,                /* Active terminal index */                               
+                                   _sys_addTick,
+                                   _sys_getTicks,
+                               };
                              
-system_t system = &_system_data;
+//system_t System = &_system_data;
 
+
+void _sys_addTick(system_t sys) {
+    System.ticks++;
+}
+
+long int _sys_getTicks(system_t sys) {
+    return System.ticks;
+}
 
 /***********************************************
 ** Kernel Exception routines:
@@ -97,7 +107,7 @@ void fault_handler(struct regs *r)
 
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
-	addTick();
+	System.addTick();
 }
 
 /* Routine for IRQ1: keyboard */
@@ -133,32 +143,32 @@ void int_80() {
     switch(syscall) {
     
         case SYSTEM_CALL_WRITE:
-            ret = _dwrite(system->device[ebx], (void*) ecx, edx);                
+            ret = _dwrite(System.device[ebx], (void*) ecx, edx);                
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_READ:
-            ret = _dread(system->device[ebx], (void*) ecx, edx);
+            ret = _dread(System.device[ebx], (void*) ecx, edx);
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_SEEKR:
-            ret = _dseekr(system->device[ebx], ecx, edx);
+            ret = _dseekr(System.device[ebx], ecx, edx);
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_SEEKW:
-            ret = _dseekw(system->device[ebx], ecx, edx);
+            ret = _dseekw(System.device[ebx], ecx, edx);
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_TELLR:
-            ret = _dtellr(system->device[ebx]);
+            ret = _dtellr(System.device[ebx]);
             MOVTO_EAX(ret);
             break;
             
         case SYSTEM_CALL_TELLW:
-            ret = _dtellw(system->device[ebx]);
+            ret = _dtellw(System.device[ebx]);
             MOVTO_EAX(ret);
             break;
             
@@ -200,12 +210,11 @@ kmain()
 
 	initializeKeyboard();
 /* Habilito IRQ0 e IRQ1 (Timer Tick y Teclado) */
-        _mascaraPIC1(0xFC);
-        _mascaraPIC2(0xFF);
-	_Sti();
+    _mascaraPIC1(0xFC);
+    _mascaraPIC2(0xFF);
 
-	_Cli();
-		_startPaging();
+//    Paging.start();
+
 	_Sti();
 	
 	shellloop();
@@ -213,6 +222,7 @@ kmain()
 }
 
 shellloop(){
+
   	while(1)
         {
 		    shell();
