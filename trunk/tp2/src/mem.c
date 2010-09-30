@@ -110,7 +110,7 @@ address_t _getFreePage(){
 }
 
 void* _reqpage(task_t task){
-
+	return (void *) _getFreePage();
 }
 
 int checkPageStatus(address_t address){
