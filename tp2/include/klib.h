@@ -140,7 +140,7 @@ struct system_t {
     int         atty;       /* Currently active terminal device index. */
     
     task_t		idle;	/* Idle task */
-    task_t		task;	/* Running task */
+    task_t*		task;	/* Running task */
     struct task_t   tasks[NUM_TASKS];
     int		nextTID; /* Next available tid */
     

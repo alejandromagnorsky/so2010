@@ -237,7 +237,7 @@ struct task_t _task_getTaskById(int tid)
 
 task_t* _task_getCurrentTask()
 {
-	return &System.task;
+	return System.task;
 }
 
 
