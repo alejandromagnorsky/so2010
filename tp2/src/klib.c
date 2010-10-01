@@ -114,6 +114,7 @@ struct TaskNamespace Task = {
     _task_getStatus,
     _task_getTID,
     //_task_createNewTask,
+    _task_killTask,
     _task_getNextTask,
     _task_getTaskById,
     _task_getCurrentTask,
@@ -162,6 +163,9 @@ int _task_getTID (task_t task) {
     return task->tid;
 }
 
+
+/* Creates a new task. It receives the task's name, function to execute, 
+	priority and status */
 void _task_createNewTask (char* name, int (*task) (void), int priority, int status)
 {
 	int i;
@@ -198,6 +202,22 @@ void _task_createNewTask (char* name, int (*task) (void), int priority, int stat
 	_Sti();
 }
 
+/* Kills the given task */
+// [TODO] check to awake parent and kill childs
+void _task_killTask(task_t* task)
+{
+	_Cli();
+	
+	// [TODO] free task's memory
+	
+	(*task)->free = 1;
+	(*task)->tname[0] = '\0';
+	
+	_Sti();
+}
+
+/* Checks if the scheduler brings a new task, in that case it changes to the
+	new one, otherwise it keeps running the current task */
 void _task_getNextTask()
 {
 	
@@ -211,11 +231,15 @@ void _task_getNextTask()
 		_task_load_state_((*newTask)->esp);
 		
 		/* [TODO] subir las pages de la nueva task */
+
+		System.task = newTask;
 	}
+	
 	
 	return;
 }
 
+/* Returns the task with the given tid */
 struct task_t _task_getTaskById(int tid)
 {
 	int i;
@@ -235,12 +259,13 @@ struct task_t _task_getTaskById(int tid)
 
 }
 
+/* Return the current running task */
 task_t* _task_getCurrentTask()
 {
 	return System.task;
 }
 
-
+/* Idle task */
 static int Idle (void)
 {
 	while(1)
@@ -249,11 +274,14 @@ static int Idle (void)
 	}
 }
 
+/* Returns an unused tid */
 int _task_getNewTID()
 {
 	return System.nextTID++;
 }
 
+/* Tasks which finish end their life in this function which "frees" the space
+	in the tasks array and calls the scheduler in order to run a new task */
 static void cleaner(void)
 {
 	task_t* task;
@@ -270,7 +298,7 @@ static void cleaner(void)
 	_scheduler();
 }
 
-
+/* Initializes the scheduler by creating the idle task and start running it */
 void _task_setupScheduler ()
 {
 	void* idleStack;
