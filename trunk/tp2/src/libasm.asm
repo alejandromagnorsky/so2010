@@ -10,6 +10,7 @@ GLOBAL	_int_18_hand, _int_19_hand, _int_1A_hand, _int_1B_hand
 GLOBAL	_int_1C_hand, _int_1D_hand, _int_1E_hand, _int_1F_hand
 GLOBAL  _mascaraPIC1,_mascaraPIC2,_Cli,_Sti
 GLOBAL	_task_load_state_, _task_save_state_
+GLOBAL	_newStack, _scheduler
 GLOBAL  _debug
 
 EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_getNextTask
@@ -228,7 +229,7 @@ _int_20_hand:				; Handler de INT 20 ( Timer tick)
 	call	int_20                 
 	mov		al,20h			; Envio de EOI generico al PIC;
 	out		20h,al
-	call	_task_getNextTask
+	;call	_task_getNextTask
 	popa                            
 	pop		es
 	pop		ds
@@ -360,6 +361,28 @@ _scheduler:						; Changing a process
 	mov esp, ebp
 	pop ebp
 	ret
+
+;-------------------------------------------------------------------------------
+;	Creating new stack
+_newStack:
+	pushfd					; Push flags
+	push	ebp
+	mov		ebp, esp
+	mov 	eax, [ebp+16]	; Recover sp
+	mov		esp, eax		; Stack to use
+	mov 	eax, [ebp+12]   ; Task to execute
+	mov 	edx, [ebp+20]	; Task to end process
+	push 	edx				; Push of new ret
+	mov		ecx, 512		; Set bit for enabling interruptions
+	push	ecx				; Push flags (just for enabling int)
+	push 	cs				; For iret
+	push 	eax
+	pusha					; Remaining registers
+	mov 	eax, esp		; Return new esp
+	mov 	esp, ebp		; Restore original esp
+	pop		ebp    			; Restore flags and ebp
+	popfd
+	retn
 
 ;-------------------------------------------------------------------------------
 

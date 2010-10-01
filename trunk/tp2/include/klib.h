@@ -22,6 +22,8 @@
 #define STACK_SIZE 1024
 #define	MAX_TASK_NAME	20
 
+#define PAGE_SIZE 0x1000
+
 enum {
     RANK_SERVER,
     RANK_NORMAL
@@ -56,17 +58,22 @@ enum {
 
 struct task_t {
     int tid;
+    char tname[MAX_TASK_NAME];
     int trank, tpriority;
     int tstatus;
-    char tname[MAX_TASK_NAME];
     
     void* stack;
+    int stackStart;
+    int stackSize;
+    int esp;
         
     struct {
         int devcode;
         int wpos;
         int rpos;
-    } odevs[10];    
+    } odevs[10];
+    
+    int free; 
     
 };
 
@@ -132,8 +139,10 @@ struct system_t {
 
     int         atty;       /* Currently active terminal device index. */
     
-    task_t          task;	/* Running task */
+    task_t		idle;	/* Idle task */
+    task_t		task;	/* Running task */
     struct task_t   tasks[NUM_TASKS];
+    int		nextTID; /* Next available tid */
     
     void (*addTick) ();
     long int (*getTicks) ();
@@ -228,9 +237,12 @@ struct TaskNamespace {
     int (*getRank)    (task_t);
     int (*getStatus)   (task_t);
     int (*getTID) (task_t task);
+    //void (*createNewTask) (char*, ????, int, int);
     void (*getNextTask) ();
     struct task_t (*getTaskById) (int);
     task_t* (*getCurrentTask) ();
+    int (*getNewTID) ();
+    void (*setupScheduler) ();
 };
 
 void _task_saveState   (task_t);
@@ -244,8 +256,12 @@ int _task_getPriority (task_t);
 int _task_getRank    (task_t);
 int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
+void _task_createNewTask (char* name, int (*task) (void), int priority, int status);
 void _task_getNextTask 	();
 struct task_t _task_getTaskById (int tid);
 task_t* _task_getCurrentTask();
+int _task_getNewTID();
+static void cleaner (void);
+void _task_setupScheduler ();
 
 #endif

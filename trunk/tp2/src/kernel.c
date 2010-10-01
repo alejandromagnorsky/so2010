@@ -35,8 +35,10 @@ struct system_t System = {     0,               /* Tick count */
                                    {&_sys_screen,
                                     &_sys_kbuffer },/* Device array */
                                    0,                /* Active terminal index */
-                                   NULL,
-                                   {},                               
+                                   NULL,	/* Idle task */
+                                   NULL,	/* Currently active task */
+                                   {},		/* Tasks */
+                                   1,		/* Next available tid */                               
                                    _sys_addTick,
                                    _sys_getTicks,
                                    _sys_write,
@@ -242,6 +244,8 @@ kmain()
     _mascaraPIC2(0xFF);
 
 //    Paging.start();
+
+//	Task.setupScheduler();
 
 	_Sti();
 

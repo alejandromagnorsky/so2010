@@ -2,6 +2,8 @@
 
 extern struct system_t System;
 
+
+
 /************************************************
 ** System data structure manipulation:
 *************************************************/
@@ -111,9 +113,12 @@ struct TaskNamespace Task = {
     _task_getRank,
     _task_getStatus,
     _task_getTID,
+    //_task_createNewTask,
     _task_getNextTask,
     _task_getTaskById,
-    _task_getCurrentTask
+    _task_getCurrentTask,
+    _task_getNewTID,
+    _task_setupScheduler
 };
 
 
@@ -157,6 +162,42 @@ int _task_getTID (task_t task) {
     return task->tid;
 }
 
+void _task_createNewTask (char* name, int (*task) (void), int priority, int status)
+{
+	int i;
+	void* stack;
+	
+	_Cli();
+	
+	/* Looking for a free place */
+	for (i=0; i<NUM_TASKS; i++)
+	{
+		if (System.tasks[i].free == 1)
+		{
+			break;
+		}
+	}
+	
+	strcpy(name, System.tasks[i].tname);
+	System.tasks[i].tid = Task.getNewTID();
+	System.tasks[i].tpriority = priority;
+	System.tasks[i].tstatus = status;
+	
+	/* Alloc memory for stack */
+	// [TODO] check error in following line
+	//stack = _reqpage(System.tasks[i]);
+	System.tasks[i].stack = stack;
+	// [TODO] PAGE_SIZE should be PAGESIZE
+	System.tasks[i].stackSize = PAGE_SIZE;
+	System.tasks[i].stackStart = ((int)stack) + System.tasks[i].stackSize - 1;
+	
+	// [TODO]  pages up
+	System.tasks[i].esp = _newStack (task, System.tasks[i].stackStart, cleaner ); 
+	// [TODO]  pages down
+	
+	_Sti();
+}
+
 void _task_getNextTask()
 {
 	
@@ -165,11 +206,11 @@ void _task_getNextTask()
 	
 	if(Task.getTID(*oldTask) != Task.getTID(*newTask))
 	{
-		/* bajar las pages de la vieja task */
-		//_task_save_state_();
-		//_task_load_state_(newTask->stack);
+		/* [TODO] bajar las pages de la vieja task */
+		_task_save_state_();
+		_task_load_state_((*newTask)->esp);
 		
-		/* subir las pages de la nueva task */
+		/* [TODO] subir las pages de la nueva task */
 	}
 	
 	return;
@@ -179,10 +220,10 @@ struct task_t _task_getTaskById(int tid)
 {
 	int i;
 	
-	//if(tid == 0)
-	//{
-		/* return idle process */
-	//}
+	/*if(tid == 0)
+	{
+		return System.idle;
+	}*/
 	
 	for( i = 0; i < NUM_TASKS; i++)
 	{
@@ -207,4 +248,70 @@ static int Idle (void)
 		;
 	}
 }
+
+int _task_getNewTID()
+{
+	return System.nextTID++;
+}
+
+static void cleaner(void)
+{
+	task_t* task;
+	
+	_Cli();
+	
+	task = Task.getCurrentTask();
+	
+	(*task)->tname[0] = '\0';
+	(*task)->free = 1;
+	
+	_Sti();
+	
+	_scheduler();
+}
+
+
+void _task_setupScheduler ()
+{
+	void* idleStack;
+	int i;
+
+	/* Tasks array initialized with free places */
+
+	for (i=0; i<NUM_TASKS; i++)
+	{
+		System.tasks[i].tid = -1;
+		System.tasks[i].free = 1;
+	}
+
+	/* Idle task is initialized */
+
+	strcpy("Idle", System.idle->tname);
+	System.idle->tid = 0;
+	System.idle->free = 0;
+	
+	// [TODO] which is the idle's task priority?
+	//System.idle->tpriority = ???;
+	
+	// [TODO] which is the idle's task rank?
+	//System.idle->trank = ???;
+	
+	// [TODO] idle's task status should be running?
+	//System.idle->tstatus = ???;
+
+	/* Stack memory reserved and task stack created */
+
+	//[TODO] check error of this function
+	//idleStack = _reqpage(Idle);
+	//System.idle->stack = idleStack;
+	System.idle->stackSize = PAGE_SIZE;
+	System.idle->stackStart =  ((int)idleStack) + System.idle->stackSize - 1;
+
+	// [TODO]  pages up
+	System.tasks[i].esp = _newStack (Idle, System.idle->stackStart, cleaner ); 
+	// [TODO]  pages down
+	
+	return;
+}
+
 
