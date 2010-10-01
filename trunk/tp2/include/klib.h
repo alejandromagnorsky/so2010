@@ -229,7 +229,7 @@ struct TaskNamespace {
     int (*getStatus)   (task_t);
     int (*getTID) (task_t task);
     void (*getNextTask) ();
-    task_t* (*getTaskById) (int);
+    struct task_t (*getTaskById) (int);
     task_t* (*getCurrentTask) ();
 };
 
@@ -245,7 +245,7 @@ int _task_getRank    (task_t);
 int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
 void _task_getNextTask 	();
-task_t* _task_getTaskById (int tid);
+struct task_t _task_getTaskById (int tid);
 task_t* _task_getCurrentTask();
 
 #endif

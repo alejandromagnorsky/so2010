@@ -175,7 +175,7 @@ void _task_getNextTask()
 	return;
 }
 
-task_t* _task_getTaskById(int tid)
+struct task_t _task_getTaskById(int tid)
 {
 	int i;
 	
@@ -188,7 +188,7 @@ task_t* _task_getTaskById(int tid)
 	{
 		if(System.tasks[i].tid == tid)
 		{
-			return &System.tasks[i];
+			return System.tasks[i];
 		}
 	}
 
