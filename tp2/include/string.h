@@ -8,4 +8,5 @@
 ****************************************************/
 
 char streq(char*, char*); /* Returns 1 if strings are equal, 0 otherwise */
+void strcpy(char *s, char* t);
 #endif
