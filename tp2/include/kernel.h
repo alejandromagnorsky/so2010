@@ -35,6 +35,7 @@ typedef enum eUSER {U_KERNEL=0, U_NORMAL} tUSERS;
 void _sys_addTick();
 long int _sys_getTicks();
 
+
 /************************************************
 ** External namespaces:
 *************************************************/

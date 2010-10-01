@@ -1,5 +1,7 @@
 #include "../include/klib.h"
 
+extern struct system_t System;
+
 /************************************************
 ** System data structure manipulation:
 *************************************************/
@@ -108,8 +110,10 @@ struct TaskNamespace Task = {
     _task_getPriority,
     _task_getRank,
     _task_getStatus,
+    _task_getTID,
     _task_getNextTask,
-    _task_getTaskById
+    _task_getTaskById,
+    _task_getCurrentTask
 };
 
 
@@ -144,28 +148,35 @@ int _task_getRank (task_t task) {
     return task->trank;
 }
 
-int _task_getStatus (task_t task) {
+int _task_getStatus (task_t task)
+{
     return task->tstatus;
 }
 
-void _task_getNextTask() {
+int _task_getTID (task_t task) {
+    return task->tid;
+}
+
+void _task_getNextTask()
+{
 	
-	task_t oldTask; /* obtener la tarea que se esta corriendo */
-	task_t newTask; /* obtener la nueva tarea segun el scheduler */
+	task_t* oldTask = Task.getCurrentTask(); /* Obtain currently running task */
+	task_t* newTask; /* Obtain next task according to scheduler */
 	
-	//if(oldTask->tid != newTask->tid)
-	//{
+	if(Task.getTID(*oldTask) != Task.getTID(*newTask))
+	{
 		/* bajar las pages de la vieja task */
 		//_task_save_state_();
 		//_task_load_state_(newTask->stack);
 		
 		/* subir las pages de la nueva task */
-//	}
+	}
 	
 	return;
 }
 
-task_t _task_getTaskById(int tid) {
+struct task_t _task_getTaskById(int tid)
+{
 	int i;
 	
 	//if(tid == 0)
@@ -173,12 +184,27 @@ task_t _task_getTaskById(int tid) {
 		/* return idle process */
 	//}
 	
-	/*for( i = 0; i < NUM_TASKS; i++)
+	for( i = 0; i < NUM_TASKS; i++)
 	{
-		if(system_t->tasks[i]->tid == tid)
+		if(System.tasks[i].tid == tid)
 		{
-			return system_t->tasks[i];
+			return System.tasks[i];
 		}
-	}*/
+	}
 
 }
+
+task_t* _task_getCurrentTask()
+{
+	return &System.task;
+}
+
+
+static int Idle (void)
+{
+	while(1)
+	{
+		;
+	}
+}
+
