@@ -368,18 +368,18 @@ _newStack:
 	pushfd					; Push flags
 	push	ebp
 	mov		ebp, esp
-	mov 	eax, [ebp+16]	; Recover sp
+	mov		eax, [ebp+16]	; Recover sp
 	mov		esp, eax		; Stack to use
-	mov 	eax, [ebp+12]   ; Task to execute
-	mov 	edx, [ebp+20]	; Task to end process
-	push 	edx				; Push of new ret
+	mov		eax, [ebp+12]   ; Task to execute
+	mov		edx, [ebp+20]	; Task to end process
+	push	edx				; Push of new ret
 	mov		ecx, 512		; Set bit for enabling interruptions
 	push	ecx				; Push flags (just for enabling int)
-	push 	cs				; For iret
-	push 	eax
+	push	cs				; For iret
+	push	eax
 	pusha					; Remaining registers
-	mov 	eax, esp		; Return new esp
-	mov 	esp, ebp		; Restore original esp
+	mov		eax, esp		; Return new esp
+	mov		esp, ebp		; Restore original esp
 	pop		ebp    			; Restore flags and ebp
 	popfd
 	retn
