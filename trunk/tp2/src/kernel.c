@@ -59,6 +59,7 @@ long int _sys_getTicks(system_t sys) {
     return System.ticks;
 }
 
+
 /***********************************************
 ** Kernel Exception routines:
 ************************************************/

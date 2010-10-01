@@ -1,7 +1,7 @@
 #ifndef _MEM_H_
 #define _MEM_H_
 
-#include "task.h"
+#include "klib.h"
 
 /* Pages of 4KB */
 #define PAGESIZE 0x1000
