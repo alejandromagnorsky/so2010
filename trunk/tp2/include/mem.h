@@ -31,16 +31,32 @@ typedef pentry_t * ptbl_t;
 /* NOT PRESENT, READ/WRITE AND SUPERVISOR BIT */
 #define NP_RW_SV 0x06
 
+#define ISPRESENT(X) ((X) & 0x01)
+#define PRESENT 0x01
+
+#define GETDIRENTRY(X) (((X) & 0xFFC00000)>>22)
+#define GETTBLENTRY(X) (((X) & 0x003FF000)>>12)
+#define GETPGOFFSET(X) ((X) & 0x00000FFF)
+
+#define GETADDRESS(X) ((X) >> 12)
+
+
+enum {
+	NO_ERRORS,
+	ERROR_ILLEGALPAGE
+};
+
 /* Creates the page directory with the firsts 4MB using Identity Mapping.
  * Fill the Page directory with the Kernel Table.
  * And sets the CR3 registry.
  * */
 void _startPaging();
 
-void _pageUp();
-void _pageDown();
+int _pageUp(void * pg);
+int _pageDown(void * pg);
 
-
+void* sys_malloc(size_t size);
+void sys_free(void *pointer);
 
 /* The following functions take a pointer to a Page Directory Entry, and fill
 *   the structure with the given information 
