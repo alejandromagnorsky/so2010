@@ -254,7 +254,6 @@ kmain()
 }
 
 shellloop(){
-
   	while(1)
         {
 		    shell();

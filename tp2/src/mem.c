@@ -6,13 +6,15 @@ void _setCR3();
 void _enablePaging();
 void _setEntry(pentry_t * entry, int address);
 address_t _getFreePage();
-int checkPageStatus(address_t);
-void setPageUsed(address_t);
-void setPageUnused(address_t);
+int _checkPageStatus(address_t address);
+void _setPageUsed(address_t address);
+void _setPageUnused(address_t address);
 
 
 /* Directory Table */
 static ptbl_t directoryTbl;
+
+static ptbl_t tablesArea = (ptbl_t) KERNEL_AREA;
 
 /* Free pages bitmap */
 static char * pageMap;
@@ -77,12 +79,35 @@ void _pd_createDirectoryTbl(){
 	lastPageDelivered = RESERVED_MEM - PAGESIZE;
 }
 
-void _pageUp(){
-	
+int _pageUp(void * pg){
+	address_t address = *((address_t *) pg);
+	if(!(address % PAGESIZE)){
+		return ERROR_ILLEGALPAGE;
+	}
+	pentry_t tblEntry = directoryTbl[GETDIRENTRY(address)];
+	ptbl_t tbl = (ptbl_t) tablesArea[GETADDRESS(tblEntry)];
+	int j = 0;
+	if(ISPRESENT(tblEntry)){
+		tbl[GETTBLENTRY(address)] |= PRESENT;
+		return NO_ERRORS;
+	}else{
+		tblEntry |= PRESENT;
+		for(j=0; j<NENTRIES; j++){
+			_setEntry(&tbl[j], address);
+			address += PAGESIZE;
+		}
+	}
 }
 
-void _pageDown(){
-	
+int _pageDown(void * pg){
+	address_t address = *((address_t *) pg);
+	pentry_t tblEntry = directoryTbl[GETDIRENTRY(address)];
+	ptbl_t tbl = (ptbl_t) tablesArea[GETADDRESS(tblEntry)];	
+	if(ISPRESENT(tblEntry)){
+		tbl[GETTBLENTRY(address)] ^= PRESENT;
+		return NO_ERRORS;
+	}
+	return ERROR_ILLEGALPAGE;
 }
 
 void _setCR3(){
@@ -102,6 +127,7 @@ address_t _getFreePage(){
 	for(i = 0; i < NPAGES; i++){
 		if(checkPageStatus(possiblePage)){
 			setPageUsed(possiblePage);
+			_pageUp(&possiblePage);
 			return lastPageDelivered = possiblePage;
 		}
 		possiblePage = (lastPageDelivered + PAGESIZE) % MEMSIZE_BYTE;
@@ -109,26 +135,42 @@ address_t _getFreePage(){
 	return NULL;
 }
 
+int _setFreePage(void * pg){
+	address_t address = *((address_t *) pg);
+	if(!(address % PAGESIZE)){
+		return ERROR_ILLEGALPAGE;
+	}
+	_setPageUnused(address);
+}
+
 void* _reqpage(task_t task){
 	return (void *) _getFreePage();
 }
 
-int checkPageStatus(address_t address){
+int _checkPageStatus(address_t address){
 	int nbyte = address / 8;
 	int nbit = address % 8;
 	char currByte = pageMap[nbyte];
 	return (currByte >> nbit) & 1;
 }
 
-void setPageUsed(address_t address){
+void _setPageUsed(address_t address){
 	int nbyte = address / 8;
 	int nbit = address % 8;
 	pageMap[nbyte] |= (1 << nbit);
 }
 
-void setPageUnused(address_t address){
+void _setPageUnused(address_t address){
 	int nbyte = address / 8;
 	int nbit = address % 8;
 	pageMap[nbyte] &= ~(1 << nbit);
 }
 
+
+void* sys_malloc(size_t size){
+	return (void*) _getFreePage();
+}
+
+void sys_free(void *pointer){
+	_setFreePage(pointer);
+}
