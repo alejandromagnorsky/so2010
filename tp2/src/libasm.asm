@@ -13,7 +13,7 @@ GLOBAL	_task_load_state_, _task_save_state_
 GLOBAL	_newStack, _scheduler
 GLOBAL  _debug
 
-EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_getNextTask
+EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_getNextTask, _saveESP
 
 SECTION .text
 
@@ -341,17 +341,18 @@ isr_common_stub:
 
 
 _task_save_state_:
-;	mov		eax, [ebp]
-;	push	eax
 	pushad
 	pushfd
+	mov eax, esp
+	push eax
+	call	_saveESP
+	pop eax
 	ret
 
 _task_load_state_:
 	mov		esp, [ebp + 8]
 	popfd
 	popad
-;	pop		eip
 	ret
 	
 _scheduler:						; Changing a process

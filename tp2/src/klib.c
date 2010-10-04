@@ -166,9 +166,9 @@ int _task_getTID (task_t task) {
 
 /* Creates a new task. It receives the task's name, function to execute, 
 	priority and status */
-void _task_createNewTask (char* name, int (*task) (void), int priority, int status)
+int _task_createNewTask (char* name, int (*task) (void), int priority, int status)
 {
-	int i;
+	int i, stat;
 	void* stack;
 	
 	_Cli();
@@ -195,10 +195,19 @@ void _task_createNewTask (char* name, int (*task) (void), int priority, int stat
 	System.tasks[i].stackSize = PAGE_SIZE;
 	System.tasks[i].stackStart = ((int)stack) + System.tasks[i].stackSize - 1;
 	
-	// [TODO]  pages up
+	stat = _pageUp(System.tasks[i].stack);
+	// [TODO] check errors
+	/*if(stat != NO_ERRORS)
+	{
+
+	}*/
 	System.tasks[i].esp = _newStack (task, System.tasks[i].stackStart, cleaner ); 
-	// [TODO]  pages down
+	stat = _pageDown(System.tasks[i].stack);
+	// [TODO] check errors
+	/*if(stat != NO_ERRORS)
+	{
 	
+	}*/
 	_Sti();
 }
 
@@ -208,7 +217,7 @@ void _task_killTask(task_t* task)
 {
 	_Cli();
 	
-	// [TODO] free task's memory
+	sys_free((*task)->stack);
 	
 	(*task)->free = 1;
 	(*task)->tname[0] = '\0';
@@ -220,17 +229,28 @@ void _task_killTask(task_t* task)
 	new one, otherwise it keeps running the current task */
 void _task_getNextTask()
 {
+	int stat;
 	
 	task_t* oldTask = Task.getCurrentTask(); /* Obtain currently running task */
 	task_t* newTask; /* Obtain next task according to scheduler */
 	
 	if(Task.getTID(*oldTask) != Task.getTID(*newTask))
 	{
-		/* [TODO] bajar las pages de la vieja task */
+		stat = _pageDown((*oldTask)->stack);
+		// [TODO] check errors
+		/*if(stat != NO_ERRORS)
+		{
+		
+		}*/
 		_task_save_state_();
 		_task_load_state_((*newTask)->esp);
 		
-		/* [TODO] subir las pages de la nueva task */
+		stat = _pageUp((*newTask)->stack);
+		// [TODO] check errors
+		/*if(stat != NO_ERRORS)
+		{
+		
+		}*/
 
 		System.task = newTask;
 	}
@@ -266,7 +286,7 @@ task_t* _task_getCurrentTask()
 }
 
 /* Idle task */
-static int Idle (void)
+int Idle (void)
 {
 	while(1)
 	{
@@ -302,7 +322,7 @@ static void cleaner(void)
 void _task_setupScheduler ()
 {
 	void* idleStack;
-	int i;
+	int i, stat;
 
 	/* Tasks array initialized with free places */
 
@@ -319,27 +339,45 @@ void _task_setupScheduler ()
 	System.idle->free = 0;
 	
 	// [TODO] which is the idle's task priority?
-	//System.idle->tpriority = ???;
+	System.idle->tpriority = PRIORITY_LOW;
 	
 	// [TODO] which is the idle's task rank?
-	//System.idle->trank = ???;
+	System.idle->trank = RANK_NORMAL;
 	
-	// [TODO] idle's task status should be running?
-	//System.idle->tstatus = ???;
+	// [TODO] idle's task status should be running or ready?
+	System.idle->tstatus = STATUS_READY;
 
 	/* Stack memory reserved and task stack created */
 
-	//[TODO] check error of this function
-	//idleStack = _reqpage(Idle);
-	//System.idle->stack = idleStack;
+	// [TODO] PAGE_SIZE should be PAGESIZE
+	idleStack = (void*)sys_malloc(PAGE_SIZE);
+	System.idle->stack = idleStack;
 	System.idle->stackSize = PAGE_SIZE;
 	System.idle->stackStart =  ((int)idleStack) + System.idle->stackSize - 1;
 
-	// [TODO]  pages up
+	stat = _pageUp(idleStack);
+	// [TODO] check errors
+	/*if(stat != NO_ERRORS)
+	{
+	
+	}*/
 	System.tasks[i].esp = _newStack (Idle, System.idle->stackStart, cleaner ); 
-	// [TODO]  pages down
+	stat = _pageDown(idleStack);
+	// [TODO] check errors
+	/*if(stat != NO_ERRORS)
+	{
+	
+	}*/
 	
 	return;
 }
 
+void _saveESP(int esp)
+{
+	task_t* task = Task.getCurrentTask();
+	
+	(*task)->esp = esp;
+	
+	return;
+}
 
