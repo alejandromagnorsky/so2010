@@ -237,7 +237,7 @@ struct TaskNamespace {
     int (*getRank)    (task_t);
     int (*getStatus)   (task_t);
     int (*getTID) (task_t task);
-    //void (*createNewTask) (char*, ????, int, int);
+    //int (*createNewTask) (char*, ????, int, int);
     void (*killTask) (task_t* task);
     void (*getNextTask) ();
     struct task_t (*getTaskById) (int);
@@ -257,7 +257,7 @@ int _task_getPriority (task_t);
 int _task_getRank    (task_t);
 int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
-void _task_createNewTask (char* name, int (*task) (void), int priority, int status);
+int _task_createNewTask (char* name, int (*task) (void), int priority, int status);
 void _task_killTask(task_t* task);
 void _task_getNextTask 	();
 struct task_t _task_getTaskById (int tid);
@@ -265,5 +265,8 @@ task_t* _task_getCurrentTask();
 int _task_getNewTID();
 static void cleaner (void);
 void _task_setupScheduler ();
+
+int Idle (void);
+void _saveESP(int esp);
 
 #endif
