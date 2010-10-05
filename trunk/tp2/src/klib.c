@@ -105,7 +105,6 @@ int _sys_exec(int (*f) (char*), char* args) {
 
 
 struct TaskNamespace Task = {
-    (void*) 0,
     _task_setPriority,
     _task_setRank,
     _task_setStatus,
@@ -113,13 +112,13 @@ struct TaskNamespace Task = {
     _task_getRank,
     _task_getStatus,
     _task_getTID,
-    //_task_createNewTask,
-    _task_killTask,
-    _task_getNextTask,
-    _task_getTaskById,
-    _task_getCurrentTask,
+    _task_new,
+    _task_kill,
+    _task_getById,
+    _task_getCurrent,
     _task_getNewTID,
-    _task_setupScheduler
+    _task_setupScheduler,
+    _task_scheduler
 };
 
 
@@ -179,7 +178,7 @@ int _task_new (task_t task, char* name, program_t program, int rank, int priorit
     /* Create a new task, given a program and its rank and priority */
     int i;
     char found;
-    	
+
 	_Cli();
 
     /* Fill out basic task information */
@@ -224,34 +223,26 @@ void _task_kill(task_t task)
 
 /* Checks if the scheduler brings a new task, in that case it changes to the
 	new one, otherwise it keeps running the current task */
-void _task_getNextTask()
+void _task_scheduler()
 {
 	int stat;
-	
-	task_t* oldTask = Task.getCurrentTask(); /* Obtain currently running task */
-	task_t* newTask; /* Obtain next task according to scheduler */
-	
-	if(Task.getTID(*oldTask) != Task.getTID(*newTask))
-	{
-		stat = _pageDown((*oldTask)->stack);
-		// [TODO] check errors
-		/*if(stat != NO_ERRORS)
-		{
-		
-		}*/
-		_task_save_state_();
-		_task_load_state_((*newTask)->esp);
-		
-		stat = _pageUp((*newTask)->stack);
-		// [TODO] check errors
-		/*if(stat != NO_ERRORS)
-		{
-		
-		}*/
+	task_t old, new;
 
-		System.task = newTask;
-	}
+    new = old = _task_getCurrent(); /* Obtain currently running task */
+    
+	/* [TODO] Obtain next task according to scheduler */
 	
+	if(_task_getTID(new) != _task_getTID(old)) {
+    
+		_pageDown(old->stack);
+        
+		_task_save_state_();
+		_task_load_state_(new->esp);
+		
+		_pageUp(new->stack);
+		
+		System.task = new;
+	}
 	
 	return;
 }
@@ -267,7 +258,7 @@ task_t _task_getById(int tid) {
     return found ? &(System.tasks[i]) : NULL;
 }
 
-task_t* _task_getCurrentTask() {
+task_t _task_getCurrent() {
     /* Return a pointer to the currently running task's control block */
 	return System.task;
 }
@@ -278,23 +269,26 @@ int idle (char* line) {
 }
 
 /* Returns an unused tid */
-int _task_getNewTID()
-{
-	return System.nextTID++;
+int _task_getNewTID() {
+	static int tid = 0;
+
+    /* [TODO] fatal error possible here.
+     * There could be overflow/wrapping problems in the long run...
+    */
+    return ++tid;
 }
 
 /* Tasks which finish end their life in this function which "frees" the space
 	in the tasks array and calls the scheduler in order to run a new task */
 static void cleaner(void)
 {
-	task_t* task;
+	task_t task;
 	
 	_Cli();
 	
-	task = Task.getCurrentTask();
+	task = _task_getCurrent();
 	
-	(*task)->tname[0] = '\0';
-	(*task)->free = 1;
+	task->tname[0] = '\0';
 	
 	_Sti();
 	
@@ -304,6 +298,7 @@ static void cleaner(void)
 /* Initializes the scheduler by creating the idle task and start running it */
 void _task_setupScheduler ()
 {
+    task_t idle_task;
 	/*
      * System.tasks array should already be zeroed
      * That is, all the IDs are set to 0, which is considered an empty
@@ -311,16 +306,18 @@ void _task_setupScheduler ()
      */	
 
 	/* What we do need to initialize is the idle task: */
-	_task_new(System->idle, "Idle", idle, RANK_NORMAL, PRIORITY_LOW);
-	
+    idle_task = &( System.tasks[_task_findSlot()] );
+	_task_new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW);
+    _task_setStatus(idle_task, STATUS_WAITING);
+    
 	return;
 }
 
 void _saveESP(int esp)
 {
-	task_t* task = Task.getCurrentTask();
+	task_t task = _task_getCurrent();
 	
-	(*task)->esp = esp;
+	task->esp = esp;
 	
 	return;
 }
