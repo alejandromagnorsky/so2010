@@ -9,47 +9,47 @@ int tickpos = -2;
 ** Global system data structure initialization:
 *************************************************/
 
-struct device_t _sys_kbuffer = { DEVICE_KEYBOARD,        /* Device ID */
-                                      "keyboard",        /* Device name */
-                                      &KeyboardDriver,   /* Device driver */
-                                      &keyBuff,          /* Mem starting addr */
-                                      BUFFER_SIZE,       /* Mem area size */
-                                      
-                                      0,                 /* Current wposition */
-				                      0,                 /* Current rposition */
-                                    };
+struct device_t _sys_kbuffer = { DEVICE_KEYBOARD,  /* Device ID */
+		                        "keyboard",        /* Device name */
+		                        &KeyboardDriver,   /* Device driver */
+		                        &keyBuff,          /* Mem starting addr */
+		                        BUFFER_SIZE,       /* Mem area size */
+		                          
+		                        0,                 /* Current wposition */
+					            0,                 /* Current rposition */
+                            };
 
-struct device_t _sys_screen = {	DEVICE_SCREEN,             /* Device ID */
-										"screen",          /* Device name */
-										&ScreenDriver,     /* Device driver */
-										(void*) 0xb8000,   /* Mem starting addr */
-										BUFFER_SIZE,       /* Mem area size */
-										
-										0,                 /* Current wposition */
-										0,                 /* Current rposition */
-									};
+struct device_t _sys_screen = {	DEVICE_SCREEN,     /* Device ID */
+								"screen",          /* Device name */
+								&ScreenDriver,     /* Device driver */
+								(void*) 0xb8000,   /* Mem starting addr */
+								BUFFER_SIZE,       /* Mem area size */
+						
+								0,                 /* Current wposition */
+								0,                 /* Current rposition */
+							};
 
 
-struct system_t System = {     0,               /* Tick count */
-                                   2,               /* Number of devices */
-                                   {&_sys_screen,
-                                    &_sys_kbuffer },/* Device array */
-                                   0,                /* Active terminal index */
-                                   NULL,	/* Idle task */
-                                   NULL,	/* Currently active task */
-                                   {},		/* Tasks */
-                                   _sys_addTick,
-                                   _sys_getTicks,
-                                   _sys_write,
-                                   _sys_read,
-                                   _sys_seekr,
-                                   _sys_seekw,
-                                   _sys_tellr,
-                                   _sys_tellw,
-                                   _sys_malloc,
-                                   _sys_free,
-                                   _sys_exec
-                               };
+struct system_t System = {     0,					/* Tick count */
+                               2,               	/* Number of devices */
+                               {&_sys_screen,
+                                &_sys_kbuffer },	/* Device array */
+                               0,                	/* Active terminal index */
+                               NULL,				/* Idle task */
+                               NULL,				/* Currently active task */
+                               {},					/* Tasks */
+                               _sys_addTick,
+                               _sys_getTicks,
+                               _sys_write,
+                               _sys_read,
+                               _sys_seekr,
+                               _sys_seekw,
+                               _sys_tellr,
+                               _sys_tellw,
+                               _sys_malloc,
+                               _sys_free,
+                               _sys_exec
+                           };
                                
 //system_t System = &_system_data;
 
@@ -111,12 +111,12 @@ void fault_handler(struct regs *r)
     if (r->int_no < 32)
     {
         printf("%s", exception_messages[r->int_no]);
-        printf(" Exception. Goodbye!\n");
+        printf(" Exception.\n");
     }
     _Sti();
-    shellloop();
+    //shellloop();
+	while(1);
 }
-
 
 /************************************************
 ** Kernel interrupt routines:
@@ -244,7 +244,7 @@ kmain()
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
-//    Paging.start();
+    Paging.start();
 
 //	Task.setupScheduler();
     _task_setupScheduler();
@@ -256,10 +256,11 @@ kmain()
 }
 
 shellloop(){
+	System.malloc(10);
   	while(1)
-        {
-		    shell();
-        }
+	{
+	    shell();
+	}
 }
 
 void initializeIDT(){

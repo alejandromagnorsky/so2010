@@ -4,16 +4,14 @@
 #include "klib.h"
 
 /* Pages of 4KB */
-#define PAGESIZE 0x1000
+#define PAGESIZE 4096
 #define NENTRIES 1024
 
 typedef unsigned int pentry_t;
 typedef unsigned int address_t;
 typedef pentry_t * ptbl_t;
 
-#define MEMSIZE_GB 4ul
-#define MEMSIZE_BYTE MEMSIZE_GB * 1024ul * 1024ul * 1024ul
-#define NPAGES ((MEMSIZE_BYTE) / PAGESIZE)
+#define NPAGES 1048576
 #define BITMAP_BYTESIZE (NPAGES / 8)
 #define BITMAP_PAGESIZE (BITMAP_BYTESIZE / PAGESIZE)
 
@@ -22,7 +20,7 @@ typedef pentry_t * ptbl_t;
 
 /* The firsts 4MB are for the kernel, the page directory and the kernel table.*/
 /* The last page of the first 4MB will be the page directory */
-#define KERNEL_AREA RESERVED_MEM - ((address_t) 0x400000)
+#define KERNEL_AREA (RESERVED_MEM - ((address_t) 0x400000))
 
 #define SETBIT(X, P, V) (V ? ((1 << (P)) | (X)) : (~(1 << (P)) & X))
 
@@ -36,9 +34,9 @@ typedef pentry_t * ptbl_t;
 
 #define GETDIRENTRY(X) (((X) & 0xFFC00000)>>22)
 #define GETTBLENTRY(X) (((X) & 0x003FF000)>>12)
-#define GETPGOFFSET(X) ((X) & 0x00000FFF)
+#define GETPGOFFSET(X) ( (X) & 0x00000FFF)
 
-#define GETADDRESS(X) ((X) >> 12)
+#define GETADDRESS(X) ((X) & 0xFFFFF000)
 
 
 enum {
