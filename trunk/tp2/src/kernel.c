@@ -248,7 +248,7 @@ kmain()
 //    Paging.start();
 
 //	Task.setupScheduler();
-_task_setupScheduler();
+    _task_setupScheduler();
 
 	_Sti();
 
