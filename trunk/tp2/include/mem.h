@@ -55,8 +55,8 @@ void _startPaging();
 int _pageUp(void * pg);
 int _pageDown(void * pg);
 
-void* sys_malloc(size_t size);
-void sys_free(void *pointer);
+void* _sys_malloc(size_t size);
+void _sys_free(void *pointer);
 
 /* The following functions take a pointer to a Page Directory Entry, and fill
 *   the structure with the given information 

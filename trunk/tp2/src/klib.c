@@ -217,7 +217,7 @@ void _task_killTask(task_t* task)
 {
 	_Cli();
 	
-	sys_free((*task)->stack);
+	_sys_free((*task)->stack);
 	
 	(*task)->free = 1;
 	(*task)->tname[0] = '\0';
@@ -350,7 +350,7 @@ void _task_setupScheduler ()
 	/* Stack memory reserved and task stack created */
 
 	// [TODO] PAGE_SIZE should be PAGESIZE
-	idleStack = (void*)sys_malloc(PAGE_SIZE);
+	idleStack = (void*) _sys_malloc(PAGE_SIZE);
 	System.idle->stack = idleStack;
 	System.idle->stackSize = PAGE_SIZE;
 	System.idle->stackStart =  ((int)idleStack) + System.idle->stackSize - 1;
