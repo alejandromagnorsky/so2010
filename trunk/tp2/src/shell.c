@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define SHELL_PROMPT "SuciOS$ "
+#define SHELL_PROMPT "SuciOS_tty%d$ "
 
 #define NUM_COMMANDS 7
 
@@ -19,14 +19,14 @@ static struct {
     char* description;
     int (*function) (char*);
 } commands[NUM_COMMANDS] =  {
-                 {"divzero", "Raise a zero divide exception", divideByZero},
-                 {"cpuid", "Display CPU information", detect_cpu},
-                 {"help", "Display system commands", help},
-		 {"grprot", "Raise a general protection Exception", gralprotection},
-		 {"echo", "Prints string", echo},
-		 {"startx", "Start graphic OS", startx},
-         {"alloc", "Test memory allocation", alloc}
-                 };
+			 {"divzero", "Raise a zero divide exception", divideByZero},
+			 {"cpuid", "Display CPU information", detect_cpu},
+			 {"help", "Display system commands", help},
+			 {"grprot", "Raise a general protection Exception", gralprotection},
+			 {"echo", "Prints string", echo},
+			 {"startx", "Start graphic OS", startx},
+			 {"alloc", "Test memory allocation", alloc}
+		};
 
 
 void shell() {
@@ -35,7 +35,7 @@ void shell() {
     int exit_status,i;
     
     if (show_prompt)
-        printf(SHELL_PROMPT);
+        printf(SHELL_PROMPT, 1);
 
 	switch(a = getchar()) {
 	

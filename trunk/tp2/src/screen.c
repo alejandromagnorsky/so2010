@@ -22,7 +22,7 @@ size_t video_write(device_t dev, void* from, size_t nbytes){
 			break;
 		case '\n':
 			wpos = dev->wpos;
-			if(wpos >= 3840){
+			if(wpos >= LAST_ROW){
 				scroll(dev);
 			}else{
 				colpos = wpos % 160;
@@ -39,7 +39,7 @@ size_t video_write(device_t dev, void* from, size_t nbytes){
 			}
 			break;
 		default:
-			if(dev->wpos == 4000){
+			if(dev->wpos == VIDEO_SIZE){
 				scroll(dev);
 			}
 			*((char*)dev->addr + dev->wpos++) = ascii;
@@ -79,8 +79,8 @@ void scroll(device_t dev){
 		_memcpy(dev->addr + i*160 + 160, dev->addr + i*160, 160);
 	}
 	
-	dev->wpos = 3840;
-	while(dev->wpos < 4000)
+	dev->wpos = LAST_ROW;
+	while(dev->wpos < VIDEO_SIZE)
 		System.write(dev->id, &zero, 1);
-	dev->wpos = 3840;
+	dev->wpos = LAST_ROW;
 }
