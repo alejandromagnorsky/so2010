@@ -140,10 +140,9 @@ struct system_t {
 
     int         atty;       /* Currently active terminal device index. */
     
-    task_t		idle;	/* Idle task */
-    task_t*		task;	/* Running task */
-    struct task_t   tasks[NUM_TASKS];
-    int		nextTID; /* Next available tid */
+    task_t		idle;	              /* Idle task */
+    task_t		task;	              /* Running task */
+    struct task_t   tasks[NUM_TASKS]; /* Static task array */
     
     void (*addTick) ();
     long int (*getTicks) ();
@@ -229,9 +228,7 @@ int _sys_exec(int (*f) (char*), char* args);
 
 
 
-struct TaskNamespace {
-    task_t (*new) (int tid, int trank, int tpriority);
-    
+struct TaskNamespace {    
     void (*setPriority) (task_t, int);
     void (*setRank)    (task_t, int);
     void (*setStatus)   (task_t, int);
@@ -240,13 +237,16 @@ struct TaskNamespace {
     int (*getRank)    (task_t);
     int (*getStatus)   (task_t);
     int (*getTID) (task_t task);
-    //int (*createNewTask) (char*, ????, int, int);
-    void (*killTask) (task_t* task);
-    void (*getNextTask) ();
-    struct task_t (*getTaskById) (int);
-    task_t* (*getCurrentTask) ();
+    
+    int (*new) (task_t, char*, program_t, int, int);
+    void (*kill) (task_t task);
+
+    task_t (*getById) (int);
+    task_t (*getCurrent) ();
+
     int (*getNewTID) ();
     void (*setupScheduler) ();
+    void (*scheduler) ();
 };
 
 void _task_saveState   (task_t);
@@ -260,14 +260,17 @@ int _task_getPriority (task_t);
 int _task_getRank    (task_t);
 int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
-int _task_createNewTask (char* name, int (*task) (void), int priority, int status);
-void _task_killTask(task_t* task);
-void _task_getNextTask 	();
-struct task_t _task_getTaskById (int tid);
-task_t* _task_getCurrentTask();
+
+int _task_new (task_t slot, char* name, program_t, int rank, int priority);
+void _task_kill(task_t task);
+
+task_t _task_getById (int tid);
+task_t _task_getCurrent();
+
 int _task_getNewTID();
 static void cleaner (void);
 void _task_setupScheduler ();
+void _task_scheduler();
 
 int Idle (void);
 void _saveESP(int esp);

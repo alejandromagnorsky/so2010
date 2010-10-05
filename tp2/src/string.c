@@ -19,7 +19,7 @@ void strcpy(char *s, char* t) {
     while(*t++ = *s++);
 }
 
-void memzero(void *mem, size_t size) {
+void memzero(void *mem, unsigned int size) {
     char *pos, *end;
     pos = (char*) mem;
     end = (char*) mem + size;
