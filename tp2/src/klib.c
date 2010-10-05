@@ -163,29 +163,35 @@ int _task_getTID (task_t task) {
     return task->tid;
 }
 
-
-/* Creates a new task. It receives the task's name, function to execute, 
-	priority and status */
-int _task_createNewTask (char* name, int (*task) (void), int priority, int status)
-{
-	int i, stat;
-	void* stack;
-	
+int _task_new (char* name, program_t program, int rank, int priority) {
+    /* Create a new task, given a program and a rank+priority */
+    int i;
+    char found;
+    task_t task = NULL;
+    	
 	_Cli();
 	
-	/* Looking for a free place */
-	for (i=0; i<NUM_TASKS; i++)
-	{
-		if (System.tasks[i].free == 1)
-		{
-			break;
-		}
-	}
-	
-	strcpy(name, System.tasks[i].tname);
-	System.tasks[i].tid = Task.getNewTID();
-	System.tasks[i].tpriority = priority;
-	System.tasks[i].tstatus = status;
+	/* Try and find a slot for the task: */
+	for (i = 0; i < NUM_TASKS; i++)
+        if ( found = (System.tasks[i].tid == 0) ) break;
+
+    if (!found)
+        return 0;
+
+    task = &(System.tasks[i]);
+    
+	strcpy(name, task->tname);
+	task->tid = Task.getNewTID();
+	task->tpriority = priority;
+	task->trank = rank;
+
+    task->stack_size = DEFAULT_STACK_SIZE;
+    
+    task->stack_start = task->stack =
+        System.malloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE - 1;
+    
+
+    task->tstatus = STATUS_READY;
 	
 	/* Alloc memory for stack */
 	// [TODO] check error in following line
@@ -353,7 +359,7 @@ void _task_setupScheduler ()
 	idleStack = (void*) _sys_malloc(PAGE_SIZE);
 	System.idle->stack = idleStack;
 	System.idle->stackSize = PAGE_SIZE;
-	System.idle->stackStart =  ((int)idleStack) + System.idle->stackSize - 1;
+	System.idle->stackStart =  idleStack + System.idle->stackSize - 1;
 
 	stat = _pageUp(idleStack);
 	// [TODO] check errors

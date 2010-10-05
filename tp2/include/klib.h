@@ -23,6 +23,7 @@
 #define	MAX_TASK_NAME	20
 
 #define PAGE_SIZE 0x1000
+#define DEFAULT_STACK_SIZE 0x1000
 
 enum {
     RANK_SERVER,
@@ -43,7 +44,7 @@ enum {
     STATUS_RUNNING /* ? */
 };
 
-typedef int (*program) (char*);
+typedef int (*program_t) (char*);
 
 enum {
     DEVICE_START,
@@ -63,8 +64,8 @@ struct task_t {
     int tstatus;
     
     void* stack;
-    int stackStart;
-    int stackSize;
+    void* stack_start;
+    int stack_size;
     int esp;
         
     struct {
