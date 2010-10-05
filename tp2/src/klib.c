@@ -163,70 +163,61 @@ int _task_getTID (task_t task) {
     return task->tid;
 }
 
-int _task_new (char* name, program_t program, int rank, int priority) {
-    /* Create a new task, given a program and a rank+priority */
+int _task_findSlot() {
     int i;
     char found;
-    task_t task = NULL;
-    	
-	_Cli();
-	
-	/* Try and find a slot for the task: */
+    
+    /* Try and find a slot in the tasks array: */
 	for (i = 0; i < NUM_TASKS; i++)
         if ( found = (System.tasks[i].tid == 0) ) break;
 
-    if (!found)
-        return 0;
+    return (found ? i : 0);
 
-    task = &(System.tasks[i]);
+}
+
+int _task_new (task_t task, char* name, program_t program, int rank, int priority) {
+    /* Create a new task, given a program and its rank and priority */
+    int i;
+    char found;
+    	
+	_Cli();
+
+    /* Fill out basic task information */
     
 	strcpy(name, task->tname);
 	task->tid = Task.getNewTID();
 	task->tpriority = priority;
 	task->trank = rank;
-
     task->stack_size = DEFAULT_STACK_SIZE;
-    
+
+    /* Reserve memory for the stack (grows downwards in x86): */
     task->stack_start = task->stack =
         System.malloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE - 1;
     
-
     task->tstatus = STATUS_READY;
 	
-	/* Alloc memory for stack */
-	// [TODO] check error in following line
-	//stack = _reqpage(System.tasks[i]);
-	System.tasks[i].stack = stack;
-	// [TODO] PAGE_SIZE should be PAGESIZE
-	System.tasks[i].stackSize = PAGE_SIZE;
-	System.tasks[i].stackStart = ((int)stack) + System.tasks[i].stackSize - 1;
-	
-	stat = _pageUp(System.tasks[i].stack);
-	// [TODO] check errors
-	/*if(stat != NO_ERRORS)
-	{
+	_pageUp(task->stack);
 
-	}*/
-	System.tasks[i].esp = _newStack (task, System.tasks[i].stackStart, cleaner ); 
-	stat = _pageDown(System.tasks[i].stack);
-	// [TODO] check errors
-	/*if(stat != NO_ERRORS)
-	{
-	
-	}*/
+    /* No idea why we need another esp variable. [TODO] ask Jime */
+    task->esp = _newStack (program, task->stack_start, cleaner); 
+
+    _pageDown(task->stack);
 	_Sti();
+
+    return task->tid;
 }
 
 /* Kills the given task */
 // [TODO] check to awake parent and kill childs
-void _task_killTask(task_t* task)
+void _task_kill(task_t task)
 {
 	_Cli();
-	
-	_sys_free((*task)->stack);
+
+    task->tstatus = STATUS_DEAD;
+	/*_sys_free((*task)->stack);
 	
 	(*task)->free = 1;
-	(*task)->tname[0] = '\0';
+	(*task)->tname[0] = '\0'; */
 	
 	_Sti();
 }
@@ -265,39 +256,25 @@ void _task_getNextTask()
 	return;
 }
 
-/* Returns the task with the given tid */
-struct task_t _task_getTaskById(int tid)
-{
+task_t _task_getById(int tid) {
+    /* Find a task by TID and return a pointer to its control block */
 	int i;
+    char found;
 	
-	/*if(tid == 0)
-	{
-		return System.idle;
-	}*/
-	
-	for( i = 0; i < NUM_TASKS; i++)
-	{
-		if(System.tasks[i].tid == tid)
-		{
-			return System.tasks[i];
-		}
-	}
+	for(i = 0; i < NUM_TASKS; i++)
+        if (found = (System.tasks[i].tid == tid)) break;
 
+    return found ? &(System.tasks[i]) : NULL;
 }
 
-/* Return the current running task */
-task_t* _task_getCurrentTask()
-{
+task_t* _task_getCurrentTask() {
+    /* Return a pointer to the currently running task's control block */
 	return System.task;
 }
 
 /* Idle task */
-int Idle (void)
-{
-	while(1)
-	{
-		;
-	}
+int idle (char* line) {
+	for(;;);
 }
 
 /* Returns an unused tid */
@@ -327,53 +304,14 @@ static void cleaner(void)
 /* Initializes the scheduler by creating the idle task and start running it */
 void _task_setupScheduler ()
 {
-	void* idleStack;
-	int i, stat;
+	/*
+     * System.tasks array should already be zeroed
+     * That is, all the IDs are set to 0, which is considered an empty
+     * task slot. No extra initialization needed for that.
+     */	
 
-	/* Tasks array initialized with free places */
-
-	for (i=0; i<NUM_TASKS; i++)
-	{
-		System.tasks[i].tid = -1;
-		System.tasks[i].free = 1;
-	}
-
-	/* Idle task is initialized */
-
-	strcpy("Idle", System.idle->tname);
-	System.idle->tid = 0;
-	System.idle->free = 0;
-	
-	// [TODO] which is the idle's task priority?
-	System.idle->tpriority = PRIORITY_LOW;
-	
-	// [TODO] which is the idle's task rank?
-	System.idle->trank = RANK_NORMAL;
-	
-	// [TODO] idle's task status should be running or ready?
-	System.idle->tstatus = STATUS_READY;
-
-	/* Stack memory reserved and task stack created */
-
-	// [TODO] PAGE_SIZE should be PAGESIZE
-	idleStack = (void*) _sys_malloc(PAGE_SIZE);
-	System.idle->stack = idleStack;
-	System.idle->stackSize = PAGE_SIZE;
-	System.idle->stackStart =  idleStack + System.idle->stackSize - 1;
-
-	stat = _pageUp(idleStack);
-	// [TODO] check errors
-	/*if(stat != NO_ERRORS)
-	{
-	
-	}*/
-	System.tasks[i].esp = _newStack (Idle, System.idle->stackStart, cleaner ); 
-	stat = _pageDown(idleStack);
-	// [TODO] check errors
-	/*if(stat != NO_ERRORS)
-	{
-	
-	}*/
+	/* What we do need to initialize is the idle task: */
+	_task_new(System->idle, "Idle", idle, RANK_NORMAL, PRIORITY_LOW);
 	
 	return;
 }
