@@ -205,7 +205,7 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-            ret = ((program) ebx)((char*) ecx);
+            ret = ((program_t) ebx)((char*) ecx);
             MOVTO_EAX(ret);
             break;
      }

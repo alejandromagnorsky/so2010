@@ -18,3 +18,11 @@ void strcpy(char *s, char* t) {
     /* WARNING: JUST AS DANGEROUS AS ITS UNIX COUNTER-PART */
     while(*t++ = *s++);
 }
+
+void memzero(void *mem, size_t size) {
+    char *pos, *end;
+    pos = (char*) mem;
+    end = (char*) mem + size;
+    
+    while (!(*pos = 0) && ++pos < end);
+}
