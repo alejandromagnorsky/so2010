@@ -167,10 +167,10 @@ void _setPageUnused(address_t address){
 }
 
 
-void* sys_malloc(size_t size){
+void* _sys_malloc(size_t size){
 	return (void*) _getFreePage();
 }
 
-void sys_free(void *pointer){
+void _sys_free(void *pointer){
 	_setFreePage(pointer);
 }

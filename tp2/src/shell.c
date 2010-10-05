@@ -2,7 +2,7 @@
 
 #define SHELL_PROMPT "SuciOS$ "
 
-#define NUM_COMMANDS 6
+#define NUM_COMMANDS 7
 
 static struct {
     char line[LINEBUF_LEN];
@@ -24,7 +24,8 @@ static struct {
                  {"help", "Display system commands", help},
 		 {"grprot", "Raise a general protection Exception", gralprotection},
 		 {"echo", "Prints string", echo},
-		 {"startx", "Start graphic OS", startx}
+		 {"startx", "Start graphic OS", startx},
+         {"alloc", "Test memory allocation", alloc}
                  };
 
 
@@ -141,4 +142,31 @@ int startx(char * line){
 	printf("\t800TB of free space in hard disk.\n");
 	printf("\n");
 	return 0;
+}
+
+int alloc(char* line) {
+    char* mem;
+    
+    printf("Attempting malloc...");
+    mem = (char*) System.malloc(1024);
+
+    printf("ok.\nAttempting access at 0 bytes... ");
+    mem[0] = 'a';
+    
+    if (mem[0] != 'a') { /* Why on Earth would this happen? */
+        printf("failed.\n");
+        return 1;
+    }
+    
+    printf("ok.\nAttempting access at PAGESIZE-1 bytes... ");
+    mem[PAGESIZE - 1] = 'b';
+
+    if (mem[PAGESIZE - 1] != 'b') {
+        printf("failed.\n");
+        return 1;
+    }
+        
+    printf("ok.\nAttempting to generate page fault... ");
+    mem[4 * PAGESIZE] = 'a';
+    printf("no fault?\n");  
 }

@@ -47,6 +47,8 @@ struct system_t System = {     0,               /* Tick count */
                                    _sys_seekw,
                                    _sys_tellr,
                                    _sys_tellw,
+                                   _sys_malloc,
+                                   _sys_free,
                                    _sys_exec
                                };
                                

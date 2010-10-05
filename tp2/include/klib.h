@@ -153,6 +153,8 @@ struct system_t {
     size_t (*seekw) (int devcode, int offset, int from);
     size_t (*tellr) (int devcode);
     size_t (*tellw) (int devcode);
+    void* (*malloc) (size_t size);
+    void (*free) ();
     int    (*exec)  (int (*f) (char*), char* args);
 };
 

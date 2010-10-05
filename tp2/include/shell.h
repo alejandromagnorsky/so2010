@@ -16,11 +16,12 @@ void parse_command();
 int run_command();
 void clearCommand();
 
-int divideByZero(char* line);
-int help(char* line);
-int startx(char * line);
-int clear(char * line);
-int echo(char * );
+int divideByZero(char*);
+int help(char*);
+int startx(char*);
+int clear(char*);
+int echo(char*);
+int alloc(char*);
 
 extern struct system_t System;
 #endif
