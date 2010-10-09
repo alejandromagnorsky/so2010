@@ -13,7 +13,7 @@ GLOBAL	_task_load_state_, _task_save_state_
 GLOBAL	_newStack, _scheduler
 GLOBAL  _debug
 
-EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_getNextTask, _saveESP
+EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_scheduler, _saveESP
 
 SECTION .text
 
@@ -229,7 +229,7 @@ _int_20_hand:				; Handler de INT 20 ( Timer tick)
 	call	int_20                 
 	mov		al,20h			; Envio de EOI generico al PIC;
 	out		20h,al
-	;call	_task_getNextTask
+	;call	_task_scheduler
 	popa                            
 	pop		es
 	pop		ds

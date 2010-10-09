@@ -38,6 +38,8 @@ struct system_t System = {     0,					/* Tick count */
                                NULL,				/* Idle task */
                                NULL,				/* Currently active task */
                                {},					/* Tasks */
+                               {0},					/* Last 100 tasks */
+                               0,					/* Last 100 tasks counter */
                                _sys_addTick,
                                _sys_getTicks,
                                _sys_write,
