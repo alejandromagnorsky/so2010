@@ -25,6 +25,8 @@
 #define PAGE_SIZE 0x1000
 #define DEFAULT_STACK_SIZE 0x1000
 
+#define LASTS_QUANT 100
+
 enum {
     RANK_SERVER,
     RANK_NORMAL
@@ -74,7 +76,6 @@ struct task_t {
         int rpos;
     } odevs[10];
     
-    int free; 
     
 };
 
@@ -143,6 +144,9 @@ struct system_t {
     task_t		idle;	              /* Idle task */
     task_t		task;	              /* Running task */
     struct task_t   tasks[NUM_TASKS]; /* Static task array */
+    
+    int			last100[LASTS_QUANT];	/* For top */
+    int			last100Counter;
     
     void (*addTick) ();
     long int (*getTicks) ();
@@ -255,11 +259,13 @@ void _task_loadState   (task_t);
 void _task_setPriority (task_t, int);
 void _task_setRank    (task_t, int);
 void _task_setStatus   (task_t, int);
+int _task_setESP (task_t task, int);
 
 int _task_getPriority (task_t);
 int _task_getRank    (task_t);
 int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
+int _task_getESP (task_t task);
 
 int _task_new (task_t slot, char* name, program_t, int rank, int priority);
 void _task_kill(task_t task);
@@ -274,5 +280,11 @@ void _task_scheduler();
 
 int Idle (void);
 void _saveESP(int esp);
+
+int increment100Counter();
+int processCpuUsage(int tid);
+void getStatusName(char* buffer, task_t task);
+void getRankName(char* buffer, task_t task);
+int top();
 
 #endif

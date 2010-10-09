@@ -145,6 +145,10 @@ void _task_setStatus (task_t task, int tstatus) {
     return;
 }
 
+int _task_setESP (task_t task, int esp) {
+    task->esp = esp;
+}
+
 int _task_getPriority (task_t task) {
     return task->tpriority;
 }
@@ -160,6 +164,10 @@ int _task_getStatus (task_t task)
 
 int _task_getTID (task_t task) {
     return task->tid;
+}
+
+int _task_getESP (task_t task) {
+    return task->esp;
 }
 
 int _task_findSlot() {
@@ -242,7 +250,13 @@ void _task_scheduler()
 		_pageUp(new->stack);
 		
 		System.task = new;
+		
 	}
+	/* saving process in last 100 executed [TODO] this should 
+		be here or inside previous if?*/
+		
+	System.last100[System.last100Counter] = new->tid;
+	increment100Counter();
 	
 	return;
 }
@@ -288,6 +302,7 @@ static void cleaner(void)
 	
 	task = _task_getCurrent();
 	
+	task->tid = 0;
 	task->tname[0] = '\0';
 	
 	_Sti();
@@ -313,6 +328,7 @@ void _task_setupScheduler ()
 	return;
 }
 
+/* Saves the ESP for context changing */
 void _saveESP(int esp)
 {
 	task_t task = _task_getCurrent();
@@ -322,3 +338,90 @@ void _saveESP(int esp)
 	return;
 }
 
+/* Functions for top process */
+int increment100Counter()
+{
+	System.last100Counter++;
+	if(System.last100Counter >= LASTS_QUANT)
+	{
+		System.last100Counter = 0;
+	}
+}
+
+int processCpuUsage(int tid)
+{
+	int i;
+	int count = 0;
+
+	for(i=0; i < LASTS_QUANT; i++)
+	{
+		if(System.last100[i] == tid)
+		{
+			count ++;
+		}
+	}
+
+	return (count*100)/LASTS_QUANT;
+}
+
+void getStatusName(char* buffer, task_t task)
+{
+	if(_task_getStatus(task) == STATUS_RUNNING)
+	{
+		strcpy(buffer, "RUNNING");
+	}	
+	else if(_task_getStatus(task) == STATUS_READY)
+	{
+		strcpy(buffer, "READY");
+	}
+	else if(_task_getStatus(task) == STATUS_WAITING)
+	{
+		strcpy(buffer, "WAITING");
+	}
+	else if(_task_getStatus(task) == STATUS_DEAD)
+	{
+		strcpy(buffer, "DEAD");
+	}
+	return;
+}
+
+void getRankName(char* buffer, task_t task)
+{
+	if(_task_getRank(task) == RANK_SERVER)
+	{
+		strcpy(buffer, "SERVER");
+	}	
+	else if(_task_getRank(task) == RANK_NORMAL)
+	{
+		strcpy(buffer, "NORMAL");
+	}
+	return;
+}
+
+
+int top()
+{
+	printf("Processes and it's CPU percentage of use\n");
+	
+	int i;
+	char status[10];
+	char rank[10];
+	
+	for(i=0; i < NUM_TASKS; i++)
+	{
+		if(System.tasks[i].tid == 0)
+		{
+			getStatusName(status, &(System.tasks[i]));
+			getRankName(rank, &(System.tasks[i]));
+
+			printf("%s [%s], pid: %d, priority: %d, rank: %s, use: %d%%\n",
+				System.tasks[i].tname, status, System.tasks[i].tid, 
+				System.tasks[i].tpriority, rank, 
+				processCpuUsage(System.tasks[i].tid));
+		}
+	}
+	printf ("\n");
+
+	return 0;
+	
+}
