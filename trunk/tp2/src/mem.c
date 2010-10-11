@@ -78,7 +78,7 @@ void _pd_createDirectoryTbl(){
 
 int _pageUp(void * pg){
 	address_t address = (address_t) pg;
-	printf("pgUp_address: %d\n", address);
+	//printf("pgUp_address: %d\n", address);
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;		
 	int i = 0;
 	if(!ISPRESENT(directoryTbl[GETDIRENTRY(address)])){
@@ -94,7 +94,7 @@ int _pageUp(void * pg){
 
 int _pageDown(void * pg){
 	address_t address = (address_t) pg;
-	printf("pgDn_address: %d\n", address);
+	//printf("pgDn_address: %d\n", address);
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
 	int i = 0;
 	tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
@@ -120,7 +120,7 @@ address_t _getFreePage(){
 		if(!_checkPageStatus(possiblePage)){
 			_setPageUsed(possiblePage);
 			_pageUp((void*) possiblePage);
-			printf("FreePage: %d\n", possiblePage);
+			//printf("FreePage: %d\n", possiblePage);
 			return lastPageDelivered = possiblePage;
 		}
 		possiblePage = (possiblePage + PAGESIZE);

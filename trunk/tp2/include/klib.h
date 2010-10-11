@@ -56,7 +56,8 @@ enum {
 
 enum {
     DEVICE_SCREEN = 0,
-    DEVICE_KEYBOARD
+    DEVICE_KEYBOARD,
+	DEVICE_TTY
 };
 
 struct task_t {
@@ -140,7 +141,7 @@ struct system_t {
     device_t    device[KERNEL_DEVICES + USER_DEVICES + NUM_TTYS]; /* Device array */
 
     int         atty;       /* Currently active terminal device index. */
-    
+
     task_t		idle;	              /* Idle task */
     task_t		task;	              /* Running task */
     struct task_t   tasks[NUM_TASKS]; /* Static task array */

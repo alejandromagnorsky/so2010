@@ -68,7 +68,6 @@ struct PagingNamespace {
 	void (*start)();
     pentry_t (*createEntry) (void*);
     void (*togglePresent) (pentry_t*);
-    
 };
 
 #endif

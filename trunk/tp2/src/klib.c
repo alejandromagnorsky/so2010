@@ -3,7 +3,6 @@
 extern struct system_t System;
 
 
-
 /************************************************
 ** System data structure manipulation:
 *************************************************/

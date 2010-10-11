@@ -1,5 +1,26 @@
 #include "../include/screen.h"
 
+
+/***************************************************************
+*k_clear_screen
+*
+* Borra la pantalla en modo texto color.
+****************************************************************/
+
+void k_clear_screen(void * addr) 
+{
+	char *vidmem = (char *) addr;
+	unsigned int i=0;
+	while(i < (VIDEO_SIZE))
+	{
+		vidmem[i]=' ';
+		i++;
+		vidmem[i]=WHITE_TXT;
+		i++;
+	};
+}
+
+
 size_t video_write(device_t dev, void* from, size_t nbytes){
 	size_t wpos;
 	char zero = 0;
@@ -57,7 +78,7 @@ void move_cursor(int position){
 	unsigned short p1 = 0x3D4;
 	unsigned short p2 = 0x3D5;
 
-	unsigned char low= position & 0xFF ;
+	unsigned char low = position & 0xFF ;
 	unsigned char high = position >> 8;
 
 	unsigned char exp1 = 0x0E;
