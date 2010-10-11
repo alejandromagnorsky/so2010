@@ -10,6 +10,8 @@
 #include "shell.h"
 #include "screen.h"
 #include "mem.h"
+#include "tty.h"
+
 
 /********************************** 
 **
@@ -41,6 +43,8 @@ long int _sys_getTicks();
 *************************************************/
 extern struct driver_t KeyboardDriver;
 extern struct driver_t ScreenDriver;
+extern struct driver_t TtyDriver;
 extern struct PagingNamespace Paging;
+extern struct TTYSNamespace TTYS;
 
 #endif

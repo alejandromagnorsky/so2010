@@ -5,6 +5,8 @@ IDTR idtr;				/* IDTR */
 unsigned char keyBuff[BUFFER_SIZE];
 int tickpos = -2;
 
+tty_t ttys[NTTYS];
+
 /************************************************
 ** Global system data structure initialization:
 *************************************************/
@@ -29,12 +31,20 @@ struct device_t _sys_screen = {	DEVICE_SCREEN,     /* Device ID */
 								0,                 /* Current rposition */
 							};
 
+struct device_t _sys_tty = {DEVICE_TTY,
+							"tty",
+							&TtyDriver,
+							};
+
 
 struct system_t System = {     0,					/* Tick count */
-                               2,               	/* Number of devices */
+                               3,               	/* Number of devices */
                                {&_sys_screen,
-                                &_sys_kbuffer },	/* Device array */
+                                &_sys_kbuffer,
+								&_sys_tty},			/* Device array */
+
                                0,                	/* Active terminal index */
+
                                NULL,				/* Idle task */
                                NULL,				/* Currently active task */
                                {},					/* Tasks */
@@ -127,7 +137,6 @@ void fault_handler(struct regs *r)
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
 	System.addTick();
-	
 }
 
 /* Routine for IRQ1: keyboard */
@@ -142,11 +151,29 @@ void int_21(){
 	if(keyPressed->type == PRINTABLE_KEY) {
 		ascii = keyPressed->ascii;
 		System.write(DEVICE_KEYBOARD, &ascii, 1);
-		
 	} else if(keyPressed->type == SPECIAL_KEY) {
-		escapedKey(keyPressed->scan_code);
-	}  
-     
+		switch(keyPressed->scan_code){
+			case F1:
+				System.atty = 0;
+				TTYS.refresh();
+				break;
+			case F2:
+				System.atty = 1;
+				TTYS.refresh();
+				break;
+			case F3:
+				System.atty = 2;
+				TTYS.refresh();					
+				break;
+			case F4:
+				System.atty = 3;
+				TTYS.refresh();
+				break;
+			default:
+				escapedKey(keyPressed->scan_code);
+		}
+	}
+	TTYS.update();
 }
 
 void int_80() {
@@ -224,8 +251,8 @@ kmain()
     int i,num, r;
 
 /* Borra la pantalla. */ 
-	k_clear_screen();
-
+	k_clear_screen((void*) 0xb8000);
+	
 /* Carga IDT */
 	initializeIDT();	
 
@@ -251,14 +278,19 @@ kmain()
 //	Task.setupScheduler();
     _task_setupScheduler();
 
+	TTYS.initialize();
+	TTYS.refresh();
+
+
 	_Sti();
 
 	shellloop();
 
 }
 
+
 shellloop(){
-	System.malloc(10);
+	
   	while(1)
 	{
 	    shell();

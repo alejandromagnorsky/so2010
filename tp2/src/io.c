@@ -59,6 +59,10 @@ size_t _screen_write(int devcode, void* from, size_t nbytes) {
     return _dwrite(System.device[devcode], from, nbytes);
 }
 
+struct driver_t TtyDriver = {
+	_screen_write
+};
+
 /************************************************
 ** Device interface:
 *************************************************/
@@ -120,6 +124,7 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
             dev->wpos++;
             break;
 
+		case DEVICE_TTY:
         case DEVICE_SCREEN:
 			return video_write(dev,from,nbytes);        
         default:
@@ -220,7 +225,10 @@ size_t _dseekr(device_t dev, int offset, int from) {
 void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
-    System.write(DEVICE_SCREEN, ch, 1);
+	System.write(DEVICE_TTY, ch, 1);		//La verdad de la milanesa!
+	ttys[System.atty].status = TTY_WRITTEN;
+	//TTYS.update();
+	System.write(DEVICE_SCREEN, ch, 1);			
 }
 
 void puts(char* str) {

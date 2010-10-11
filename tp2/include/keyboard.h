@@ -4,21 +4,6 @@
 #include "defs.h"
 #include "kernel.h"
 
-enum{
-	OFF,
-	ON
-};
-
-typedef struct{
-	unsigned char shift_status;
-	unsigned char mayus_status;
-	unsigned char num_status;
-	unsigned char scroll_status;
-	unsigned char accent_status;
-	unsigned char escaped;
-}flags_t;
-
-
 struct keyDataInput {
     unsigned char 	type; 
     unsigned char	ascii;

@@ -1,6 +1,8 @@
 #include "../include/keyboard.h"
 
 
+
+
 unsigned char shift_status = 0;
 unsigned char mayus_status = 0;
 unsigned char num_status = 0;
@@ -214,18 +216,6 @@ void updateLeds() {
 escapedKey(unsigned int scan_code){
 	unsigned char ascii;	
 	switch(scan_code) {
-		case F1:
-			printf("F1");
-			break;
-		case F2:
-			printf("F2");
-			break;
-		case F3:
-			printf("F3");
-			break;
-		case F4:
-			printf("F4");
-			break;
 		case F5:
 			printf("F5");
 			break;
