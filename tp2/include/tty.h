@@ -43,10 +43,9 @@ typedef struct {
 	output_t output;
 }tty_t;
 
-
 void _initialize_ttys();
 void _refresh();
-void _update();
+void _save();
 
 extern tty_t ttys[NTTYS];
 extern struct system_t System;
@@ -54,7 +53,9 @@ extern struct system_t System;
 struct TTYSNamespace {
 	void (*initialize)();
 	void (*refresh)();
-	void (*update)();
+	void (*save)();
+	void (*load)();
+	void (*jumpToTTY)(int);
 };
 
 #endif

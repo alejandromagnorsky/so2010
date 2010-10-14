@@ -2,12 +2,17 @@
 void _initializeInput(input_t * input);
 void _initializeOutput(output_t * output);
 void _initialize_tty(tty_t * tty);
+void _load();
+void _jumpToTTY(int ntty);
+
 
 /* Namespace structure */
 struct TTYSNamespace TTYS = {
 	_initialize_ttys,
 	_refresh,
-	_update
+	_save,
+	_load,
+	_jumpToTTY
 };
 
 
@@ -46,12 +51,26 @@ void _refresh(){
 	
 	_memcpy(System.device[DEVICE_TTY]->addr, System.device[DEVICE_SCREEN]->addr, VIDEO_SIZE);
 
+	move_cursor(System.device[DEVICE_TTY]->wpos / 2);
+
 	System.device[DEVICE_SCREEN]->wpos = System.device[DEVICE_TTY]->wpos;
 	ttys[System.atty].output.wpos = System.device[DEVICE_SCREEN]->wpos;
 }
 
-void _update(){
-	if(ttys[System.atty].status == TTY_WRITTEN){
-		
-	}
+void _save(){
+	ttys[System.atty].output.wpos = System.device[DEVICE_SCREEN]->wpos;
+	ttys[System.atty].output.rpos = System.device[DEVICE_SCREEN]->rpos;
+}
+
+void _load(){
+	System.device[DEVICE_TTY]->wpos = System.device[DEVICE_SCREEN]->wpos = ttys[System.atty].output.wpos;
+	System.device[DEVICE_TTY]->rpos = System.device[DEVICE_SCREEN]->rpos = ttys[System.atty].output.rpos;
+	System.device[DEVICE_TTY]->addr = (void*) ttys[System.atty].output.address;
+}
+
+void _jumpToTTY(int ntty){
+	TTYS.save();
+	System.atty = ntty;
+	TTYS.load();
+	TTYS.refresh();
 }

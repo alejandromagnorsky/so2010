@@ -34,6 +34,10 @@ struct device_t _sys_screen = {	DEVICE_SCREEN,     /* Device ID */
 struct device_t _sys_tty = {DEVICE_TTY,
 							"tty",
 							&TtyDriver,
+							NULL,
+							VIDEO_SIZE,
+							0,
+							0,
 							};
 
 
@@ -154,26 +158,21 @@ void int_21(){
 	} else if(keyPressed->type == SPECIAL_KEY) {
 		switch(keyPressed->scan_code){
 			case F1:
-				System.atty = 0;
-				TTYS.refresh();
+				TTYS.jumpToTTY(0);
 				break;
 			case F2:
-				System.atty = 1;
-				TTYS.refresh();
+				TTYS.jumpToTTY(1);
 				break;
 			case F3:
-				System.atty = 2;
-				TTYS.refresh();					
+				TTYS.jumpToTTY(2);					
 				break;
 			case F4:
-				System.atty = 3;
-				TTYS.refresh();
+				TTYS.jumpToTTY(3);
 				break;
 			default:
 				escapedKey(keyPressed->scan_code);
 		}
 	}
-	TTYS.update();
 }
 
 void int_80() {

@@ -3,6 +3,7 @@
 
 #include "klib.h"
 #include "screen.h"
+#include "tty.h"
 
 /************************************ 
 **
@@ -57,5 +58,6 @@ int sscanf(char* str, char* fmt, ...);
 int scanf(char* fstr, ...);
 
 extern struct system_t System;
+extern struct TTYSNamespace TTYS;
 
 #endif

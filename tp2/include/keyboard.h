@@ -2,6 +2,7 @@
 #define _KEYBOARD_H_
 
 #include "defs.h"
+#include "klib.h"
 #include "kernel.h"
 
 struct keyDataInput {
@@ -12,7 +13,6 @@ struct keyDataInput {
 
 typedef struct keyDataInput* keyEntry;
 
-//types
 enum {
 	PRINTABLE_KEY = 0,
 	SPECIAL_KEY,
