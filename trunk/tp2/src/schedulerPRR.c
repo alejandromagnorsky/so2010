@@ -16,6 +16,11 @@ task_t priorityRoundRobin()
 {
 	int counter = 0;
 	task_t task;
+
+	if(System.task->trank == RANK_SERVER)
+	{
+		return System.task;
+	}
 	
 	if(timesLeft == 0)
 	{
@@ -25,13 +30,10 @@ task_t priorityRoundRobin()
 			index ++;
 			if(task->tid != 0)
 			{
-				if(task->trank != RANK_SERVER)
+				if(task->tstatus == STATUS_READY)
 				{
-					if(task->tstatus == STATUS_READY)
-					{
-						timesLeft = (CANT_PRIORITY - task->tpriority -1) * RATIO;
-						return task;
-					}
+					timesLeft = (CANT_PRIORITY - task->tpriority -1) * RATIO;
+					return task;
 				}
 			}
 			counter ++;
