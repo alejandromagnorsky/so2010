@@ -227,7 +227,6 @@ void putchar(char c) {
     ch[0] = c;
 	System.write(DEVICE_TTY, ch, 1);		//La verdad de la milanesa!
 	ttys[System.atty].status = TTY_WRITTEN;
-	//TTYS.update();
 	System.write(DEVICE_SCREEN, ch, 1);			
 }
 
