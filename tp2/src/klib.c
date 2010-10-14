@@ -2,6 +2,8 @@
 
 extern struct system_t System;
 
+int firstTime = 1;	/* Tells if it's the first time that scheduler is called */
+
 
 /************************************************
 ** System data structure manipulation:
@@ -197,14 +199,13 @@ int _task_new (task_t task, char* name, program_t program, int rank, int priorit
     task->stack_size = DEFAULT_STACK_SIZE;
 
     /* Reserve memory for the stack (grows downwards in x86): */
-    task->stack_start = task->stack =
-        System.malloc(DEFAULT_STACK_SIZE) + DEFAULT_STACK_SIZE - 1;
+    task->stack = System.malloc(DEFAULT_STACK_SIZE);
+    task->stack_start = task->stack + DEFAULT_STACK_SIZE - 1;
     
     task->tstatus = STATUS_READY;
 	
 	_pageUp(task->stack);
 
-    /* No idea why we need another esp variable. [TODO] ask Jime */
     task->esp = _newStack (program, task->stack_start, cleaner); 
 
     _pageDown(task->stack);
@@ -230,29 +231,42 @@ void _task_kill(task_t task)
 
 /* Checks if the scheduler brings a new task, in that case it changes to the
 	new one, otherwise it keeps running the current task */
-void _task_scheduler()
+void _task_scheduler(int esp)
 {
 	int stat;
 	task_t old, new;
-
-    new = old = _task_getCurrent(); /* Obtain currently running task */
-    
-	/* [TODO] Obtain next task according to scheduler */
 	
+    old = _task_getCurrent(); /* Obtain currently running task */
+    new = (task_t)getNextTask();
+
+    if(firstTime)
+	{
+		old->esp = esp;
+		old->stack = (void*)esp;
+	}
+	firstTime = 0;
+    
+    /*if(System.ticks %200 == 0)
+    {
+		printf("old task: %s, %d\n",old->tname, old->tid);
+    	printf("new task: %s, %d\n",new->tname, new->tid);
+    }*/
+    
+    
 	if(_task_getTID(new) != _task_getTID(old)) {
     
 		_pageDown(old->stack);
         
 		_task_save_state_();
-		_task_load_state_(new->esp);
+		/*_task_load_state_(new->esp);*/
 		
 		_pageUp(new->stack);
 		
 		System.task = new;
 		
 	}
-	/* saving process in last 100 executed [TODO] this should 
-		be here or inside previous if?*/
+	
+	/* saving process in last 100 executed*/
 		
 	System.last100[System.last100Counter] = new->tid;
 	increment100Counter();
@@ -323,6 +337,8 @@ void _task_setupScheduler ()
     idle_task = &( System.tasks[_task_findSlot()] );
 	_task_new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW);
     _task_setStatus(idle_task, STATUS_WAITING);
+    
+    System.idle = idle_task;
     
 	return;
 }

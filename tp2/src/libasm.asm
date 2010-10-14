@@ -229,7 +229,9 @@ _int_20_hand:				; Handler de INT 20 ( Timer tick)
 	call	int_20                 
 	mov		al,20h			; Envio de EOI generico al PIC;
 	out		20h,al
+	push	esp
 	;call	_task_scheduler
+	pop		eax
 	popa                            
 	pop		es
 	pop		ds
@@ -343,14 +345,14 @@ isr_common_stub:
 _task_save_state_:
 	pushad
 	pushfd
-	mov eax, esp
-	push eax
+	mov		eax, esp
+	push	eax
 	call	_saveESP
 	pop eax
 	ret
 
 _task_load_state_:
-	mov		esp, [ebp + 8]
+	mov 	esp, [ebp + 8]
 	popfd
 	popad
 	ret
