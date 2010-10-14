@@ -27,16 +27,20 @@
 
 #define LASTS_QUANT 100
 
+#define CANT_PRIORITY 4
+#define RATIO 2
+
+
 enum {
     RANK_SERVER,
     RANK_NORMAL
 };
 
 enum {
-    PRIORITY_LOW,
-    PRIORITY_MEDIUM,
+    PRIORITY_MAX,
     PRIORITY_HIGH,
-    PRIORITY_MAX
+    PRIORITY_MEDIUM,
+    PRIORITY_LOW
 };
 
 enum {
@@ -66,11 +70,13 @@ struct task_t {
     int trank, tpriority;
     int tstatus;
     
-    void* stack;
-    void* stack_start;
-    int stack_size;
-    int esp;
-        
+    void* stack;		/* Memory direction where stack starts */
+    void* stack_start;	/* Begin of stack for the program (grows downwards) */
+    int stack_size;		/* Stack size */
+    int esp;			/* Stack pointer */
+    
+    int parentTID;
+    
     struct {
         int devcode;
         int wpos;
