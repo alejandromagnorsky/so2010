@@ -207,7 +207,7 @@ int _task_new (task_t task, char* name, program_t program, int rank, int priorit
 	_pageUp(task->stack);
 
     task->esp = _newStack (program, task->stack_start, cleaner); 
-
+	printf("NEW TASK");
     _pageDown(task->stack);
 	_Sti();
 
@@ -235,6 +235,7 @@ void _task_scheduler(int esp)
 {
 	int stat;
 	task_t old, new;
+	static int auxesp;	//[TODO] clear this... only for testing
 	
     old = _task_getCurrent(); /* Obtain currently running task */
     new = (task_t)getNextTask();
@@ -242,25 +243,30 @@ void _task_scheduler(int esp)
     if(firstTime)
 	{
 		old->esp = esp;
-		old->stack = (void*)esp;
+		auxesp = esp;
 	}
 	firstTime = 0;
     
-    /*if(System.ticks %200 == 0)
+    if(System.ticks %300 == 0)
     {
-		printf("old task: %s, %d\n",old->tname, old->tid);
-    	printf("new task: %s, %d\n",new->tname, new->tid);
-    }*/
+    	//printf("\nnew task: %s, %d, %d\n",new->tname, new->stack_start, new->esp);
+		/* stack_start:	8392703
+			stack:		8392655*/
+    }
     
+   /* if(System.ticks %50 == 0)
+    {
+		printf("esp: %d",esp);
+		printf("auxesp: %d",auxesp);
+    }*/
     
 	if(_task_getTID(new) != _task_getTID(old)) {
     
+		//_task_save_state_();
 		_pageDown(old->stack);
         
-		_task_save_state_();
-		/*_task_load_state_(new->esp);*/
-		
 		_pageUp(new->stack);
+		//_task_load_state_(new->esp);
 		
 		System.task = new;
 		
@@ -383,19 +389,19 @@ void getStatusName(char* buffer, task_t task)
 {
 	if(_task_getStatus(task) == STATUS_RUNNING)
 	{
-		strcpy(buffer, "RUNNING");
+		strcpy("RUNNING", buffer);
 	}	
 	else if(_task_getStatus(task) == STATUS_READY)
 	{
-		strcpy(buffer, "READY");
+		strcpy("READY", buffer);
 	}
 	else if(_task_getStatus(task) == STATUS_WAITING)
 	{
-		strcpy(buffer, "WAITING");
+		strcpy("WAITING", buffer);
 	}
 	else if(_task_getStatus(task) == STATUS_DEAD)
 	{
-		strcpy(buffer, "DEAD");
+		strcpy("DEAD", buffer);
 	}
 	return;
 }
@@ -404,11 +410,11 @@ void getRankName(char* buffer, task_t task)
 {
 	if(_task_getRank(task) == RANK_SERVER)
 	{
-		strcpy(buffer, "SERVER");
+		strcpy("SERVER", buffer);
 	}	
 	else if(_task_getRank(task) == RANK_NORMAL)
 	{
-		strcpy(buffer, "NORMAL");
+		strcpy("NORMAL", buffer);
 	}
 	return;
 }
@@ -424,7 +430,7 @@ int top()
 	
 	for(i=0; i < NUM_TASKS; i++)
 	{
-		if(System.tasks[i].tid == 0)
+		if(System.tasks[i].tid != 0)
 		{
 			getStatusName(status, &(System.tasks[i]));
 			getRankName(rank, &(System.tasks[i]));
