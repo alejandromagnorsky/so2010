@@ -290,16 +290,19 @@ kmain()
 
 	_Sti();
 
-	shellloop();
+    for(;;);
+
+	//shellloop();
 
 }
 
 
 shellloop(){
-	printf("Shell loop called");
+	
   	while(1)
 	{
-	    shell();
+    	printf("Shell loop");
+	//    shell();
 	}
 }
 

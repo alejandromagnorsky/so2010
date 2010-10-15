@@ -238,17 +238,17 @@ int _task_scheduler(int esp)
     old = _task_getCurrent();       /* Obtain currently running task */
     new = old; //(task_t) getNextTask(); 
     
+    old->esp = esp; // [NOTE] This goes outside the if below, but it's only
+                    // actually necessary the first time the scheduler is called
+    
 	if(_task_getTID(new) != _task_getTID(old)) {
 
-        old->esp = esp;
-        
 		System.task = new;
 
 		/*_pageDown(old->stack);
-        
 		_pageUp(new->stack);
 		*/
-		
+				
 	    _task_setStatus(old, STATUS_READY);
 	    _task_setStatus(new, STATUS_RUNNING);
 	}
@@ -258,7 +258,7 @@ int _task_scheduler(int esp)
 	/*System.last100[System.last100Counter] = new->tid;
 	increment100Counter(); */
 
-	return esp;
+	return new->esp;
 }
 
 task_t _task_getById(int tid) {
@@ -279,8 +279,8 @@ task_t _task_getCurrent() {
 
 /* Idle task */
 int idle (char* line) {
-	for(;;);
-	   // printf("%d ", System.idle->tid);
+	for(;;)
+	   printf("%d ", System.idle->tid);
 }
 
 int task1 (char* line) {
