@@ -2,7 +2,7 @@
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
-#define NUM_COMMANDS 7
+#define NUM_COMMANDS 8
 
 static struct {
     char line[LINEBUF_LEN];
@@ -25,7 +25,8 @@ static struct {
 			 {"grprot", "Raise a general protection Exception", gralprotection},
 			 {"echo", "Prints string", echo},
 			 {"startx", "Start graphic OS", startx},
-			 {"alloc", "Test memory allocation", alloc}
+			 {"alloc", "Test memory allocation", alloc},
+			 {"top", "View processes and it's CPU percentage of use", top}
 		};
 
 

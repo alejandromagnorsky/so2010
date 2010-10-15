@@ -219,7 +219,7 @@ _int_1F_hand:
     push byte 31
     jmp isr_common_stub     
     
-_int_20_hand:				; Handler de INT 20 ( Timer tick)
+_int_20_hand:				; Handler de INT 20 ( Ti	mer tick)
 	push	ds
 	push	es				; Se salvan los registros
 	pusha					; Carga de DS y ES con el valor del selector
@@ -230,7 +230,7 @@ _int_20_hand:				; Handler de INT 20 ( Timer tick)
 	mov		al,20h			; Envio de EOI generico al PIC;
 	out		20h,al
 	push	esp
-	;call	_task_scheduler
+	call	_task_scheduler
 	pop		eax
 	popa                            
 	pop		es
@@ -343,18 +343,22 @@ isr_common_stub:
 
 
 _task_save_state_:
+	cli
 	pushad
 	pushfd
 	mov		eax, esp
 	push	eax
 	call	_saveESP
 	pop eax
+	sti
 	ret
 
 _task_load_state_:
+	cli
 	mov 	esp, [ebp + 8]
 	popfd
 	popad
+	sti
 	ret
 	
 _scheduler:						; Changing a process
