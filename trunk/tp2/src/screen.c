@@ -48,8 +48,8 @@ size_t video_write(device_t dev, void* from, size_t nbytes){
 			}else{
 				colpos = wpos % 160;
 				for( i = colpos; i < 160; i++){
-					if(i % 2 == 0)						
-						System.write(DEVICE_SCREEN, &zero, 1);
+					if(i % 2 == 0)
+						System.write(dev->id, &zero, 1);				
 				}
 			}
 			break;
