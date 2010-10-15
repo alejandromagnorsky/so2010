@@ -219,24 +219,44 @@ _int_1F_hand:
     push byte 31
     jmp isr_common_stub     
     
-_int_20_hand:				; Handler de INT 20 ( Ti	mer tick)
-	push	ds
-	push	es				; Se salvan los registros
-	pusha					; Carga de DS y ES con el valor del selector
-	mov		ax, 10h			; a utilizar.
-	mov		ds, ax
-	mov		es, ax                  
-	call	int_20                 
-	mov		al,20h			; Envio de EOI generico al PIC;
-	out		20h,al
-	push	esp
-	call	_task_scheduler
-	pop		eax
-	popa                            
-	pop		es
-	pop		ds
-	iret
+_int_20_hand: ; Timer tick interruption
+    cli
+    pushad
 
+	    call	int_20
+
+        mov     ebx, esp
+        
+        push    ebx
+    	    call _task_scheduler
+        pop     ebx
+
+        mov esp, eax ; STACK SWITCH!
+	    
+	    mov		al, 20h			; PIC ACK
+	    out		20h, al
+	
+	popad
+	sti
+	iret
+	
+nada:
+    push eax
+    call nadanada
+    pop eax
+    ret
+
+nadanada:
+    push eax
+    call nadanadanada
+    pop eax
+    ret
+    
+nadanadanada:
+    push eax
+    pop eax
+    ret
+    
 _int_21_hand:
 	cli
 	push	ds
@@ -277,8 +297,8 @@ _int_80_hand:
         call    int_80
         
         pop     di
-	pop     si
-	pop     bp
+	    pop     si
+	    pop     bp
         pop     sp                    
         pop     es
         pop     ds
@@ -341,55 +361,65 @@ isr_common_stub:
 ;	sti
 ;	iret
 
-
-_task_save_state_:
-	cli
-	pushad
-	pushfd
-	mov		eax, esp
-	push	eax
-	call	_saveESP
-	pop eax
-	sti
-	ret
-
-_task_load_state_:
-	cli
-	mov 	esp, [ebp + 8]
-	popfd
-	popad
-	sti
-	ret
-	
-_scheduler:						; Changing a process
-	push ebp
-	mov ebp, esp
-	int 0x20
-	mov esp, ebp
-	pop ebp
-	ret
+;_scheduler:						; Changing a process;
+;	push ebp;
+;	mov ebp, esp;
+;	int 0x20
+;	mov esp, ebp
+;	pop ebp
+;	ret
 
 ;-------------------------------------------------------------------------------
 ;	Creating new stack
 _newStack:
+    push ebp
+    mov ebp, esp
+    
+        pushfd
+        
+            mov eax, [ebp + 12] ; Pointer to the bottom of the new stack.
+            mov esp, eax        ; We switch to the new stack
+            
+            mov eax, [ebp + 16] ; Function to clean-up after task is done.
+            push eax            ; To the new stack it goes!
+            
+            mov eax, 0          ; New flags register, to be popfd'd
+            push eax            ; There we go.                       
+            
+            push cs             ; Code segment.
+            
+            mov eax, [ebp + 8]  ; Function for the new task to run.
+            push eax            ; To the new stack it goes as well!
+            
+            pushad              ; Trash. Won't matter.
+            mov eax, esp        ; Return the moved stack pointer.
+            
+        popfd
+    
+    mov esp, ebp
+    pop ebp
+    ret
+
+_nothignasd:    
 	pushfd					; Push flags
-	push	ebp
-	mov		ebp, esp
-	mov		eax, [ebp+16]	; Recover sp
-	mov		esp, eax		; Stack to use
-	mov		eax, [ebp+12]   ; Task to execute
-	mov		edx, [ebp+20]	; Task to end process
-	push	edx				; Push of new ret
-	mov		ecx, 512		; Set bit for enabling interruptions
-	push	ecx				; Push flags (just for enabling int)
-	push	cs				; For iret
-	push	eax
-	pusha					; Remaining registers
-	mov		eax, esp		; Return new esp
-	mov		esp, ebp		; Restore original esp
-	pop		ebp    			; Restore flags and ebp
+        mov		ebp, esp
+        
+            mov		eax, [ebp + 12]	; Recover sp
+            mov		esp, eax		; Stack to use
+            mov		eax, [ebp + 8]  ; Task to execute
+            mov		edx, [ebp + 16]	; Task to end process
+            
+            push	edx				; Push of new ret
+            mov		ecx, 512		; Set bit for enabling interruptions
+            push	ecx				; Push flags (just for enabling int)
+            push	cs				; For iret
+            push	eax             ; Task IP
+            pushad					; Remaining registers
+            mov		eax, esp		; Return new esp
+            
+        mov		esp, ebp		; Restore original esp
 	popfd
-	retn
+	ret
 
 ;-------------------------------------------------------------------------------
 
