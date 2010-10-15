@@ -26,7 +26,7 @@ static struct {
 			 {"echo", "Prints string", echo},
 			 {"startx", "Start graphic OS", startx},
 			 {"alloc", "Test memory allocation", alloc},
-			 {"top", "View processes and it's CPU percentage of use", top}
+			 {"top   ", "View processes and it's CPU percentage of use", top}
 		};
 
 
