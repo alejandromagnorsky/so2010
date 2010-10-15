@@ -127,6 +127,7 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
 		case DEVICE_TTY:
         case DEVICE_SCREEN:
 			return video_write(dev,from,nbytes);        
+
         default:
             if (dev->wpos + nbytes > dev->size)
                 nbytes = (dev->size - dev->wpos);
@@ -226,7 +227,7 @@ void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
 	System.write(DEVICE_TTY, ch, 1);
-	System.write(DEVICE_SCREEN, ch, 1);			
+	System.write(DEVICE_SCREEN, ch, 1);
 }
 
 void puts(char* str) {
