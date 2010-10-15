@@ -2,7 +2,7 @@
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
-#define NUM_COMMANDS 8
+#define NUM_COMMANDS 7
 
 static struct {
     char line[LINEBUF_LEN];
@@ -19,15 +19,14 @@ static struct {
     char* description;
     int (*function) (char*);
 } commands[NUM_COMMANDS] =  {
-			 {"divzero", "Raise a zero divide exception", divideByZero},
-			 {"cpuid", "Display CPU information", detect_cpu},
-			 {"help", "Display system commands", help},
-			 {"grprot", "Raise a general protection Exception", gralprotection},
-			 {"echo", "Prints string", echo},
-			 {"startx", "Start graphic OS", startx},
-			 {"alloc", "Test memory allocation", alloc},
-			 {"top", "View processes and it's CPU percentage of use", top}
-		};
+                 {"divzero", "Raise a zero divide exception", divideByZero},
+                 {"cpuid", "Display CPU information", detect_cpu},
+                 {"help", "Display system commands", help},
+		         {"grprot", "Raise a general protection Exception", gralprotection},
+		         {"echo", "Prints string", echo},
+		         {"startx", "Start graphic OS", startx},
+		         {"clear", "Clear the screen", clear}
+};
 
 
 void shell() {
@@ -145,29 +144,8 @@ int startx(char * line){
 	return 0;
 }
 
-int alloc(char* line) {
-    char* mem;
-    
-    printf("Attempting malloc...");
-    mem = (char*) System.malloc(1024);
-
-    printf("ok.\nAttempting access at 0 bytes... ");
-    mem[0] = 'a';
-    
-    if (mem[0] != 'a') { /* Why on Earth would this happen? */
-        printf("failed.\n");
-        return 1;
-    }
-    
-    printf("ok.\nAttempting access at PAGESIZE-1 bytes... ");
-    mem[PAGESIZE - 1] = 'b';
-
-    if (mem[PAGESIZE - 1] != 'b') {
-        printf("failed.\n");
-        return 1;
-    }
-        
-    printf("ok.\nAttempting to generate page fault... ");
-    mem[4 * PAGESIZE] = 'a';
-    printf("no fault?\n");  
+int clear(char* line) {
+    int i;
+    for (i = 0; i < 4000; i++)
+        System.device[DEVICE_SCREEN]->driver->write(DEVICE_SCREEN, " ", 1);
 }

@@ -141,6 +141,10 @@ void fault_handler(struct regs *r)
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
 	System.addTick();
+	//static char * vid = (char*) 0xB8000;
+	//vid++;
+	//*/vid = 'a';
+	printf("tick ");
 }
 
 /* Routine for IRQ1: keyboard */
@@ -232,8 +236,11 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-            ret = ((program_t) ebx)((char*) ecx);
+            ret = ((program_t) ebx)((char*) ecx);           
             MOVTO_EAX(ret);
+            
+            
+            
             break;
      }
 
@@ -289,7 +296,7 @@ kmain()
 
 
 shellloop(){
-	
+	printf("Shell loop called");
   	while(1)
 	{
 	    shell();
@@ -330,7 +337,6 @@ void initializeIDT(){
 	setup_IDT_entry (&idt[0x1D], 0x08, (dword)&_int_1D_hand, ACS_INT, 0);
 	setup_IDT_entry (&idt[0x1E], 0x08, (dword)&_int_1E_hand, ACS_INT, 0);
 	setup_IDT_entry (&idt[0x1F], 0x08, (dword)&_int_1F_hand, ACS_INT, 0);
-	
 	setup_IDT_entry (&idt[0x20], 0x08, (dword)&_int_20_hand, ACS_INT, 0);
 	setup_IDT_entry (&idt[0x21], 0x08, (dword)&_int_21_hand, ACS_INT, 0);
 	setup_IDT_entry (&idt[0x80], 0x08, (dword)&_int_80_hand, ACS_INT, 0);	

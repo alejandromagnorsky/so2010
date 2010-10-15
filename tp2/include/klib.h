@@ -69,7 +69,7 @@ struct task_t {
     char tname[MAX_TASK_NAME];
     int trank, tpriority;
     int tstatus;
-    
+        
     void* stack;		/* Memory direction where stack starts */
     void* stack_start;	/* Begin of stack for the program (grows downwards) */
     int stack_size;		/* Stack size */
@@ -257,7 +257,7 @@ struct TaskNamespace {
 
     int (*getNewTID) ();
     void (*setupScheduler) ();
-    void (*scheduler) ();
+    int (*scheduler) (int);
 };
 
 void _task_saveState   (task_t);
@@ -283,7 +283,7 @@ task_t _task_getCurrent();
 int _task_getNewTID();
 static void cleaner (void);
 void _task_setupScheduler ();
-void _task_scheduler();
+int _task_scheduler(int esp);
 
 int Idle (void);
 void _saveESP(int esp);

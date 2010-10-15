@@ -1,8 +1,8 @@
 #include "../include/klib.h"
 
-extern struct system_t System;
+#pragma pack(1)
 
-int firstTime = 1;	/* Tells if it's the first time that scheduler is called */
+extern struct system_t System;
 
 
 /************************************************
@@ -204,11 +204,10 @@ int _task_new (task_t task, char* name, program_t program, int rank, int priorit
     
     task->tstatus = STATUS_READY;
 	
-	_pageUp(task->stack);
+	//_pageUp(task->stack);
 
-    task->esp = _newStack (program, task->stack_start, cleaner); 
-	printf("NEW TASK");
-    _pageDown(task->stack);
+    task->esp = _newStack (program, task->stack_start, cleaner);
+   // _pageDown(task->stack);
 	_Sti();
 
     return task->tid;
@@ -231,53 +230,35 @@ void _task_kill(task_t task)
 
 /* Checks if the scheduler brings a new task, in that case it changes to the
 	new one, otherwise it keeps running the current task */
-void _task_scheduler(int esp)
+int _task_scheduler(int esp)
 {
-	int stat;
-	task_t old, new;
-	static int auxesp;	//[TODO] clear this... only for testing
-	
-    old = _task_getCurrent(); /* Obtain currently running task */
-    new = (task_t)getNextTask();
 
-    if(firstTime)
-	{
-		old->esp = esp;
-		auxesp = esp;
-	}
-	firstTime = 0;
-    
-    if(System.ticks %300 == 0)
-    {
-    	//printf("\nnew task: %s, %d, %d\n",new->tname, new->stack_start, new->esp);
-		/* stack_start:	8392703
-			stack:		8392655*/
-    }
-    
-   /* if(System.ticks %50 == 0)
-    {
-		printf("esp: %d",esp);
-		printf("auxesp: %d",auxesp);
-    }*/
+	task_t old, new;
+	
+    old = _task_getCurrent();       /* Obtain currently running task */
+    new = old; //(task_t) getNextTask(); 
     
 	if(_task_getTID(new) != _task_getTID(old)) {
-    
-		//_task_save_state_();
-		_pageDown(old->stack);
+
+        old->esp = esp;
+        
+		System.task = new;
+
+		/*_pageDown(old->stack);
         
 		_pageUp(new->stack);
-		//_task_load_state_(new->esp);
+		*/
 		
-		System.task = new;
-		
+	    _task_setStatus(old, STATUS_READY);
+	    _task_setStatus(new, STATUS_RUNNING);
 	}
-	
+
 	/* saving process in last 100 executed*/
 		
-	System.last100[System.last100Counter] = new->tid;
-	increment100Counter();
-	
-	return;
+	/*System.last100[System.last100Counter] = new->tid;
+	increment100Counter(); */
+
+	return esp;
 }
 
 task_t _task_getById(int tid) {
@@ -299,6 +280,12 @@ task_t _task_getCurrent() {
 /* Idle task */
 int idle (char* line) {
 	for(;;);
+	   // printf("%d ", System.idle->tid);
+}
+
+int task1 (char* line) {
+	for(;;);
+	    printf("task 1\n");
 }
 
 /* Returns an unused tid */
@@ -326,7 +313,7 @@ static void cleaner(void)
 	
 	_Sti();
 	
-	_scheduler();
+	//_scheduler();
 }
 
 /* Initializes the scheduler by creating the idle task and start running it */
@@ -344,7 +331,9 @@ void _task_setupScheduler ()
 	_task_new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW);
     _task_setStatus(idle_task, STATUS_WAITING);
     
-    System.idle = idle_task;
+    //_task_new(&(System.tasks[_task_findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW);
+    
+    System.task = System.idle = idle_task;
     
 	return;
 }
@@ -387,6 +376,8 @@ int processCpuUsage(int tid)
 
 void getStatusName(char* buffer, task_t task)
 {
+    /* [TODO] usar un array aca. Dale, Jime. Hace falta llamar a la funcion
+    *  cada vez que queres el status? Existen las variables. Jatejode. */
 	if(_task_getStatus(task) == STATUS_RUNNING)
 	{
 		strcpy("RUNNING", buffer);

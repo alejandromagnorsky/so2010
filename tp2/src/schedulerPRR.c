@@ -32,7 +32,7 @@ task_t priorityRoundRobin()
 			{
 				if(task->tstatus == STATUS_READY)
 				{
-					timesLeft = (CANT_PRIORITY - task->tpriority -1) * RATIO;
+					timesLeft = 3; //(CANT_PRIORITY - task->tpriority -1) * RATIO;
 					return task;
 				}
 			}
