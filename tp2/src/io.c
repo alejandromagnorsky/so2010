@@ -225,8 +225,7 @@ size_t _dseekr(device_t dev, int offset, int from) {
 void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
-	System.write(DEVICE_TTY, ch, 1);		//La verdad de la milanesa!
-	ttys[System.atty].status = TTY_WRITTEN;
+	System.write(DEVICE_TTY, ch, 1);
 	System.write(DEVICE_SCREEN, ch, 1);			
 }
 

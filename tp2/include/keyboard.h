@@ -84,6 +84,10 @@ void updateLeds();
 int isKeyNumPad(unsigned char ascii);
 unsigned char accentuate(unsigned char ascii);
 
+struct KBNamespace {
+	void (*updateLeds)();
+};
+
 
 extern struct system_t System;
 #endif

@@ -1,14 +1,9 @@
 #include "../include/keyboard.h"
 
+struct KBNamespace Keyboard = {
+	updateLeds
+};
 
-
-
-unsigned char shift_status = 0;
-unsigned char mayus_status = 0;
-unsigned char num_status = 0;
-unsigned char scroll_status = 0;
-unsigned char accent_status = 0;
-unsigned char escaped = 0;
 
 unsigned char ordinary_map[] = {
 		//	0		1		2		3		4		5		6		7		8		9		10		11		12		13		14		15
@@ -58,7 +53,7 @@ keyEntry scan2ascii(byte scan_code) {
 	switch (scan_code) {
 	case CAPS:
 		ans.type = PRIVATE_KEY;
-		mayus_status = mayus_status == 0 ? 1 : 0;
+		ttys[System.atty].input.flags.mayus_status = ttys[System.atty].input.flags.mayus_status == 0 ? 1 : 0;
 		updateLeds();
 		break;
 	case L_SHIFT:
@@ -66,19 +61,19 @@ keyEntry scan2ascii(byte scan_code) {
 	case L_SHIFT_OUT:
 	case R_SHIFT_OUT:
 		ans.type = PRIVATE_KEY;
-		shift_status = shift_status == 0 ? 1 : 0;
+		ttys[System.atty].input.flags.shift_status = ttys[System.atty].input.flags.shift_status == 0 ? 1 : 0;
 		break;
 	case NUM:
 		ans.type = PRIVATE_KEY;
-		num_status = num_status == 0 ? 1 : 0;
+		ttys[System.atty].input.flags.num_status = ttys[System.atty].input.flags.num_status == 0 ? 1 : 0;
 		updateLeds();
 		break;
 	case ESCAPED_PREFIX:
 		ans.type = PRIVATE_KEY;
-		escaped = 1;
+		ttys[System.atty].input.flags.escaped = 1;
 		break;
 	case ACCENT:
-		accent_status = 1;
+		ttys[System.atty].input.flags.accent_status = 1;
 		break;
 	case L_CTRL:case L_ALT:
 		ans.type = PRIVATE_KEY;
@@ -91,41 +86,41 @@ keyEntry scan2ascii(byte scan_code) {
 			ans.type = PRIVATE_KEY;
 		} else {
 			ans.type = PRINTABLE_KEY;
-			if (escaped == 1) {
+			if (ttys[System.atty].input.flags.escaped == 1) {
 				ans.type = SPECIAL_KEY;
 				ans.scan_code += 0x100;
-				escaped = 0;
+				ttys[System.atty].input.flags.escaped = 0;
 				return &ans;
 			}
-			if (shift_status == 1) {
+			if (ttys[System.atty].input.flags.shift_status == 1) {
 				ans.ascii = special_map[ans.scan_code];
 				if ((ans.ascii >= 'A' && ans.ascii <= 'Z') || ans.ascii == 165) {
-					if (mayus_status == 1) {
+					if (ttys[System.atty].input.flags.mayus_status == 1) {
 						ans.ascii = ordinary_map[ans.scan_code];
 					}
 				}
-				if(accent_status == 1){
+				if(ttys[System.atty].input.flags.accent_status == 1){
 					ans.ascii = accentuate(ans.ascii);
-					accent_status = 0;
+					ttys[System.atty].input.flags.accent_status = 0;
 				}
 			} else {
-				if (mayus_status == 0) {
+				if (ttys[System.atty].input.flags.mayus_status == 0) {
 					ans.ascii = ordinary_map[ans.scan_code];
 				} else {
 					ans.ascii = special_map[ans.scan_code];
 					if (!((ans.ascii >= 'A' && ans.ascii <= 'Z') || ans.ascii == 165))
 						ans.ascii = ordinary_map[ans.scan_code];
 				}
-				if(accent_status == 1){
+				if(ttys[System.atty].input.flags.accent_status == 1){
 					ans.ascii = accentuate(ans.ascii);
-					accent_status = 0;
+					ttys[System.atty].input.flags.accent_status = 0;
 				}
 			}
 		}
 	}
 	
 	if (isKeyNumPad(ans.scan_code) == 1) {
-		if (num_status == 1) {
+		if (ttys[System.atty].input.flags.num_status == 1) {
 			ans.type = PRINTABLE_KEY;
 			ans.ascii = modify_ascii(ans.ascii);
 		} else {
@@ -201,7 +196,9 @@ void initializeKeyboard() {
 
 void updateLeds() {
 
-	unsigned char leds = scroll_status | (num_status * 2) | (mayus_status * 4);
+	unsigned char leds = ttys[System.atty].input.flags.scroll_status | 
+		(ttys[System.atty].input.flags.num_status * 2) | 
+		(ttys[System.atty].input.flags.mayus_status * 4);
 
 	while ((_inport(0x64) & 2) != 0)
 		;

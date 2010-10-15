@@ -48,7 +48,7 @@ void _refresh(){
 	System.device[DEVICE_TTY]->wpos = ttys[System.atty].output.wpos;
 	System.device[DEVICE_TTY]->rpos = ttys[System.atty].output.rpos;
 	System.device[DEVICE_TTY]->addr = (void*) ttys[System.atty].output.address;	
-	
+
 	_memcpy(System.device[DEVICE_TTY]->addr, System.device[DEVICE_SCREEN]->addr, VIDEO_SIZE);
 
 	move_cursor(System.device[DEVICE_TTY]->wpos / 2);
@@ -73,4 +73,5 @@ void _jumpToTTY(int ntty){
 	System.atty = ntty;
 	TTYS.load();
 	TTYS.refresh();
+	Keyboard.updateLeds();
 }

@@ -49,6 +49,7 @@ void _save();
 
 extern tty_t ttys[NTTYS];
 extern struct system_t System;
+extern struct KBNamespace Keyboard;
 
 struct TTYSNamespace {
 	void (*initialize)();
