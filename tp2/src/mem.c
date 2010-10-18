@@ -69,14 +69,12 @@ void _pd_createDirectoryTbl(int kbytes){
 			address += PAGESIZE;
 		}
 		if(j < NENTRIES){
-			printf("Last Page: %d\n", j);
 			for(j = NENTRIES - j; j < NENTRIES; j++){
 				_setEntry(&tbl[j], address, NP_RW_SV);
 				address += PAGESIZE;
 			}
 		}
 	}
-	printf("Last Tbl: %d\n", i);
 	for( ; i < NENTRIES; i++){
 		tbl = (ptbl_t) (tablesArea + i * PAGESIZE); 
 		_setEntry(&directoryTbl[i], (address_t) tbl, NP_RW_SV);
