@@ -82,6 +82,8 @@ struct task_t {
         int wpos;
         int rpos;
     } odevs[10];
+
+	//agregar tty donde esté corriendo.
     
     
 };

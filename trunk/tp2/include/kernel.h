@@ -11,6 +11,7 @@
 #include "screen.h"
 #include "mem.h"
 #include "tty.h"
+#include "multiboot.h"
 
 
 /********************************** 
