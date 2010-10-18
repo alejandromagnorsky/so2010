@@ -144,7 +144,7 @@ void int_20() {
 	//static char * vid = (char*) 0xB8000;
 	//vid++;
 	//*/vid = 'a';
-	printf("tick ");
+	//printf("tick ");
 }
 
 /* Routine for IRQ1: keyboard */
@@ -251,9 +251,8 @@ void int_80() {
 ** Entry point for C code:
 *************************************************/
 
-kmain() 
+kmain(multiboot_info_t* mbd, unsigned int magic) 
 {
-
     int i,num, r;
 
 /* Borra la pantalla. */ 
@@ -270,29 +269,41 @@ kmain()
 	
 	_lidt (&idtr);	
 
+	printf("________________________________________________________________________________\n");
+	printf("Welcome to SuciOS\n");
+	printf("________________________________________________________________________________\n");
+
 	_Cli();
 /* Inicializo offsets de los PICS */
+	printf("Initializing PICs ............. ");
 	initialize_pics(0x20, 0x28);
+	printf("OK\n\n");
 
+	printf("Initializing Keyboard ......... ");
 	initializeKeyboard();
+	printf("OK\n\n");
+
 /* Habilito IRQ0 e IRQ1 (Timer Tick y Teclado) */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
-    Paging.start();
+	
+	printf("Memory detected: %d KB\n", (mbd->mem_lower + mbd->mem_upper));
+	printf("Paging the memory ............. ");
+    Paging.start((mbd->mem_lower + mbd->mem_upper));
+	printf("OK\n\n");
 
 //	Task.setupScheduler();
-    _task_setupScheduler();
+//    _task_setupScheduler();
 
 	TTYS.initialize();
 	TTYS.refresh();
 
-
 	_Sti();
 
-    for(;;);
+   // for(;;);
 
-	//shellloop();
+	shellloop();
 
 }
 
@@ -301,8 +312,8 @@ shellloop(){
 	
   	while(1)
 	{
-    	printf("Shell loop");
-	//    shell();
+    	//printf("Shell loop");
+	    shell();
 	}
 }
 

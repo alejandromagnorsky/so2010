@@ -38,7 +38,6 @@ typedef pentry_t * ptbl_t;
 
 #define GETADDRESS(X) ((X) & 0xFFFFF000)
 
-
 enum {
 	NO_ERRORS,
 	ERROR_ILLEGALPAGE
@@ -48,7 +47,7 @@ enum {
  * Fill the Page directory with the Kernel Table.
  * And sets the CR3 registry.
  * */
-void _startPaging();
+void _startPaging(int kbytes);
 
 int _pageUp(void * pg);
 int _pageDown(void * pg);
@@ -65,7 +64,7 @@ void        _pd_togglePresent(pentry_t*);
 void* _reqpage(task_t task);
 
 struct PagingNamespace {
-	void (*start)();
+	void (*start)(int);
     pentry_t (*createEntry) (void*);
     void (*togglePresent) (pentry_t*);
 };

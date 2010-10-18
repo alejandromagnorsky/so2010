@@ -1,7 +1,7 @@
 #include "../include/mem.h"
 
 /* Private memory functions */
-void _pd_createDirectoryTbl();
+void _pd_createDirectoryTbl(int kbytes);
 void _setCR3();
 void _enablePaging();
 void _set_Entry(pentry_t * entry, address_t address, unsigned int permissions);
@@ -45,34 +45,50 @@ void _pd_togglePresent(pentry_t * entry) {
 }
 
 
-void _startPaging(){
-	_pd_createDirectoryTbl();
+void _startPaging(int kbytes){
+	_pd_createDirectoryTbl(kbytes);
 	_setCR3();
 	_enablePaging();
 }
 
-void _pd_createDirectoryTbl(){
+void _pd_createDirectoryTbl(int kbytes){
 	directoryTbl = (ptbl_t) KERNEL_AREA - PAGESIZE;
 	ptbl_t tbl;
 	int i = 0, j = 0;
 	address_t address = 0;
 	
-	for(i = 0; i < NENTRIES; i++){
-		address = 0;
-		tbl = (ptbl_t) (tablesArea + i * PAGESIZE);
-		_setEntry(&directoryTbl[i], (address_t) tbl, P_RW_SV);
-		// VER SI CALCULAMOS LA MEMORIA Y ASIGNAMOS SOLO LA NECESARIA.
-		for(j = 0; j < NENTRIES; j++){
+	int totalbytes = (kbytes * 1024);
+	int totalpages = totalbytes / PAGESIZE;
+	int totaltbls = totalpages / NENTRIES;
+
+	for(i = 0; i < totaltbls; i++){
+		tbl = (ptbl_t) (tablesArea + i * PAGESIZE); 
+		_setEntry(&directoryTbl[i], (address_t) tbl, P_RW_SV);		
+		for(j = 0; i * NENTRIES + j < totalpages && j < NENTRIES; j++){
 			_setEntry(&tbl[j], address, P_RW_SV);
 			address += PAGESIZE;
 		}
+		if(j < NENTRIES){
+			printf("Last Page: %d\n", j);
+			for(j = NENTRIES - j; j < NENTRIES; j++){
+				_setEntry(&tbl[j], address, NP_RW_SV);
+				address += PAGESIZE;
+			}
+		}
+	}
+	printf("Last Tbl: %d\n", i);
+	for( ; i < NENTRIES; i++){
+		tbl = (ptbl_t) (tablesArea + i * PAGESIZE); 
+		_setEntry(&directoryTbl[i], (address_t) tbl, NP_RW_SV);
 	}
 	
+
 	/* Below the directory will be the bitmap */
 	pageMap = (char *) KERNEL_AREA - PAGESIZE - BITMAP_PAGESIZE * PAGESIZE;
 	for(i=0; i < BITMAP_PAGESIZE; i++){
-		pageMap[i] = ((i * PAGESIZE) < RESERVED_MEM) ? 1 : 0;
+		pageMap[i] = ((i * PAGESIZE) < RESERVED_MEM || i > totalpages) ? 1 : 0;
 	}
+
 	lastPageDelivered = RESERVED_MEM - PAGESIZE;
 }
 
