@@ -5,6 +5,10 @@ IDTR idtr;				/* IDTR */
 unsigned char keyBuff[BUFFER_SIZE];
 int tickpos = -2;
 
+char scheduling = 0;
+
+extern struct TaskNamespace Task;
+
 tty_t ttys[NTTYS];
 
 /************************************************
@@ -51,7 +55,7 @@ struct system_t System = {     0,					/* Tick count */
 
                                NULL,				/* Idle task */
                                NULL,				/* Currently active task */
-                               {},					/* Tasks */
+                               {0},					/* Tasks */
                                {0},					/* Last 100 tasks */
                                0,					/* Last 100 tasks counter */
                                _sys_addTick,
@@ -254,54 +258,56 @@ void int_80() {
 kmain(multiboot_info_t* mbd, unsigned int magic) 
 {
     int i,num, r;
+    _Cli();
+    
+    /* Borra la pantalla. */ 
+    k_clear_screen((void*) 0xb8000);
 
-/* Borra la pantalla. */ 
-	k_clear_screen((void*) 0xb8000);
-	
-/* Carga IDT */
-	initializeIDT();	
+    /* Dame paz */
+    _mascaraPIC1(0xFF);
+    _mascaraPIC2(0xFF);
+    
+    /* Carga IDT */
+    initializeIDT();        
 
-/* Carga de IDTR    */
+    /* Carga de IDTR    */
 
-	idtr.base = 0;  
-	idtr.base +=(dword) &idt;
-	idtr.limit = sizeof(idt)-1;
-	
-	_lidt (&idtr);	
+    idtr.base = 0;  
+    idtr.base +=(dword) &idt;
+    idtr.limit = sizeof(idt)-1;
 
-	printf("________________________________________________________________________________\n");
-	printf("Welcome to SuciOS\n");
-	printf("________________________________________________________________________________\n");
+    _lidt (&idtr);  
 
-	_Cli();
-/* Inicializo offsets de los PICS */
-	printf("Initializing PICs ............. ");
-	initialize_pics(0x20, 0x28);
-	printf("OK\n\n");
+    printf("________________________________________________________________________________\n");
+    printf("Welcome to SuciOS\n");
+    printf("________________________________________________________________________________\n");
 
-	printf("Initializing Keyboard ......... ");
-	initializeKeyboard();
-	printf("OK\n\n");
+    /* Inicializo offsets de los PICS */
+    printf("Initializing PICs ............. ");
+    initialize_pics(0x20, 0x28);
+    printf("OK\n\n");
 
-/* Habilito IRQ0 e IRQ1 (Timer Tick y Teclado) */
+    printf("Initializing Keyboard ......... ");
+    initializeKeyboard();
+    printf("OK\n\n");
+
+
+    printf("Memory detected: %d KB\n", (mbd->mem_lower + mbd->mem_upper));
+    printf("Paging the memory ............. ");
+    Paging.start((mbd->mem_lower + mbd->mem_upper));
+    printf("OK\n\n");
+
+    Task.setupScheduler();
+
+       // TTYS.initialize();
+        //TTYS.refresh();
+
+    /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
-	
-	printf("Memory detected: %d KB\n", (mbd->mem_lower + mbd->mem_upper));
-	printf("Paging the memory ............. ");
-    Paging.start((mbd->mem_lower + mbd->mem_upper));
-	printf("OK\n\n");
+    _Sti();
 
-//	Task.setupScheduler();
-//    _task_setupScheduler();
-
-	TTYS.initialize();
-	TTYS.refresh();
-
-	_Sti();
-
-   // for(;;);
 
 	shellloop();
 

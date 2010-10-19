@@ -7,5 +7,6 @@
 	scheduling algorithm used. */
 
 task_t getNextTask();
+task_t dummyScheduler();
 
 #endif
