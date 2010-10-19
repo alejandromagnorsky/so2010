@@ -69,6 +69,7 @@ struct task_t {
     char tname[MAX_TASK_NAME];
     int trank, tpriority;
     int tstatus;
+    int isFront;
         
     void* stack;		/* Memory direction where stack starts */
     void* stack_start;	/* Begin of stack for the program (grows downwards) */
@@ -251,7 +252,9 @@ struct TaskNamespace {
     int (*getStatus)   (task_t);
     int (*getTID) (task_t task);
     
-    int (*new) (task_t, char*, program_t, int, int);
+    int (*findSlot) ();
+    
+    int (*new) (task_t, char*, program_t, int, int, int);
     void (*kill) (task_t task);
 
     task_t (*getById) (int);
@@ -260,6 +263,15 @@ struct TaskNamespace {
     int (*getNewTID) ();
     void (*setupScheduler) ();
     int (*scheduler) (int);
+    void (*cleaner) (void);
+};
+
+struct TopNamespace {
+	int (*increment100Counter)();
+	int (*processCpuUsage)(int);
+	void (*getStatusName)(char*, task_t);
+	void (*getRankName)(char*, task_t);
+	int (*top)();
 };
 
 void _task_saveState   (task_t);
@@ -275,25 +287,26 @@ int _task_getRank    (task_t);
 int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
 int _task_getESP (task_t task);
+int _task_findSlot();
 
-int _task_new (task_t slot, char* name, program_t, int rank, int priority);
+int _task_new (task_t slot, char* name, program_t, int rank, 
+					int priority, int isFront);
 void _task_kill(task_t task);
 
 task_t _task_getById (int tid);
 task_t _task_getCurrent();
 
 int _task_getNewTID();
-static void cleaner (void);
+static void _task_cleaner (void);
 void _task_setupScheduler ();
 int _task_scheduler(int esp);
 
 int Idle (void);
-void _saveESP(int esp);
 
-int increment100Counter();
-int processCpuUsage(int tid);
-void getStatusName(char* buffer, task_t task);
-void getRankName(char* buffer, task_t task);
-int top();
+int _top_increment100Counter();
+int _top_processCpuUsage(int tid);
+void _top_getStatusName(char* buffer, task_t task);
+void _top_getRankName(char* buffer, task_t task);
+int _top_run();
 
 #endif

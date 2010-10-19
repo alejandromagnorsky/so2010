@@ -113,13 +113,23 @@ struct TaskNamespace Task = {
     _task_getRank,
     _task_getStatus,
     _task_getTID,
+    _task_findSlot,
     _task_new,
     _task_kill,
     _task_getById,
     _task_getCurrent,
     _task_getNewTID,
     _task_setupScheduler,
-    _task_scheduler
+    _task_scheduler,
+    _task_cleaner
+};
+
+struct TopNamespace Top = {
+	_top_increment100Counter,
+	_top_processCpuUsage,
+	_top_getStatusName,
+	_top_getRankName,
+	_top_run
 };
 
 
@@ -183,10 +193,12 @@ int _task_findSlot() {
 
 }
 
-int _task_new (task_t task, char* name, program_t program, int rank, int priority) {
+int _task_new (task_t task, char* name, program_t program, int rank, 
+			int priority, int isFront) {
     /* Create a new task, given a program and its rank and priority */
     int i;
     char found;
+    task_t current = Task.getCurrent();
 
 	_Cli();
 
@@ -206,24 +218,60 @@ int _task_new (task_t task, char* name, program_t program, int rank, int priorit
 	
 	//_pageUp(task->stack);
 
-    task->esp = _newStack (program, task->stack_start, cleaner);
+    task->esp = _newStack (program, task->stack_start, Task.cleaner);
    // _pageDown(task->stack);
+	
+	// [TODO] check this
+	if(isFront && current->tid > 1)
+	{
+		current->tstatus = STATUS_WAITING;
+		task->parentTID = current->tid;
+	}
+	else
+	{
+		task->parentTID = 0;
+	}
+	
 	_Sti();
-
+	
     return task->tid;
 }
 
 /* Kills the given task */
-// [TODO] check to awake parent and kill childs
+// [TODO] check this
 void _task_kill(task_t task)
 {
+	int i;
+	task_t parent;
+
 	_Cli();
+	
+	if(task->tid == 0)
+	{
+		return;
+	}
+	
+	/* Looking for task's children in order to kill them */
+	for(i = 0; i < NUM_TASKS; i++)
+	{
+		if(System.tasks[i].tid != 0 && System.tasks[i].parentTID == task->tid)
+		{
+			Task.kill(&System.tasks[i]);
+		}
+	}
+	
+	/* Need to awake parent if it's not idle and it's waiting */
+	if(task->parentTID != 0)
+	{
+		parent = Task.getById(task->parentTID);
+		parent->tstatus = STATUS_READY;
+	}
 
     task->tstatus = STATUS_DEAD;
-	/*_sys_free((*task)->stack);
+    task->tid = 0;
+    task->tname[0] = '\0';
+	/*_sys_free((*task)->stack);*/
 	
-	(*task)->free = 1;
-	(*task)->tname[0] = '\0'; */
 	
 	_Sti();
 }
@@ -235,13 +283,13 @@ int _task_scheduler(int esp)
 
 	task_t old, new;
 	
-    old = _task_getCurrent();       /* Obtain currently running task */
+    old = Task.getCurrent();       /* Obtain currently running task */
     new = old; //(task_t) getNextTask(); 
     
     old->esp = esp; // [NOTE] This goes outside the if below, but it's only
                     // actually necessary the first time the scheduler is called
     
-	if(_task_getTID(new) != _task_getTID(old)) {
+	if(Task.getTID(new) != Task.getTID(old)) {
 
 		System.task = new;
 
@@ -249,14 +297,13 @@ int _task_scheduler(int esp)
 		_pageUp(new->stack);
 		*/
 				
-	    _task_setStatus(old, STATUS_READY);
-	    _task_setStatus(new, STATUS_RUNNING);
+	    Task.setStatus(old, STATUS_READY);
+	    Task.setStatus(new, STATUS_RUNNING);
 	}
-
+	
 	/* saving process in last 100 executed*/
-		
-	/*System.last100[System.last100Counter] = new->tid;
-	increment100Counter(); */
+	System.last100[System.last100Counter] = new->tid;
+	Top.increment100Counter();
 
 	return new->esp;
 }
@@ -283,6 +330,7 @@ int idle (char* line) {
 	   printf("%d ", System.idle->tid);
 }
 
+// [TODO] remove this
 int task1 (char* line) {
 	for(;;);
 	    printf("task 1\n");
@@ -299,17 +347,26 @@ int _task_getNewTID() {
 }
 
 /* Tasks which finish end their life in this function which "frees" the space
-	in the tasks array and calls the scheduler in order to run a new task */
-static void cleaner(void)
+	in the tasks array, awakes the task's parent if necessary and calls the 
+	scheduler in order to run a new task */
+static void _task_cleaner(void)
 {
-	task_t task;
+	task_t task, parent;
 	
 	_Cli();
 	
-	task = _task_getCurrent();
+	task = Task.getCurrent();
+	
+	/* Awake parent if necessary */
+	if(task->parentTID > 1)
+	{
+		parent = Task.getById(task->parentTID);
+		parent->tstatus = STATUS_READY;
+	}
 	
 	task->tid = 0;
 	task->tname[0] = '\0';
+	task->tstatus = STATUS_DEAD;
 	
 	_Sti();
 	
@@ -327,29 +384,19 @@ void _task_setupScheduler ()
      */	
 
 	/* What we do need to initialize is the idle task: */
-    idle_task = &( System.tasks[_task_findSlot()] );
-	_task_new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW);
-    _task_setStatus(idle_task, STATUS_WAITING);
+    idle_task = &( System.tasks[Task.findSlot()] );
+	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW, 0);
+    Task.setStatus(idle_task, STATUS_WAITING);
     
-    //_task_new(&(System.tasks[_task_findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW);
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
     
     System.task = System.idle = idle_task;
     
 	return;
 }
 
-/* Saves the ESP for context changing */
-void _saveESP(int esp)
-{
-	task_t task = _task_getCurrent();
-	
-	task->esp = esp;
-	
-	return;
-}
-
 /* Functions for top process */
-int increment100Counter()
+int _top_increment100Counter()
 {
 	System.last100Counter++;
 	if(System.last100Counter >= LASTS_QUANT)
@@ -358,7 +405,7 @@ int increment100Counter()
 	}
 }
 
-int processCpuUsage(int tid)
+int _top_processCpuUsage(int tid)
 {
 	int i;
 	int count = 0;
@@ -374,36 +421,36 @@ int processCpuUsage(int tid)
 	return (count*100)/LASTS_QUANT;
 }
 
-void getStatusName(char* buffer, task_t task)
+void _top_getStatusName(char* buffer, task_t task)
 {
     /* [TODO] usar un array aca. Dale, Jime. Hace falta llamar a la funcion
     *  cada vez que queres el status? Existen las variables. Jatejode. */
-	if(_task_getStatus(task) == STATUS_RUNNING)
+	if(Task.getStatus(task) == STATUS_RUNNING)
 	{
 		strcpy("RUNNING", buffer);
 	}	
-	else if(_task_getStatus(task) == STATUS_READY)
+	else if(Task.getStatus(task) == STATUS_READY)
 	{
 		strcpy("READY", buffer);
 	}
-	else if(_task_getStatus(task) == STATUS_WAITING)
+	else if(Task.getStatus(task) == STATUS_WAITING)
 	{
 		strcpy("WAITING", buffer);
 	}
-	else if(_task_getStatus(task) == STATUS_DEAD)
+	else if(Task.getStatus(task) == STATUS_DEAD)
 	{
 		strcpy("DEAD", buffer);
 	}
 	return;
 }
 
-void getRankName(char* buffer, task_t task)
+void _top_getRankName(char* buffer, task_t task)
 {
-	if(_task_getRank(task) == RANK_SERVER)
+	if(Task.getRank(task) == RANK_SERVER)
 	{
 		strcpy("SERVER", buffer);
 	}	
-	else if(_task_getRank(task) == RANK_NORMAL)
+	else if(Task.getRank(task) == RANK_NORMAL)
 	{
 		strcpy("NORMAL", buffer);
 	}
@@ -411,7 +458,7 @@ void getRankName(char* buffer, task_t task)
 }
 
 
-int top()
+int _top_run()
 {
 	printf("Processes and it's CPU percentage of use\n");
 	
@@ -423,13 +470,13 @@ int top()
 	{
 		if(System.tasks[i].tid != 0)
 		{
-			getStatusName(status, &(System.tasks[i]));
-			getRankName(rank, &(System.tasks[i]));
+			Top.getStatusName(status, &(System.tasks[i]));
+			Top.getRankName(rank, &(System.tasks[i]));
 
 			printf("%s [%s], pid: %d, priority: %d, rank: %s, use: %d%%\n",
 				System.tasks[i].tname, status, System.tasks[i].tid, 
 				System.tasks[i].tpriority, rank, 
-				processCpuUsage(System.tasks[i].tid));
+				Top.processCpuUsage(System.tasks[i].tid));
 		}
 	}
 	printf ("\n");
