@@ -2,50 +2,86 @@
 
 extern struct system_t System;
 
-static int timesLeft = 0;
-static int index = 0;
+extern char scheduling;
 
 task_t priorityRoundRobin();
 
 task_t getNextTask()
 {
-	return priorityRoundRobin();
+    return scheduling ? priorityRoundRobin() : System.task;
+}
+
+task_t dummyScheduler() {
+    int i, stop;
+    static int last = 0;
+    
+    i = stop = (last + 1) % NUM_TASKS;
+    
+    do {
+    
+        if (System.tasks[i].tid != 0)
+            return System.tasks + (last = i);
+        
+        i = (i + 1) % NUM_TASKS;
+        
+    } while (i != stop);
+    
+    return System.idle;
+    
 }
 
 task_t priorityRoundRobin()
-{
-	int counter = 0;
-	task_t task;
-
-	if(System.task->trank == RANK_SERVER)
-	{
-		return System.task;
-	}
+{;
+	task_t candidate, new, old;
 	
-	if(timesLeft == 0)
-	{
+	int counter = 0; 
+    static int left = 0, index = 0;
+	
+	old = System.task;
+	candidate = NULL;
+	
+	if (old->trank == RANK_SERVER) {
+	    
+	    if (old->tstatus == STATUS_READY)	
+		    return System.task;
+		    
+	}
+
+	if(left == 0) {
+
+        if (old->tstatus == STATUS_RUNNING)
+            old->tstatus = STATUS_READY;
+
 		do
 		{
-			task = &(System.tasks[index % NUM_TASKS]);
-			index ++;
-			if(task->tid != 0)
-			{
-				if(task->tstatus == STATUS_READY)
-				{
-					timesLeft = 3; //(CANT_PRIORITY - task->tpriority -1) * RATIO;
-					return task;
-				}
+			new = &(System.tasks[++index % NUM_TASKS]);
+			
+			if (new->tid != 0 && new->tstatus == STATUS_READY) {
+			
+			    if (new->trank == RANK_SERVER) {
+			        candidate = new;
+    			    break;
+    			    
+			    } else if (candidate == NULL)
+    			    candidate = new;
+			
 			}
-			counter ++;
-		}
-		while(counter < NUM_TASKS);
-		return System.idle;
+			
+	    /* We wrap around the array as needed. When counter reaches NUM_TASKS,
+		  we stop. */			
+		} while(++counter < NUM_TASKS);
+		
+		candidate = candidate ? candidate : System.idle;
+			
+		left = (CANT_PRIORITY - candidate->tpriority - 1) * RATIO;
+		
+		return candidate;
+		
+	} else {
+		left--;
+	    return System.task;
 	}
-	else
-	{
-		timesLeft --;
-	}
-	return task;
+	
 	
 }
 

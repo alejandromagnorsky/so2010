@@ -3,7 +3,7 @@
 #pragma pack(1)
 
 extern struct system_t System;
-
+extern char scheduling;
 
 /************************************************
 ** System data structure manipulation:
@@ -280,30 +280,41 @@ void _task_kill(task_t task)
 	new one, otherwise it keeps running the current task */
 int _task_scheduler(int esp)
 {
-
+    int i;
+    static int stop = 0;
 	task_t old, new;
 	
     old = Task.getCurrent();       /* Obtain currently running task */
-    new = old; //(task_t) getNextTask(); 
+    new = (task_t) getNextTask(); 
     
-    old->esp = esp; // [NOTE] This goes outside the if below, but it's only
-                    // actually necessary the first time the scheduler is called
+    old->esp = esp;
     
-	if(Task.getTID(new) != Task.getTID(old)) {
+    _Cli();
+    if (++stop < 10) {
+        printf("Old task id: %d (%s) status: %d\n", old->tid, old->tname, old->tstatus);
+        printf("New task id: %d (%s) status: %d\n", new->tid, new->tname, new->tstatus);
+    }
+    _Sti();
 
+	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
 
 		/*_pageDown(old->stack);
 		_pageUp(new->stack);
 		*/
-				
-	    Task.setStatus(old, STATUS_READY);
-	    Task.setStatus(new, STATUS_RUNNING);
+
+	    if (old->tstatus == STATUS_RUNNING)
+	        Task.setStatus(old, STATUS_READY);
+
+	    if (new != System.idle)        
+    	    Task.setStatus(new, STATUS_RUNNING);
+	    
 	}
 	
 	/* saving process in last 100 executed*/
-	System.last100[System.last100Counter] = new->tid;
-	Top.increment100Counter();
+	//System.last100[System.last100Counter] = new->tid;
+	//Top.increment100Counter();
+
 
 	return new->esp;
 }
@@ -332,8 +343,12 @@ int idle (char* line) {
 
 // [TODO] remove this
 int task1 (char* line) {
-	for(;;);
-	    printf("task 1\n");
+    int i = 0;
+//    while(++i < 10);
+    
+    System.task->tstatus = STATUS_WAITING;// STATUS_WAITING;
+    
+    while(1);
 }
 
 /* Returns an unused tid */
@@ -392,6 +407,7 @@ void _task_setupScheduler ()
     
     System.task = System.idle = idle_task;
     
+    scheduling = 1;
 	return;
 }
 

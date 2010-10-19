@@ -17,7 +17,7 @@
 
 #define NUM_TASKS 10
 
-#define QUANTUM 1
+#define QUANTUM 2
 
 #define STACK_SIZE 1024
 #define	MAX_TASK_NAME	20

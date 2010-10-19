@@ -383,7 +383,7 @@ _newStack:
             mov eax, [ebp + 16] ; Function to clean-up after task is done.
             push eax            ; To the new stack it goes!
             
-            mov eax, 0          ; New flags register, to be popfd'd
+            mov eax, 512        ; New flags register, to be popfd'd
             push eax            ; There we go.                       
             
             push cs             ; Code segment.
