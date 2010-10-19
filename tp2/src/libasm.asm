@@ -13,7 +13,7 @@ GLOBAL	_task_load_state_, _task_save_state_
 GLOBAL	_newStack, _scheduler
 GLOBAL  _debug
 
-EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_scheduler, _saveESP
+EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_scheduler
 
 SECTION .text
 
