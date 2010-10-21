@@ -147,7 +147,7 @@ void int_20() {
 	System.addTick();
 	//static char * vid = (char*) 0xB8000;
 	//vid++;
-	//*/vid = 'a';
+	//vid = 'a';
 	//printf("tick ");
 }
 
@@ -297,29 +297,33 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     Paging.start((mbd->mem_lower + mbd->mem_upper));
     printf("OK\n\n");
 
-    Task.setupScheduler();
+//	Task.setupScheduler();
+//  _task_setupScheduler();
 
-       // TTYS.initialize();
+        //TTYS.initialize();
         //TTYS.refresh();
 
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
+	
+   //for(;;);
 
-    _Sti();
-
-
-	shellloop();
-
+	shellloop(); //Debería crearse 1 proceso para cada TTY, corriendo shelloop cada uno. A cada uno se le setea la tty que maneja. y debería andar.
 }
 
 
 shellloop(){
-	
+
+	while(1){
+		if(_sys_malloc(1) == NULL){
+			printf("El malloc retorno NULL\n");
+		}
+	}
+
   	while(1)
 	{
-    	//printf("Shell loop");
-	    shell();
+	    shell(System.atty);
 	}
 }
 

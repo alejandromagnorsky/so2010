@@ -226,8 +226,14 @@ size_t _dseekr(device_t dev, int offset, int from) {
 void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
-	System.write(DEVICE_TTY, ch, 1);
-	System.write(DEVICE_SCREEN, ch, 1);
+
+	//ACTIVAR CUANDO ANDE CON MULTITASK!!!!!!!!!!!!!!!!!!!!
+	//if(Task.getRunningMode(System.task) != RUNNING_BACK){
+		System.write(DEVICE_TTY, ch, 1);
+		//if(Task.getTty(System.task) == System.atty){
+			System.write(DEVICE_SCREEN, ch, 1);
+		//}
+	//}
 }
 
 void puts(char* str) {
