@@ -257,13 +257,14 @@ struct TaskNamespace {
     int (*new) (task_t, char*, program_t, int, int, int);
     void (*kill) (task_t task);
 
-    task_t (*getById) (int);
+    task_t (*getByTID) (int);
     task_t (*getCurrent) ();
 
     int (*getNewTID) ();
     void (*setupScheduler) ();
     int (*scheduler) (int);
     void (*cleaner) (void);
+    void (*yield)(task_t);
 };
 
 struct TopNamespace {
@@ -271,7 +272,7 @@ struct TopNamespace {
 	int (*processCpuUsage)(int);
 	void (*getStatusName)(char*, task_t);
 	void (*getRankName)(char*, task_t);
-	int (*top)();
+	int (*run)();
 };
 
 void _task_saveState   (task_t);
@@ -293,7 +294,7 @@ int _task_new (task_t slot, char* name, program_t, int rank,
 					int priority, int isFront);
 void _task_kill(task_t task);
 
-task_t _task_getById (int tid);
+task_t _task_getByTID (int tid);
 task_t _task_getCurrent();
 
 int _task_getNewTID();
@@ -302,6 +303,8 @@ void _task_setupScheduler ();
 int _task_scheduler(int esp);
 
 int Idle (void);
+
+void _task_yield(task_t task);
 
 int _top_increment100Counter();
 int _top_processCpuUsage(int tid);

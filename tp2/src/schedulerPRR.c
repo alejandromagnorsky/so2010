@@ -46,7 +46,12 @@ task_t priorityRoundRobin()
 		    return System.task;
 		    
 	}
-
+	
+	if(System.task->tid == 0)
+	{
+		return System.task;
+	}
+	
 	if(left == 0) {
 
         if (old->tstatus == STATUS_RUNNING)

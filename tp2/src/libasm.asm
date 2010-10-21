@@ -361,13 +361,13 @@ isr_common_stub:
 ;	sti
 ;	iret
 
-;_scheduler:						; Changing a process;
-;	push ebp;
-;	mov ebp, esp;
-;	int 0x20
-;	mov esp, ebp
-;	pop ebp
-;	ret
+_scheduler:						; Changing a process;
+	push ebp;
+	mov ebp, esp;
+	int 0x20
+	mov esp, ebp
+	pop ebp
+	ret
 
 ;-------------------------------------------------------------------------------
 ;	Creating new stack
