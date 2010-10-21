@@ -30,13 +30,13 @@ static struct {
 };
 
 
-void shell() {
+void shell(int tty) {
     static char show_prompt = 1;
 	unsigned char a;
     int exit_status,i;
     
     if (show_prompt)
-        printf(SHELL_PROMPT, 1);
+        printf(SHELL_PROMPT, tty);
 
 	switch(a = getchar()) {
 	

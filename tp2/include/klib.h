@@ -64,6 +64,11 @@ enum {
 	DEVICE_TTY
 };
 
+enum {
+	RUNNING_FRONT = 0,
+	RUNNING_BACK,
+};
+
 struct task_t {
     int tid;
     char tname[MAX_TASK_NAME];
@@ -77,16 +82,15 @@ struct task_t {
     int esp;			/* Stack pointer */
     
     int parentTID;
+
+	int tty;			/* TTY where is running */
+	char running_mode;	/* RUNNING_BACK | RUNNING_FRONT */
     
     struct {
         int devcode;
         int wpos;
         int rpos;
     } odevs[10];
-
-	//agregar tty donde esté corriendo.
-    
-    
 };
 
 typedef struct task_t* task_t;
@@ -264,7 +268,11 @@ struct TaskNamespace {
     void (*setupScheduler) ();
     int (*scheduler) (int);
     void (*cleaner) (void);
-    void (*yield)(task_t);
+
+	void (*setTty)(task_t, int);
+	int (*getTty)(task_t);
+	void (*runInBackground)(task_t);
+	int (*getRunningMode)(task_t);
 };
 
 struct TopNamespace {
@@ -289,6 +297,11 @@ int _task_getStatus   (task_t);
 int _task_getTID (task_t task);
 int _task_getESP (task_t task);
 int _task_findSlot();
+
+void _task_setTty(task_t, int);
+int _task_getTty(task_t);
+int _task_runInBackground(task_t);
+int _task_getRunningMode(task_t);
 
 int _task_new (task_t slot, char* name, program_t, int rank, 
 					int priority, int isFront);

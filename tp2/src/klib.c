@@ -105,7 +105,6 @@ int _sys_exec(int (*f) (char*), char* args) {
 
 
 
-
 struct TaskNamespace Task = {
     _task_setPriority,
     _task_setRank,
@@ -123,7 +122,10 @@ struct TaskNamespace Task = {
     _task_setupScheduler,
     _task_scheduler,
     _task_cleaner,
-    _task_yield
+	_task_setTty,
+	_task_getTty,
+	_task_runInBackground,
+	_task_getRunningMode
 };
 
 struct TopNamespace Top = {
@@ -181,6 +183,22 @@ int _task_getTID (task_t task) {
 
 int _task_getESP (task_t task) {
     return task->esp;
+}
+
+void _task_setTty(task_t task, int tty){
+	task->tty = tty;
+}
+
+int _task_getTty(task_t task){
+	return task->tty;
+}
+
+int _task_runInBackground(task_t task){
+	task->running_mode = RUNNING_BACK;
+}
+
+int _task_getRunningMode(task_t task){
+	return task->running_mode;
 }
 
 int _task_findSlot() {
