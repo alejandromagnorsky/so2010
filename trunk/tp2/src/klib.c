@@ -5,6 +5,7 @@
 extern struct system_t System;
 extern char scheduling;
 
+
 /************************************************
 ** System data structure manipulation:
 *************************************************/
@@ -116,12 +117,13 @@ struct TaskNamespace Task = {
     _task_findSlot,
     _task_new,
     _task_kill,
-    _task_getById,
+    _task_getByTID,
     _task_getCurrent,
     _task_getNewTID,
     _task_setupScheduler,
     _task_scheduler,
-    _task_cleaner
+    _task_cleaner,
+    _task_yield
 };
 
 struct TopNamespace Top = {
@@ -136,7 +138,7 @@ struct TopNamespace Top = {
 /* Basic getters/setters: */
 
 void _task_setPriority (task_t task, int tpriority) {
-    if (task != NULL && tpriority >= PRIORITY_LOW && tpriority <= PRIORITY_MAX)
+    if (task != NULL && tpriority <= PRIORITY_LOW && tpriority >= PRIORITY_MAX)
         task->tpriority = tpriority;
         
     return;
@@ -219,7 +221,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	//_pageUp(task->stack);
 
     task->esp = _newStack (program, task->stack_start, Task.cleaner);
-   // _pageDown(task->stack);
+	//_pageDown(task->stack);
 	
 	// [TODO] check this
 	if(isFront && current->tid > 1)
@@ -263,7 +265,7 @@ void _task_kill(task_t task)
 	/* Need to awake parent if it's not idle and it's waiting */
 	if(task->parentTID != 0)
 	{
-		parent = Task.getById(task->parentTID);
+		parent = Task.getByTID(task->parentTID);
 		parent->tstatus = STATUS_READY;
 	}
 
@@ -289,12 +291,12 @@ int _task_scheduler(int esp)
     
     old->esp = esp;
     
-    _Cli();
+    /*_Cli();
     if (++stop < 10) {
         printf("Old task id: %d (%s) status: %d\n", old->tid, old->tname, old->tstatus);
         printf("New task id: %d (%s) status: %d\n", new->tid, new->tname, new->tstatus);
     }
-    _Sti();
+    _Sti();*/
 
 	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
@@ -312,14 +314,14 @@ int _task_scheduler(int esp)
 	}
 	
 	/* saving process in last 100 executed*/
-	//System.last100[System.last100Counter] = new->tid;
-	//Top.increment100Counter();
+	System.last100[System.last100Counter] = new->tid;
+	Top.increment100Counter();
 
 
 	return new->esp;
 }
 
-task_t _task_getById(int tid) {
+task_t _task_getByTID(int tid) {
     /* Find a task by TID and return a pointer to its control block */
 	int i;
     char found;
@@ -337,8 +339,8 @@ task_t _task_getCurrent() {
 
 /* Idle task */
 int idle (char* line) {
-	for(;;)
-	   printf("%d ", System.idle->tid);
+	for(;;);
+	   //printf("%d ", System.idle->tid);
 }
 
 // [TODO] remove this
@@ -346,9 +348,10 @@ int task1 (char* line) {
     int i = 0;
 //    while(++i < 10);
     
-    System.task->tstatus = STATUS_WAITING;// STATUS_WAITING;
-    
+    //System.task->tstatus = STATUS_WAITING;// STATUS_WAITING;
+	Task.yield(System.task);
     while(1);
+    	//Top.run();
 }
 
 /* Returns an unused tid */
@@ -375,7 +378,7 @@ static void _task_cleaner(void)
 	/* Awake parent if necessary */
 	if(task->parentTID > 1)
 	{
-		parent = Task.getById(task->parentTID);
+		parent = Task.getByTID(task->parentTID);
 		parent->tstatus = STATUS_READY;
 	}
 	
@@ -385,7 +388,7 @@ static void _task_cleaner(void)
 	
 	_Sti();
 	
-	//_scheduler();
+	_scheduler();
 }
 
 /* Initializes the scheduler by creating the idle task and start running it */
@@ -404,11 +407,20 @@ void _task_setupScheduler ()
     Task.setStatus(idle_task, STATUS_WAITING);
     
     Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
+    Task.setStatus(idle_task, STATUS_READY);
     
     System.task = System.idle = idle_task;
     
     scheduling = 1;
 	return;
+}
+
+void _task_yield(task_t task)
+{
+	// [TODO] should this cli be here, and is it right not to incude a sti?
+	_Cli();
+	Task.setStatus(task, STATUS_WAITING);
+	_scheduler();
 }
 
 /* Functions for top process */
