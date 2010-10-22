@@ -412,13 +412,6 @@ int task3 (char* line) {
     return 1;
 }
 
-void testMultitasking(char * line)
-{
-	Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
-}
-
 /* Returns an unused tid */
 int _task_getNewTID() {
 	static int tid = 0;
@@ -473,6 +466,10 @@ void _task_setupScheduler ()
     idle_task = &(System.tasks[Task.findSlot()] );
 	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_NEVER, 0);
     Task.setStatus(idle_task, STATUS_WAITING);
+    
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
     
     System.task = System.idle = idle_task;
     
