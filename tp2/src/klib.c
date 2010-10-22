@@ -412,7 +412,7 @@ int task3 (char* line) {
     return 1;
 }
 
-void testMultitasking()
+void testMultitasking(char * line)
 {
 	Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
     Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
