@@ -271,8 +271,9 @@ struct TaskNamespace {
 
 	void (*setTty)(task_t, int);
 	int (*getTty)(task_t);
-	int (*runInBackground)(task_t);
+	void (*runInBackground)(task_t);
 	int (*getRunningMode)(task_t);
+	void (*yield)(task_t);
 };
 
 struct TopNamespace {
@@ -280,6 +281,8 @@ struct TopNamespace {
 	int (*processCpuUsage)(int);
 	void (*getStatusName)(char*, task_t);
 	void (*getRankName)(char*, task_t);
+	void (*initialize)(int);
+	void (*clearTask)(int);
 	int (*run)();
 };
 
@@ -300,7 +303,7 @@ int _task_findSlot();
 
 void _task_setTty(task_t, int);
 int _task_getTty(task_t);
-int _task_runInBackground(task_t);
+void _task_runInBackground(task_t);
 int _task_getRunningMode(task_t);
 
 int _task_new (task_t slot, char* name, program_t, int rank, 
@@ -323,6 +326,8 @@ int _top_increment100Counter();
 int _top_processCpuUsage(int tid);
 void _top_getStatusName(char* buffer, task_t task);
 void _top_getRankName(char* buffer, task_t task);
+void _top_initialize(int tid);
+void _top_clearTask(int tid);
 int _top_run();
 
 #endif

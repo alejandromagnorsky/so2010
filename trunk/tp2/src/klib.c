@@ -125,7 +125,8 @@ struct TaskNamespace Task = {
 	_task_setTty,
 	_task_getTty,
 	_task_runInBackground,
-	_task_getRunningMode
+	_task_getRunningMode,
+	_task_yield
 };
 
 struct TopNamespace Top = {
@@ -133,6 +134,8 @@ struct TopNamespace Top = {
 	_top_processCpuUsage,
 	_top_getStatusName,
 	_top_getRankName,
+	_top_initialize,
+	_top_clearTask,
 	_top_run
 };
 
@@ -193,7 +196,7 @@ int _task_getTty(task_t task){
 	return task->tty;
 }
 
-int _task_runInBackground(task_t task){
+void _task_runInBackground(task_t task){
 	task->running_mode = RUNNING_BACK;
 }
 
@@ -218,23 +221,24 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     /* Create a new task, given a program and its rank and priority */
     int i;
     char found;
-    task_t current = Task.getCurrent();
-
+    
 	_Cli();
+
+    task_t current = Task.getCurrent();
 
     /* Fill out basic task information */
     
 	strcpy(name, task->tname);
 	task->tid = Task.getNewTID();
-	task->tpriority = priority;
-	task->trank = rank;
+	Task.setPriority(task, priority);
+	Task.setRank(task, rank);
     task->stack_size = DEFAULT_STACK_SIZE;
 
     /* Reserve memory for the stack (grows downwards in x86): */
     task->stack = System.malloc(DEFAULT_STACK_SIZE);
     task->stack_start = task->stack + DEFAULT_STACK_SIZE - 1;
     
-    task->tstatus = STATUS_READY;
+    Task.setStatus(task, STATUS_READY);
 	
 	//_pageUp(task->stack);
 
@@ -250,6 +254,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	else
 	{
 		task->parentTID = 0;
+		//Task.runInBackground(task);
 	}
 	
 	_Sti();
@@ -284,10 +289,10 @@ void _task_kill(task_t task)
 	if(task->parentTID != 0)
 	{
 		parent = Task.getByTID(task->parentTID);
-		parent->tstatus = STATUS_READY;
+		Task.setStatus(parent, STATUS_READY);
 	}
 
-    task->tstatus = STATUS_DEAD;
+    Task.setStatus(task, STATUS_DEAD);
     task->tid = 0;
     task->tname[0] = '\0';
 	/*_sys_free((*task)->stack);*/
@@ -334,7 +339,8 @@ int _task_scheduler(int esp)
 	/* saving process in last 100 executed*/
 	System.last100[System.last100Counter] = new->tid;
 	Top.increment100Counter();
-
+	
+	//printf("%d\n", new->tid);
 
 	return new->esp;
 }
@@ -364,12 +370,35 @@ int idle (char* line) {
 // [TODO] remove this
 int task1 (char* line) {
     int i = 0;
-//    while(++i < 10);
-    
-    //System.task->tstatus = STATUS_WAITING;// STATUS_WAITING;
-	//Task.yield(System.task);
-    while(1);
+    printf("task 1 started... \n");
+    while(System.ticks < 10)
+    {
     	//Top.run();
+    }
+	printf("task 1 finishing... \n");
+    return 1;
+}
+
+int task2 (char* line) {
+    int i = 0;
+    printf("task 2 started... \n");
+    while(System.ticks < 20)
+    {
+    	//Top.run();
+    }
+	printf("task 2 finishing... \n");
+    return 1;
+}
+
+int task3 (char* line) {
+    int i = 0;
+    printf("task 3 started... \n");
+    while(System.ticks < 30)
+    {
+    	//Top.run();
+    }
+	printf("task 3 finishing... \n");
+    return 1;
 }
 
 /* Returns an unused tid */
@@ -387,10 +416,9 @@ int _task_getNewTID() {
 	scheduler in order to run a new task */
 static void _task_cleaner(void)
 {
-	task_t task, parent;
 	
 	_Cli();
-	
+	task_t task, parent;
 	task = Task.getCurrent();
 	
 	/* Awake parent if necessary */
@@ -400,9 +428,11 @@ static void _task_cleaner(void)
 		parent->tstatus = STATUS_READY;
 	}
 	
-	task->tid = 0;
 	task->tname[0] = '\0';
-	task->tstatus = STATUS_DEAD;
+	Task.setStatus(task, STATUS_DEAD);
+	task->tid = 0;
+	
+	Top.clearTask(task->tid);
 	
 	_Sti();
 	
@@ -420,15 +450,20 @@ void _task_setupScheduler ()
      */	
 
 	/* What we do need to initialize is the idle task: */
-    idle_task = &( System.tasks[Task.findSlot()] );
+	
+	
+    idle_task = &(System.tasks[Task.findSlot()] );
 	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW, 0);
     Task.setStatus(idle_task, STATUS_WAITING);
     
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_LOW, 0);
     Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-    Task.setStatus(idle_task, STATUS_READY);
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
     
     System.task = System.idle = idle_task;
     
+	Top.initialize(idle_task->tid);
+	
     scheduling = 1;
 	return;
 }
@@ -438,6 +473,7 @@ void _task_yield(task_t task)
 	// [TODO] should this cli be here, and is it right not to incude a sti?
 	_Cli();
 	Task.setStatus(task, STATUS_WAITING);
+	_Sti();
 	_scheduler();
 }
 
@@ -455,7 +491,7 @@ int _top_processCpuUsage(int tid)
 {
 	int i;
 	int count = 0;
-
+	
 	for(i=0; i < LASTS_QUANT; i++)
 	{
 		if(System.last100[i] == tid)
@@ -503,6 +539,28 @@ void _top_getRankName(char* buffer, task_t task)
 	return;
 }
 
+void _top_initialize(int tid)
+{
+	int i;
+	
+	for(i=0; i < LASTS_QUANT; i++)
+	{
+		System.last100[i] = tid;
+	}
+}
+
+void _top_clearTask(int tid)
+{
+	int i;
+	
+	for(i=0; i < LASTS_QUANT; i++)
+	{
+		if(System.last100[i] == tid)
+		{
+			System.last100[i] = System.idle->tid;
+		}
+	}
+}
 
 int _top_run()
 {
@@ -512,6 +570,8 @@ int _top_run()
 	char status[10];
 	char rank[10];
 	
+	_Cli();
+	
 	for(i=0; i < NUM_TASKS; i++)
 	{
 		if(System.tasks[i].tid != 0)
@@ -519,13 +579,15 @@ int _top_run()
 			Top.getStatusName(status, &(System.tasks[i]));
 			Top.getRankName(rank, &(System.tasks[i]));
 
-			printf("%s [%s], pid: %d, priority: %d, rank: %s, use: %d%%\n",
+			printf("%s [%s] \t tid: %d\t priority: %d\t rank: %s\t use: %d%%\n",
 				System.tasks[i].tname, status, System.tasks[i].tid, 
 				System.tasks[i].tpriority, rank, 
 				Top.processCpuUsage(System.tasks[i].tid));
 		}
 	}
 	printf ("\n");
+	
+	_Sti();
 
 	return 0;
 	
