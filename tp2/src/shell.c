@@ -2,7 +2,7 @@
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
-#define NUM_COMMANDS 9
+#define NUM_COMMANDS 8
 
 static struct {
     char line[LINEBUF_LEN];
@@ -27,7 +27,6 @@ static struct {
      {"startx", "Start graphic OS", startx},
      {"clear", "Clear the screen", clear},
      {"top", "Shows active processes and it's CPU percentage of use", _top_run},
-     {"test", "Tests the multitasker creating 3 tasks", testMultitasking}
 };
 
 
