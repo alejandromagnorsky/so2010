@@ -11,6 +11,7 @@ task_t getNextTask()
     return scheduling ? priorityRoundRobin() : System.task;
 }
 
+/* Dummy scheduler is working */
 task_t dummyScheduler() {
     int i, stop;
     static int last = 0;
@@ -34,41 +35,49 @@ task_t priorityRoundRobin()
 {;
 	task_t candidate, new, old;
 	
-	int counter = 0; 
-    static int left = 0, index = 0;
+	static int left = 0, index = 0;
+    
+	int counter = 0, auxi; 
 	
 	old = System.task;
-	candidate = NULL;
+
+	_Cli();
 	
-	if (old->trank == RANK_SERVER) {
+	if (old->tid != 0 && old->trank == RANK_SERVER) {
 	    
 	    if (old->tstatus == STATUS_READY)	
+	    {
+	    	printf("IS A SERVER");
 		    return System.task;
+	    }
 		    
 	}
 	
-	if(System.task->tid == 0)
+	/*if(System.task->tid == 0)
 	{
 		return System.task;
-	}
+	}*/
 	
 	if(left == 0) {
-
+		candidate = NULL;
+		
         if (old->tstatus == STATUS_RUNNING)
             old->tstatus = STATUS_READY;
 
 		do
 		{
-			new = &(System.tasks[++index % NUM_TASKS]);
-			
+			new = &(System.tasks[(++index) % NUM_TASKS]);
 			if (new->tid != 0 && new->tstatus == STATUS_READY) {
 			
 			    if (new->trank == RANK_SERVER) {
 			        candidate = new;
+			        auxi = index;
     			    break;
     			    
-			    } else if (candidate == NULL)
+			    } else if (candidate == NULL) {
     			    candidate = new;
+    			    auxi = index;
+			    }
 			
 			}
 			
@@ -76,17 +85,17 @@ task_t priorityRoundRobin()
 		  we stop. */			
 		} while(++counter < NUM_TASKS);
 		
+		index = auxi;		
 		candidate = candidate ? candidate : System.idle;
 			
 		left = (CANT_PRIORITY - candidate->tpriority - 1) * RATIO;
 		
+		//printf("candidate tid: %d\n", candidate->tid);
 		return candidate;
 		
 	} else {
 		left--;
 	    return System.task;
 	}
-	
-	
 }
 

@@ -219,7 +219,7 @@ _int_1F_hand:
     push byte 31
     jmp isr_common_stub     
     
-_int_20_hand: ; Timer tick interruption
+_int_20_hand: ; Timer tick interruption handler
     cli
     pushad
 
@@ -332,38 +332,9 @@ isr_common_stub:
 ;-------------------------------------------------------------------------------
 ; Functions for context changing
 
-
-;_int_20_hand:					;  INT 20 handler ( Timer tick)
-;	cli
-;	push	ds
-;	push	es
-;	pushad
-;
-;	mov		ax, 10h
-;	mov		ds, ax
-;	mov		es, ax                  
-;	call	int_20
-;
-;	mov 	al,20h			; Sending EOI to the PIC
-;	out		20h,al
-;
-;	push	esp				; Parameter from GetNextTask
-;
-;	call	getNextTask
-;		
-;	pop		esp				; Recovering previous push
-;	mov 	esp,eax			; Load the ESP with the corresponging stack
-;
-;	popad
-;	pop		es
-;	pop		ds
-;
-;	sti
-;	iret
-
 _scheduler:						; Changing a process;
-	push ebp;
-	mov ebp, esp;
+	push ebp
+	mov ebp, esp
 	int 0x20
 	mov esp, ebp
 	pop ebp
@@ -371,6 +342,7 @@ _scheduler:						; Changing a process;
 
 ;-------------------------------------------------------------------------------
 ;	Creating new stack
+
 _newStack:
     push ebp
     mov ebp, esp

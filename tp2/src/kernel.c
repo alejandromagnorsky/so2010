@@ -297,8 +297,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     Paging.start((mbd->mem_lower + mbd->mem_upper));
     printf("OK\n\n");
 
-//	Task.setupScheduler();
-//  _task_setupScheduler();
+	Task.setupScheduler();
 
         //TTYS.initialize();
         //TTYS.refresh();
@@ -310,13 +309,11 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	_Sti();
 	
    //for(;;);
-
 	shellloop(); //Debería crearse 1 proceso para cada TTY, corriendo shelloop cada uno. A cada uno se le setea la tty que maneja. y debería andar.
 }
 
 
 shellloop(){
-
   	while(1)
 	{
 	    shell(System.atty);
