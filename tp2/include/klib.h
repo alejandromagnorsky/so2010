@@ -40,7 +40,8 @@ enum {
     PRIORITY_MAX,
     PRIORITY_HIGH,
     PRIORITY_MEDIUM,
-    PRIORITY_LOW
+    PRIORITY_LOW,
+    PRIORITY_NEVER
 };
 
 enum {
@@ -281,6 +282,7 @@ struct TopNamespace {
 	int (*processCpuUsage)(int);
 	void (*getStatusName)(char*, task_t);
 	void (*getRankName)(char*, task_t);
+	void (*getPriority)(char*, task_t);
 	void (*initialize)(int);
 	void (*clearTask)(int);
 	int (*run)();
@@ -326,6 +328,7 @@ int _top_increment100Counter();
 int _top_processCpuUsage(int tid);
 void _top_getStatusName(char* buffer, task_t task);
 void _top_getRankName(char* buffer, task_t task);
+void _top_getPriority(char* buffer, task_t task);
 void _top_initialize(int tid);
 void _top_clearTask(int tid);
 int _top_run();
