@@ -315,12 +315,6 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 shellloop(){
 
-	while(1){
-		if(_sys_malloc(1) == NULL){
-			printf("El malloc retorno NULL\n");
-		}
-	}
-
   	while(1)
 	{
 	    shell(System.atty);

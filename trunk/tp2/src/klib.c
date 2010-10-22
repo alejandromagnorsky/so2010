@@ -367,7 +367,7 @@ int task1 (char* line) {
 //    while(++i < 10);
     
     //System.task->tstatus = STATUS_WAITING;// STATUS_WAITING;
-	Task.yield(System.task);
+	//Task.yield(System.task);
     while(1);
     	//Top.run();
 }
