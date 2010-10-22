@@ -333,4 +333,6 @@ void _top_initialize(int tid);
 void _top_clearTask(int tid);
 int _top_run();
 
+void testMultitasking();
+
 #endif
