@@ -92,12 +92,11 @@ void _pd_createDirectoryTbl(int kbytes){
 void _initializeMemMan(){
 	pageMap = (char *) KERNEL_AREA - PAGESIZE - BITMAP_BYTESIZE - PAGESIZE * 3;
 	int i = 0;
-
+	int cmp = 0;
+	int j = 10000;
 	for(i = 0; i < BITMAP_BYTESIZE ; i++){
-		pageMap[i] = ((i * 8 * PAGESIZE) < RESERVED_MEM || (i * 8 * PAGESIZE) > totalbytes) ? 0xFF : 0x00; //CHECKEAR!!!!!!!!!!!
+		pageMap[i] = ((i * PAGESIZE) < RESERVED_MEM || (i * PAGESIZE) > totalbytes) ? 0xFF : 0x00;
 	}
-	
-	printf("%d\n", i);
 
 	lastPageDelivered = RESERVED_MEM - PAGESIZE;	
 }
@@ -151,7 +150,6 @@ address_t _getFreePage(){
 		if(!_checkPageStatus(possiblePage)){
 			_setPageUsed(possiblePage);
 			_pageUp((void*) possiblePage);
-			printf("Return: %d\n", possiblePage);
 			return lastPageDelivered = possiblePage;
 		}
 		possiblePage = (possiblePage + PAGESIZE) % totalbytes;

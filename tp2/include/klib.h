@@ -271,7 +271,7 @@ struct TaskNamespace {
 
 	void (*setTty)(task_t, int);
 	int (*getTty)(task_t);
-	void (*runInBackground)(task_t);
+	int (*runInBackground)(task_t);
 	int (*getRunningMode)(task_t);
 };
 
