@@ -134,6 +134,7 @@ struct TopNamespace Top = {
 	_top_processCpuUsage,
 	_top_getStatusName,
 	_top_getRankName,
+	_top_getPriority,
 	_top_initialize,
 	_top_clearTask,
 	_top_run
@@ -143,7 +144,7 @@ struct TopNamespace Top = {
 /* Basic getters/setters: */
 
 void _task_setPriority (task_t task, int tpriority) {
-    if (task != NULL && tpriority <= PRIORITY_LOW && tpriority >= PRIORITY_MAX)
+    if (task != NULL && tpriority <= PRIORITY_NEVER && tpriority >= PRIORITY_MAX)
         task->tpriority = tpriority;
         
     return;
@@ -238,7 +239,14 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     task->stack = System.malloc(DEFAULT_STACK_SIZE);
     task->stack_start = task->stack + DEFAULT_STACK_SIZE - 1;
     
-    Task.setStatus(task, STATUS_READY);
+    if(rank == RANK_SERVER)
+    {
+		Task.setStatus(task, STATUS_WAITING);
+    }
+    else 
+    {
+	    Task.setStatus(task, STATUS_READY);
+    }
 	
 	//_pageUp(task->stack);
 
@@ -382,6 +390,9 @@ int task1 (char* line) {
 int task2 (char* line) {
     int i = 0;
     printf("task 2 started... \n");
+    printf("task 2 killing task 3...\n");
+    Task.kill(&(System.tasks[1]));
+    printf("task 3 killed...\n");    
     while(System.ticks < 20)
     {
     	//Top.run();
@@ -446,17 +457,17 @@ void _task_setupScheduler ()
 	/*
      * System.tasks array should already be zeroed
      * That is, all the IDs are set to 0, which is considered an empty
-     * task slot. No extra initialization needed for that.
+     * task slot.
      */	
 
-	/* What we do need to initialize is the idle task: */
+	/* What we need to initialize is the idle task: */
 	
 	
     idle_task = &(System.tasks[Task.findSlot()] );
-	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_LOW, 0);
+	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_NEVER, 0);
     Task.setStatus(idle_task, STATUS_WAITING);
     
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_LOW, 0);
+    Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
     Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
     Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
     
@@ -539,6 +550,31 @@ void _top_getRankName(char* buffer, task_t task)
 	return;
 }
 
+void _top_getPriority(char* buffer, task_t task)
+{
+	if(Task.getPriority(task) == PRIORITY_LOW)
+	{
+		strcpy("LOW", buffer);
+	}	
+	else if(Task.getPriority(task) == PRIORITY_HIGH)
+	{
+		strcpy("HIGH", buffer);
+	}
+	else if(Task.getPriority(task) == PRIORITY_NEVER)
+	{
+		strcpy("NEVER", buffer);
+	}
+	else if(Task.getPriority(task) == PRIORITY_MEDIUM)
+	{
+		strcpy("MEDIUM", buffer);
+	}
+	else if(Task.getPriority(task) == PRIORITY_MAX)
+	{
+		strcpy("MAX", buffer);
+	}
+	return;
+}
+
 void _top_initialize(int tid)
 {
 	int i;
@@ -569,6 +605,7 @@ int _top_run()
 	int i;
 	char status[10];
 	char rank[10];
+	char priority[10];
 	
 	_Cli();
 	
@@ -578,10 +615,11 @@ int _top_run()
 		{
 			Top.getStatusName(status, &(System.tasks[i]));
 			Top.getRankName(rank, &(System.tasks[i]));
+			Top.getPriority(priority, &(System.tasks[i]));
 
-			printf("%s [%s] \t tid: %d\t priority: %d\t rank: %s\t use: %d%%\n",
+			printf("%s [%s] \t tid: %d\t priority: %s\t rank: %s\t use: %d%%\n",
 				System.tasks[i].tname, status, System.tasks[i].tid, 
-				System.tasks[i].tpriority, rank, 
+				priority, rank, 
 				Top.processCpuUsage(System.tasks[i].tid));
 		}
 	}
