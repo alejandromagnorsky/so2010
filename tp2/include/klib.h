@@ -70,6 +70,16 @@ enum {
 	RUNNING_BACK,
 };
 
+struct block_t {
+	struct block_t * next;
+	void * firstPage;
+	unsigned int npages;
+	unsigned int freeSpace;
+	void * ptrFreeMemory;
+};
+
+typedef struct block_t * block_t;
+
 struct task_t {
     int tid;
     char tname[MAX_TASK_NAME];
@@ -86,7 +96,9 @@ struct task_t {
 
 	int tty;			/* TTY where is running */
 	char running_mode;	/* RUNNING_BACK | RUNNING_FRONT */
-    
+
+	block_t mem;
+
     struct {
         int devcode;
         int wpos;

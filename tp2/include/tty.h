@@ -57,6 +57,7 @@ struct TTYSNamespace {
 	void (*save)();
 	void (*load)();
 	void (*jumpToTTY)(int);
+	void (*createTTYs)();
 };
 
 #endif

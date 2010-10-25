@@ -4,7 +4,8 @@ void _initializeOutput(output_t * output);
 void _initialize_tty(tty_t * tty);
 void _load();
 void _jumpToTTY(int ntty);
-
+void _createTtys();
+int _createTty(char * a);
 
 /* Namespace structure */
 struct TTYSNamespace TTYS = {
@@ -12,9 +13,20 @@ struct TTYSNamespace TTYS = {
 	_refresh,
 	_save,
 	_load,
-	_jumpToTTY
+	_jumpToTTY,
+	_createTtys
 };
 
+void _createTtys(){
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+}
+
+int _createTty(char * a){
+	shellloop();
+}
 
 void _initialize_ttys(){
 	int i = 0;

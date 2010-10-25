@@ -235,6 +235,8 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	Task.setRank(task, rank);
     task->stack_size = DEFAULT_STACK_SIZE;
 
+	task->mem = NULL;
+
     /* Reserve memory for the stack (grows downwards in x86): */
     task->stack = System.malloc(DEFAULT_STACK_SIZE);
     task->stack_start = task->stack + DEFAULT_STACK_SIZE - 1;
@@ -254,6 +256,13 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	//_pageDown(task->stack);
 	
 	// [TODO] check this
+
+	if(isFront){
+		task->running_mode = RUNNING_FRONT;
+	}else{
+		task->running_mode = RUNNING_BACK;
+	}
+
 	if(isFront && current->tid > 1)
 	{
 		current->tstatus = STATUS_WAITING;
@@ -377,14 +386,7 @@ int idle (char* line) {
 
 // [TODO] remove this
 int task1 (char* line) {
-    int i = 0;
-    printf("task 1 started... \n");
-    while(System.ticks < 10)
-    {
-    	//Top.run();
-    }
-	printf("task 1 finishing... \n");
-    return 1;
+	shellloop();
 }
 
 int task2 (char* line) {
@@ -467,9 +469,12 @@ void _task_setupScheduler ()
 	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_NEVER, 0);
     Task.setStatus(idle_task, STATUS_WAITING);
     
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
+    //Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
+    Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0); //FALTA PONER EN QUE TTY CORREN!
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell 2", task1, RANK_NORMAL, PRIORITY_LOW, 0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell 3", task1, RANK_NORMAL, PRIORITY_LOW, 0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0);
+    //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
     
     System.task = System.idle = idle_task;
     
