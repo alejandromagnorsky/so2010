@@ -309,11 +309,14 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	_Sti();
 	
    //for(;;);
-	shellloop(); //Debería crearse 1 proceso para cada TTY, corriendo shelloop cada uno. A cada uno se le setea la tty que maneja. y debería andar.
+	//shellloop(); //Debería crearse 1 proceso para cada TTY, corriendo shelloop cada uno. A cada uno se le setea la tty que maneja. y debería andar.
+
+	TTYS.createTTYs();
+	//Task.new(&(System.tasks[Task.findSlot()]), "Shell1", shellloop, RANK_NORMAL, PRIORITY_HIGH, 0);
 }
 
-
 shellloop(){
+	
   	while(1)
 	{
 	    shell(System.atty);

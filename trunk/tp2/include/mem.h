@@ -53,7 +53,7 @@ int _pageUp(void * pg);
 int _pageDown(void * pg);
 
 void* _sys_malloc(size_t size);
-void _sys_free(void *pointer);
+void _sys_free(void *pointer, int npages);
 
 /* The following functions take a pointer to a Page Directory Entry, and fill
 *   the structure with the given information 
@@ -63,10 +63,15 @@ void        _pd_togglePresent(pentry_t*);
 
 void* _reqpage(task_t task);
 
+void* malloc(size_t size);
+void free(void *pointer);
+
 struct PagingNamespace {
 	void (*start)(int);
-    pentry_t (*createEntry) (void*);
-    void (*togglePresent) (pentry_t*);
+	int (*pageUp)(void * pg);
+	int (*pageDown)(void * pg);
 };
+
+extern struct system_t System;
 
 #endif
