@@ -126,6 +126,8 @@ struct TaskNamespace Task = {
 	_task_getTty,
 	_task_runInBackground,
 	_task_getRunningMode,
+	_task_setParentTID,
+	_task_getParentTID,
 	_task_yield
 };
 
@@ -144,7 +146,7 @@ struct TopNamespace Top = {
 /* Basic getters/setters: */
 
 void _task_setPriority (task_t task, int tpriority) {
-    if (task != NULL && tpriority <= PRIORITY_NEVER && tpriority >= PRIORITY_MAX)
+    if (task != NULL && tpriority <= PRIORITY_MIN && tpriority >= PRIORITY_MAX)
         task->tpriority = tpriority;
         
     return;
@@ -205,6 +207,16 @@ int _task_getRunningMode(task_t task){
 	return task->running_mode;
 }
 
+void _task_setParentTID(task_t task, int parentTID)
+{
+	task->parentTID = parentTID;
+}
+
+int _task_getParentTID(task_t task)
+{
+	return task->parentTID;
+}
+
 int _task_findSlot() {
     int i;
     char found;
@@ -259,19 +271,26 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 
 	if(isFront){
 		task->running_mode = RUNNING_FRONT;
+		
+		// [TODO] ver si lo cambiamos por algo mejor
+		if(task->tid > 1 && task->tid < 6) {
+			Task.setTty(task, task->tid - 2);
+		} else {
+			Task.setTty(task, System.atty);
+		}
 	}else{
-		task->running_mode = RUNNING_BACK;
+		Task.runInBackground(task);
+		task->tty = -1;
 	}
 
 	if(isFront && current->tid > 1)
 	{
-		current->tstatus = STATUS_WAITING;
-		task->parentTID = current->tid;
+		Task.setStatus(current, STATUS_WAITING);
+		Task.setParentTID(task, current->tid);
 	}
 	else
 	{
-		task->parentTID = 0;
-		//Task.runInBackground(task);
+		Task.setParentTID(task, 1);
 	}
 	
 	_Sti();
@@ -280,7 +299,6 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 }
 
 /* Kills the given task */
-// [TODO] check this
 void _task_kill(task_t task)
 {
 	int i;
@@ -296,24 +314,27 @@ void _task_kill(task_t task)
 	/* Looking for task's children in order to kill them */
 	for(i = 0; i < NUM_TASKS; i++)
 	{
-		if(System.tasks[i].tid != 0 && System.tasks[i].parentTID == task->tid)
+		if(System.tasks[i].tid != 0 && Task.getParentTID(&(System.tasks[i])) == task->tid)
 		{
 			Task.kill(&System.tasks[i]);
 		}
 	}
 	
 	/* Need to awake parent if it's not idle and it's waiting */
-	if(task->parentTID != 0)
+	if(Task.getParentTID(task) != 0)
 	{
-		parent = Task.getByTID(task->parentTID);
-		Task.setStatus(parent, STATUS_READY);
+		parent = Task.getByTID(Task.getParentTID(task));
+		if(parent->tid > 1)
+		{
+			Task.setStatus(parent, STATUS_READY);
+		}
 	}
 
     Task.setStatus(task, STATUS_DEAD);
     task->tid = 0;
     task->tname[0] = '\0';
+    
 	/*_sys_free((*task)->stack);*/
-	
 	
 	_Sti();
 }
@@ -330,13 +351,6 @@ int _task_scheduler(int esp)
     new = (task_t) getNextTask(); 
     
     old->esp = esp;
-    
-    /*_Cli();
-    if (++stop < 10) {
-        printf("Old task id: %d (%s) status: %d\n", old->tid, old->tname, old->tstatus);
-        printf("New task id: %d (%s) status: %d\n", new->tid, new->tname, new->tstatus);
-    }
-    _Sti();*/
 
 	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
@@ -435,15 +449,20 @@ static void _task_cleaner(void)
 	task = Task.getCurrent();
 	
 	/* Awake parent if necessary */
-	if(task->parentTID > 1)
+	if(Task.getParentTID(task) > 1)
 	{
-		parent = Task.getByTID(task->parentTID);
-		parent->tstatus = STATUS_READY;
+		parent = Task.getByTID(Task.getParentTID(task));
+		if(parent->tid > 1)
+		{
+			Task.setStatus(parent, STATUS_READY);
+		}
 	}
 	
 	task->tname[0] = '\0';
 	Task.setStatus(task, STATUS_DEAD);
 	task->tid = 0;
+	
+	/*_sys_free((*task)->stack);*/
 	
 	Top.clearTask(task->tid);
 	
@@ -466,15 +485,16 @@ void _task_setupScheduler ()
 	
 	
     idle_task = &(System.tasks[Task.findSlot()] );
-	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_NEVER, 0);
+	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, 0);
     Task.setStatus(idle_task, STATUS_WAITING);
     
     //Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0); //FALTA PONER EN QUE TTY CORREN!
+    //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
+    
+    Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0); 
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell 2", task1, RANK_NORMAL, PRIORITY_LOW, 0);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell 3", task1, RANK_NORMAL, PRIORITY_LOW, 0);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-    //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
     
     System.task = System.idle = idle_task;
     
@@ -565,9 +585,9 @@ void _top_getPriority(char* buffer, task_t task)
 	{
 		strcpy("HIGH", buffer);
 	}
-	else if(Task.getPriority(task) == PRIORITY_NEVER)
+	else if(Task.getPriority(task) == PRIORITY_MIN)
 	{
-		strcpy("NEVER", buffer);
+		strcpy("MIN", buffer);
 	}
 	else if(Task.getPriority(task) == PRIORITY_MEDIUM)
 	{

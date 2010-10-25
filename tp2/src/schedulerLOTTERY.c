@@ -5,9 +5,11 @@ extern struct system_t System;
 extern char scheduling;
 
 task_t priorityRoundRobin();
+int random();
 
 task_t getNextTask()
 {
+	//printf("%d ", random());
     return scheduling ? priorityRoundRobin() : System.task;
 }
 
@@ -33,9 +35,17 @@ task_t dummyScheduler() {
 
 task_t priorityRoundRobin()
 {
-	task_t candidate, new, old;
+	static int max = 0, high = 0, medium = 0, low = 0, min = 0, index = 0;
+	
+	int rand = random();
+	
+	_Cli();
+	
+	/*task_t candidate, new, old;
 	
 	static int left = 0, index = 0;
+	
+	static int times[NUM_TASKS];
     
 	int counter = 0, auxi; 
 	
@@ -58,7 +68,7 @@ task_t priorityRoundRobin()
 		return System.task;
 	}*/
 	
-	if(left == 0) {
+	/*if(left == 0) {
 		candidate = NULL;
 		
         if (old->tstatus == STATUS_RUNNING)
@@ -83,18 +93,66 @@ task_t priorityRoundRobin()
 			
 	    /* We wrap around the array as needed. When counter reaches NUM_TASKS,
 		  we stop. */			
-		} while(++counter < NUM_TASKS);
+		/*} while(++counter < NUM_TASKS);
 		
 		index = auxi;		
 		candidate = candidate ? candidate : System.idle;
 			
 		left = (CANT_PRIORITY - candidate->tpriority - 1) * RATIO;
 		
+		//printf("candidate tid: %d\n", candidate->tid);
 		return candidate;
 		
 	} else {
 		left--;
 	    return System.task;
+	}*/
+	
+	int counter = 0;
+
+	do
+	{
+		index++; // index + min/max, etc
+
+		if(System.tasks[index % CANT_PROCESS]->tid > 1)
+		{
+			if (System.tasks[index % CANT_PROCESS]->tstatus == STATUS_READY)
+			{
+				return &System.tasks[index % CANT_PROCESS];
+			}
+		}
+		counter++;
 	}
+	while (counter < CANT_PROCESS);
+
+	return &idle;
+	    
+	
+	if(rand < 50)
+	{
+		// choose a task with PRIORITY_MAX
+	}
+	else if (rand < 70)
+	{
+		// choose a task with PRIORITY_HIGH
+	}
+	else if (rand < 85)
+	{
+		// choose a task with PRIORITY_MEDIUM
+	}
+	else if(rand < 95)
+	{
+		// choose a task with PRIORITY_LOW
+	}
+	else
+	{
+		// choose a task with PRIORITY_MIN
+	}
+	
 }
 
+int random()
+{
+	static int prev = 89;
+	return prev = (prev + 263) % 100;
+}

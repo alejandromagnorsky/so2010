@@ -240,7 +240,10 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-            ret = ((program_t) ebx)((char*) ecx);           
+            ret = ((program_t) ebx)((char*) ecx);  
+            
+            /*ret = Task.new(&(System.tasks[Task.findSlot()]), "Task", 
+            				(program_t) ebx, RANK_NORMAL, PRIORITY_HIGH, 0);*/         
             MOVTO_EAX(ret);
             
             

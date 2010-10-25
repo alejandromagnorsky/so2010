@@ -347,8 +347,6 @@ _newStack:
     push ebp
     mov ebp, esp
     
-        pushfd
-        
             mov eax, [ebp + 12] ; Pointer to the bottom of the new stack.
             mov esp, eax        ; We switch to the new stack
             
@@ -366,8 +364,6 @@ _newStack:
             pushad              ; Trash. Won't matter.
             mov eax, esp        ; Return the moved stack pointer.
             
-        popfd
-    
     mov esp, ebp
     pop ebp
     ret

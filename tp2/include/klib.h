@@ -41,14 +41,14 @@ enum {
     PRIORITY_HIGH,
     PRIORITY_MEDIUM,
     PRIORITY_LOW,
-    PRIORITY_NEVER
+    PRIORITY_MIN
 };
 
 enum {
     STATUS_READY,
     STATUS_WAITING,
     STATUS_DEAD,
-    STATUS_RUNNING /* ? */
+    STATUS_RUNNING
 };
 
 typedef int (*program_t) (char*);
@@ -286,6 +286,8 @@ struct TaskNamespace {
 	int (*getTty)(task_t);
 	void (*runInBackground)(task_t);
 	int (*getRunningMode)(task_t);
+	void (*setParentTID)(task_t, int);
+	int (*getParentTID)(task_t);
 	void (*yield)(task_t);
 };
 
@@ -319,6 +321,8 @@ void _task_setTty(task_t, int);
 int _task_getTty(task_t);
 void _task_runInBackground(task_t);
 int _task_getRunningMode(task_t);
+void _task_setParentTID(task_t task, int parentTID);
+int _task_getParentTID(task_t task);
 
 int _task_new (task_t slot, char* name, program_t, int rank, 
 					int priority, int isFront);
