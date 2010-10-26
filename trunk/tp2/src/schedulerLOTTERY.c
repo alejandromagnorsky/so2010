@@ -32,7 +32,9 @@ task_t lottery()
 	
 	if (old->tstatus == STATUS_RUNNING)
             old->tstatus = STATUS_READY;
-	
+            
+    /* It gives higher priority tasks more chances of running, and chances
+       decrement as priorities do */
 	if(rand < 50)
 	{
 		/* If there is one ready, choose a task with PRIORITY_MAX, if not look
@@ -258,5 +260,5 @@ task_t findTask(int priority)
 int random()
 {
 	static int prev = 89;
-	return prev = (prev + 263) % 100;
+	return prev = (prev + 263 + System.ticks) % 100;
 }

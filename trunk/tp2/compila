@@ -17,5 +17,5 @@ gcc -c ../src/gralprotection.c -o gralprotection.o -fno-builtin -march=i386 -mtu
 gcc -c ../src/mem.c -o mem.o -fno-builtin -march=i386 -mtune=i386 -m32
 gcc -c ../src/task.c -o task.o -fno-builtin -march=i386 -mtune=i386 -m32
 gcc -c ../src/tty.c -o tty.o -fno-builtin -march=i386 -mtune=i386 -m32
-gcc -c ../src/schedulerPRR.c -o scheduler.o -fno-builtin -march=i386 -mtune=i386 -m32
+gcc -c ../src/schedulerLOTTERY.c -o scheduler.o -fno-builtin -march=i386 -mtune=i386 -m32
 ld -T ../src/link.ld -o kernel.bin kernel.o kstart.o libc.o libasm.o io.o string.o klib.o keyboard.o shell.o screen.o cpuid.o gralprotection.o mem.o task.o tty.o scheduler.o -melf_i386

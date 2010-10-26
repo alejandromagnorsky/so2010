@@ -302,8 +302,8 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 	Task.setupScheduler();
 
-        TTYS.initialize();
-        TTYS.refresh();
+    TTYS.initialize();
+    TTYS.refresh();
 
 	TTYS.createTTYs();
 	
