@@ -47,7 +47,6 @@ task_t priorityRoundRobin()
 	    
 	    if (old->tstatus == STATUS_READY)	
 	    {
-	    	printf("IS A SERVER");
 		    return System.task;
 	    }
 		    

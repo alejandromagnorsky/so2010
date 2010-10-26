@@ -18,10 +18,16 @@ struct TTYSNamespace TTYS = {
 };
 
 void _createTtys(){
+	System.atty = 0;
+	TTYS.jumpToTTY(0);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	TTYS.jumpToTTY(1);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	TTYS.jumpToTTY(2);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	TTYS.jumpToTTY(3);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, 0);
+	TTYS.jumpToTTY(0);
 }
 
 int _createTty(char * a){
