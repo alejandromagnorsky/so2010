@@ -9,28 +9,7 @@ int random();
 
 task_t getNextTask()
 {
-	//printf("%d ", random());
     return scheduling ? priorityRoundRobin() : System.task;
-}
-
-/* Dummy scheduler is working */
-task_t dummyScheduler() {
-    int i, stop;
-    static int last = 0;
-    
-    i = stop = (last + 1) % NUM_TASKS;
-    
-    do {
-    
-        if (System.tasks[i].tid != 0)
-            return System.tasks + (last = i);
-        
-        i = (i + 1) % NUM_TASKS;
-        
-    } while (i != stop);
-    
-    return System.idle;
-    
 }
 
 task_t priorityRoundRobin()
@@ -114,18 +93,18 @@ task_t priorityRoundRobin()
 	{
 		index++; // index + min/max, etc
 
-		if(System.tasks[index % CANT_PROCESS]->tid > 1)
+		if(System.tasks[index % NUM_TASKS]->tid > 1)
 		{
-			if (System.tasks[index % CANT_PROCESS]->tstatus == STATUS_READY)
+			if (System.tasks[index % NUM_TASKS]->tstatus == STATUS_READY)
 			{
-				return &System.tasks[index % CANT_PROCESS];
+				return &System.tasks[index % NUM_TASKS];
 			}
 		}
 		counter++;
 	}
-	while (counter < CANT_PROCESS);
+	while (counter < NUM_TASKS);
 
-	return &idle;
+	return System.idle;
 	    
 	
 	if(rand < 50)
