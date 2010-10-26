@@ -267,17 +267,8 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     task->esp = _newStack (program, task->stack_start, Task.cleaner);
 	//_pageDown(task->stack);
 	
-	// [TODO] check this
-
 	if(isFront){
 		task->running_mode = RUNNING_FRONT;
-		
-		// [TODO] ver si lo cambiamos por algo mejor
-		/*if(task->tid > 1 && task->tid < 6) {
-			Task.setTty(task, task->tid - 2);
-		} else {
-			Task.setTty(task, System.atty);
-		}*/
 		Task.setTty(task, System.atty);
 	}else{
 		Task.runInBackground(task);
@@ -372,8 +363,6 @@ int _task_scheduler(int esp)
 	System.last100[System.last100Counter] = new->tid;
 	Top.increment100Counter();
 	
-	//printf("%d\n", new->tid);
-
 	return new->esp;
 }
 
@@ -396,37 +385,6 @@ task_t _task_getCurrent() {
 /* Idle task */
 int idle (char* line) {
 	for(;;);
-	   //printf("%d ", System.idle->tid);
-}
-
-// [TODO] remove this
-int task1 (char* line) {
-	shellloop();
-}
-
-int task2 (char* line) {
-    int i = 0;
-    printf("task 2 started... \n");
-    printf("task 2 killing task 3...\n");
-    Task.kill(&(System.tasks[1]));
-    printf("task 3 killed...\n");    
-    while(System.ticks < 20)
-    {
-    	//Top.run();
-    }
-	printf("task 2 finishing... \n");
-    return 1;
-}
-
-int task3 (char* line) {
-    int i = 0;
-    printf("task 3 started... \n");
-    while(System.ticks < 30)
-    {
-    	//Top.run();
-    }
-	printf("task 3 finishing... \n");
-    return 1;
 }
 
 /* Returns an unused tid */
@@ -484,18 +442,9 @@ void _task_setupScheduler ()
 
 	/* What we need to initialize is the idle task: */
 	
-	
     idle_task = &(System.tasks[Task.findSlot()] );
 	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, 0);
     Task.setStatus(idle_task, STATUS_WAITING);
-    
-    //Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
-    //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
-    
-	/*Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0); 
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell 2", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell 3", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0);*/
     
     System.task = System.idle = idle_task;
     
@@ -507,7 +456,6 @@ void _task_setupScheduler ()
 
 void _task_yield(task_t task)
 {
-	// [TODO] should this cli be here, and is it right not to incude a sti?
 	_Cli();
 	Task.setStatus(task, STATUS_WAITING);
 	_Sti();

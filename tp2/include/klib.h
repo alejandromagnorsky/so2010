@@ -99,6 +99,7 @@ struct task_t {
 
 	block_t mem;
 
+	// [TODO] we are not using this:
     struct {
         int devcode;
         int wpos;
