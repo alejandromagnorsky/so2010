@@ -60,4 +60,9 @@ struct TTYSNamespace {
 	void (*createTTYs)();
 };
 
+int _createTty1(char * a);
+int _createTty2(char * a);
+int _createTty3(char * a);
+int _createTty4(char * a);
+
 #endif
