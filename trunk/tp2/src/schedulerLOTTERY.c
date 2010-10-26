@@ -69,7 +69,7 @@ task_t lottery()
 			}
 		}
 	}
-	if (rand < 70)
+	else if (rand < 70)
 	{
 		/* If there is one ready, choose a task with PRIORITY_HIGH, if not look
 		   for another one in priority order */
@@ -103,7 +103,7 @@ task_t lottery()
 			}
 		}
 	}
-	if (rand < 85)
+	else if (rand < 85)
 	{
 		/* If there is one ready, choose a task with PRIORITY_MEDIUM, if not look
 		   for another one in priority order */
@@ -137,7 +137,7 @@ task_t lottery()
 			}
 		}
 	}
-	if(rand < 95)
+	else if(rand < 95)
 	{
 		/* If there is one ready, choose a task with PRIORITY_LOW, if not look
 		   for another one in priority order */
