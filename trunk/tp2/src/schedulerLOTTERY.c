@@ -260,5 +260,5 @@ task_t findTask(int priority)
 int random()
 {
 	static int prev = 89;
-	return prev = (prev + 263 + System.ticks) % 100;
+	return prev = (prev + 263 + System.ticks * 5) % 100;
 }
