@@ -304,19 +304,15 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
     TTYS.initialize();
     TTYS.refresh();
-
 	TTYS.createTTYs();
+
 	
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
-	_Sti();
 	
-   //for(;;);
-	//shellloop(); //Debería crearse 1 proceso para cada TTY, corriendo shelloop cada uno. A cada uno se le setea la tty que maneja. y debería andar.
-
-	//Task.new(&(System.tasks[Task.findSlot()]), "Shell1", shellloop, RANK_NORMAL, PRIORITY_HIGH, 0);
+	_Sti();
 }
 
 shellloop(){
