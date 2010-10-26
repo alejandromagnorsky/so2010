@@ -273,11 +273,12 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 		task->running_mode = RUNNING_FRONT;
 		
 		// [TODO] ver si lo cambiamos por algo mejor
-		if(task->tid > 1 && task->tid < 6) {
+		/*if(task->tid > 1 && task->tid < 6) {
 			Task.setTty(task, task->tid - 2);
 		} else {
 			Task.setTty(task, System.atty);
-		}
+		}*/
+		Task.setTty(task, System.atty);
 	}else{
 		Task.runInBackground(task);
 		task->tty = -1;
@@ -491,10 +492,10 @@ void _task_setupScheduler ()
     //Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
     //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
     
-    Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0); 
+	/*Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0); 
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell 2", task1, RANK_NORMAL, PRIORITY_LOW, 0);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell 3", task1, RANK_NORMAL, PRIORITY_LOW, 0);
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0);*/
     
     System.task = System.idle = idle_task;
     
