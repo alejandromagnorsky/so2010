@@ -304,8 +304,8 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
     TTYS.initialize();
     TTYS.refresh();
-	TTYS.createTTYs();
 
+	TTYS.createTTYs();
 	
     /* Gracias */
     _mascaraPIC1(0xFC);
@@ -313,6 +313,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 	
 	_Sti();
+	
 }
 
 shellloop(){

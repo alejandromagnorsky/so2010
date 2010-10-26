@@ -11,26 +11,6 @@ task_t getNextTask()
     return scheduling ? priorityRoundRobin() : System.task;
 }
 
-/* Dummy scheduler is working */
-task_t dummyScheduler() {
-    int i, stop;
-    static int last = 0;
-    
-    i = stop = (last + 1) % NUM_TASKS;
-    
-    do {
-    
-        if (System.tasks[i].tid != 0)
-            return System.tasks + (last = i);
-        
-        i = (i + 1) % NUM_TASKS;
-        
-    } while (i != stop);
-    
-    return System.idle;
-    
-}
-
 task_t priorityRoundRobin()
 {
 	task_t candidate, new, old;
@@ -51,11 +31,6 @@ task_t priorityRoundRobin()
 	    }
 		    
 	}
-	
-	/*if(System.task->tid == 0)
-	{
-		return System.task;
-	}*/
 	
 	if(left == 0) {
 		candidate = NULL;
