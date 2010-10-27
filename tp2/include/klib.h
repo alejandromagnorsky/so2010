@@ -17,7 +17,7 @@ extern struct PagingNamespace Paging;
 #define USER_DEVICES 10
 #define NUM_TTYS 4
 
-#define NUM_TASKS 10
+#define NUM_TASKS 20
 
 #define QUANTUM 2
 

@@ -9,7 +9,6 @@
 
 extern struct system_t System;
 extern struct TaskNamespace Task;
-extern struct TopNamespace Top;
 
 int testTasks(char * a);
 int task1 (char* line);

@@ -225,8 +225,13 @@ int _task_findSlot() {
 	for (i = 0; i < NUM_TASKS; i++)
         if ( found = (System.tasks[i].tid == 0) ) break;
 
-    return (found ? i : 0);
-
+	if(found)
+	{
+		return i;
+	} else {
+		printf("Sorry, but there is no room available for more tasks");
+		return -1;
+	}
 }
 
 int _task_new (task_t task, char* name, program_t program, int rank, 
@@ -434,6 +439,11 @@ static void _task_cleaner(void)
 void _task_setupScheduler ()
 {
     task_t idle_task;
+    int slot = Task.findSlot();
+    if(slot == -1)
+    {
+    	return;
+    }
 	/*
      * System.tasks array should already be zeroed
      * That is, all the IDs are set to 0, which is considered an empty
@@ -442,17 +452,9 @@ void _task_setupScheduler ()
 
 	/* What we need to initialize is the idle task: */
 	
-    idle_task = &(System.tasks[Task.findSlot()] );
+    idle_task = &(System.tasks[slot] );
 	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, RUNNING_BACK, NO_TTY);
     Task.setStatus(idle_task, STATUS_WAITING);
-    
-    //Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
-    //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
-    
-    //Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0, 0); 
-	//Task.new(&(System.tasks[Task.findSlot()]), "Shell 2", task1, RANK_NORMAL, PRIORITY_LOW, 0, 1);
-	//Task.new(&(System.tasks[Task.findSlot()]), "Shell 3", task1, RANK_NORMAL, PRIORITY_LOW, 0, 2);
-	//Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0, 3);
     
     System.task = System.idle = idle_task;
     

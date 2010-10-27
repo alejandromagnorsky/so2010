@@ -295,7 +295,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
     printf("Memory detected: %d KB\n", (mbd->mem_lower + mbd->mem_upper));
     printf("Paging the memory ............. ");
-    Paging.start((mbd->mem_lower + mbd->mem_upper));
+    Paging.start(mbd->mem_lower + mbd->mem_upper);
     printf("OK\n\n");
 
 	Task.setupScheduler();
@@ -303,6 +303,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     TTYS.initialize();
     TTYS.refresh();
 
+	System.atty = TTY0;
 	TTYS.createTTYs();
 	
     /* Gracias */
@@ -311,8 +312,8 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 	_Sti();
 
-	System.atty = TTY0;
-	TTYS.createTTYs();
+	//System.atty = TTY0;
+	//TTYS.createTTYs();
 	
 }
 
