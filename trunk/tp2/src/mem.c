@@ -111,9 +111,9 @@ int _pageDown(void * pg){
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
 	int i = 0;
 	tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
-	printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]); 
+	//printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]); 
 	tbl[GETTBLENTRY(address)] ^= PRESENT;
-	printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]);	
+	//printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]);	
 	address += PAGESIZE;
 }
 

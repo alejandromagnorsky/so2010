@@ -10,6 +10,7 @@
 #include "kernel.h"
 #include "cpuid.h"
 #include "gralprotection.h"
+#include "task.h"
 
 void input_handler();
 void parse_command();

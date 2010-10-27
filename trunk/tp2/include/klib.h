@@ -2,7 +2,6 @@
 #define _KLIB_H_
 
 #include "defs.h"
-#include "task.h"
 
 /************************************************
 ** Constants and definitions:
