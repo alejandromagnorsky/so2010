@@ -58,6 +58,7 @@ struct TTYSNamespace {
 	void (*load)();
 	void (*jumpToTTY)(int);
 	void (*createTTYs)();
+	void (*switchTTY)(int);
 };
 
 

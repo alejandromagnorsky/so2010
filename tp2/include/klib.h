@@ -2,6 +2,7 @@
 #define _KLIB_H_
 
 #include "defs.h"
+//#include "tty.h"
 
 extern struct PagingNamespace Paging;
 
@@ -64,6 +65,14 @@ enum {
     DEVICE_SCREEN = 0,
     DEVICE_KEYBOARD,
 	DEVICE_TTY
+};
+
+enum{
+	NO_TTY = -1,
+	TTY0 = 0,
+	TTY1,
+	TTY2,
+	TTY3
 };
 
 enum {
@@ -272,8 +281,7 @@ struct TaskNamespace {
     int (*getTID) (task_t task);
     
     int (*findSlot) ();
-    
-    int (*new) (task_t, char*, program_t, int, int, int);
+    int (*new) (task_t, char*, program_t, int, int, int, int);
     void (*kill) (task_t task);
 
     task_t (*getByTID) (int);
@@ -326,8 +334,8 @@ int _task_getRunningMode(task_t);
 void _task_setParentTID(task_t task, int parentTID);
 int _task_getParentTID(task_t task);
 
-int _task_new (task_t slot, char* name, program_t, int rank, 
-					int priority, int isFront);
+int _task_new (task_t task, char* name, program_t program, int rank, 
+			int priority, int isFront, int tty);
 void _task_kill(task_t task);
 
 task_t _task_getByTID (int tid);

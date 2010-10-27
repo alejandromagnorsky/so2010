@@ -6,6 +6,7 @@ void _load();
 void _jumpToTTY(int ntty);
 void _createTtys();
 int _createTty(char * a);
+void _switchTTY(int ntty);
 
 /* Namespace structure */
 struct TTYSNamespace TTYS = {
@@ -14,19 +15,15 @@ struct TTYSNamespace TTYS = {
 	_save,
 	_load,
 	_jumpToTTY,
-	_createTtys
+	_createTtys,
+	_switchTTY
 };
 
 void _createTtys(){
-	TTYS.jumpToTTY(0);
-	Task.new(&(System.tasks[Task.findSlot()]), "tty0", _createTty, RANK_NORMAL, PRIORITY_HIGH, 1);
-	TTYS.jumpToTTY(1);
-	Task.new(&(System.tasks[Task.findSlot()]), "tty1", _createTty, RANK_NORMAL, PRIORITY_HIGH, 1);
-	TTYS.jumpToTTY(2);
-	Task.new(&(System.tasks[Task.findSlot()]), "tty2", _createTty, RANK_NORMAL, PRIORITY_HIGH, 1);
-	TTYS.jumpToTTY(3);
-	Task.new(&(System.tasks[Task.findSlot()]), "tty3", _createTty, RANK_NORMAL, PRIORITY_HIGH, 1);
-	TTYS.jumpToTTY(0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY3);
 }
 
 int _createTty(char * a){
@@ -93,3 +90,10 @@ void _jumpToTTY(int ntty){
 	TTYS.refresh();
 	Keyboard.updateLeds();
 }
+
+void _switchTTY(int ntty){
+	System.device[DEVICE_TTY]->wpos = ttys[ntty].output.wpos;
+	System.device[DEVICE_TTY]->rpos = ttys[ntty].output.rpos;
+	System.device[DEVICE_TTY]->addr = ttys[ntty].output.address;
+}
+

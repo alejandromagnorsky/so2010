@@ -164,16 +164,16 @@ void int_21(){
 	} else if(keyPressed->type == SPECIAL_KEY) {
 		switch(keyPressed->scan_code){
 			case F1:
-				TTYS.jumpToTTY(0);
+				TTYS.jumpToTTY(TTY0);
 				break;
 			case F2:
-				TTYS.jumpToTTY(1);
+				TTYS.jumpToTTY(TTY1);
 				break;
 			case F3:
-				TTYS.jumpToTTY(2);					
+				TTYS.jumpToTTY(TTY2);					
 				break;
 			case F4:
-				TTYS.jumpToTTY(3);
+				TTYS.jumpToTTY(TTY3);
 				break;
 			default:
 				escapedKey(keyPressed->scan_code);
@@ -310,11 +310,14 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     _mascaraPIC2(0xFF);
 
 	_Sti();
+
+	System.atty = TTY0;
+	TTYS.createTTYs();
 	
 }
 
 shellloop(){
-	
+	printf("Inicio shellloop con TTY: %d\n", System.task->tty);
   	while(1)
 	{
 	    shell(System.atty);
