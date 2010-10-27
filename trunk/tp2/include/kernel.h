@@ -46,6 +46,7 @@ extern struct driver_t KeyboardDriver;
 extern struct driver_t ScreenDriver;
 extern struct driver_t TtyDriver;
 extern struct PagingNamespace Paging;
+extern struct TaskNamespace Task;
 extern struct TTYSNamespace TTYS;
 extern struct KBNamespace Keyboard;
 

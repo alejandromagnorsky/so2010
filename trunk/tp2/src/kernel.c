@@ -7,8 +7,6 @@ int tickpos = -2;
 
 char scheduling = 0;
 
-extern struct TaskNamespace Task;
-
 tty_t ttys[NTTYS];
 
 /************************************************

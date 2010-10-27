@@ -3,6 +3,8 @@
 
 #include "defs.h"
 
+extern struct PagingNamespace Paging;
+
 /************************************************
 ** Constants and definitions:
 *************************************************/
