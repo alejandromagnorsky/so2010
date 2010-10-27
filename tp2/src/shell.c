@@ -1,7 +1,5 @@
 #include "../include/shell.h"
 
-#define SHELL_PROMPT "SuciOS_tty%d$ "
-
 #define NUM_COMMANDS 9
 
 static struct {

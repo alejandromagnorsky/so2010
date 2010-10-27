@@ -14,7 +14,6 @@ int task1 (char* line) {
     while(i < 100000)
     {
     	i++;
-        //Top.run();
     }
 	printf("task 1 finishing... \n");
     return 1;
@@ -29,7 +28,6 @@ int task2 (char* line) {
     while(i < 2000)
     {
     	i++;
-        //Top.run();
     }
 	printf("task 2 finishing... \n");
     return 1;
@@ -41,7 +39,6 @@ int task3 (char* line) {
     while(i < 10000000)
     {
     	i++;
-        //Top.run();
     }
 	printf("task 3 finishing... \n");
     return 1;

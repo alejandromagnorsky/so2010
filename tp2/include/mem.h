@@ -70,6 +70,7 @@ struct PagingNamespace {
 	void (*start)(int);
 	int (*pageUp)(void * pg);
 	int (*pageDown)(void * pg);
+	void (*freeMem)(void *, int );
 };
 
 extern struct system_t System;

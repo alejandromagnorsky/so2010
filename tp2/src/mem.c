@@ -32,6 +32,7 @@ struct PagingNamespace Paging =
 	_startPaging,
 	_pageUp,
 	_pageDown,
+	_sys_free
 };
 
 

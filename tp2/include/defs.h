@@ -6,6 +6,8 @@
 #ifndef _defs_
 #define _defs_
 
+#define SHELL_PROMPT "SuciOS_tty%d$ "
+
 #define NULL 0
 
 #define TRUE    1

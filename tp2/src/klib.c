@@ -262,10 +262,12 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	    Task.setStatus(task, STATUS_READY);
     }
 	
-	//_pageUp(task->stack);
+	//Paging.pageUp(task->stack);
+	_pageUp(task->stack);
 
     task->esp = _newStack (program, task->stack_start, Task.cleaner);
-	//_pageDown(task->stack);
+    //Paging.pageDown(task->stack);
+	_pageDown(task->stack);
 	
 	if(isFront){
 		task->running_mode = RUNNING_FRONT;
@@ -325,7 +327,8 @@ void _task_kill(task_t task)
     task->tid = 0;
     task->tname[0] = '\0';
     
-	/*_sys_free((*task)->stack);*/
+	//Paging.freeMem(task->stack,1);
+	_sys_free(task->stack,1);
 	
 	_Sti();
 }
@@ -346,9 +349,10 @@ int _task_scheduler(int esp)
 	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
 
-		/*_pageDown(old->stack);
+		//Paging.pageDown(old->stack);
+		//Paging.pageUp(new->stack);
+		_pageDown(old->stack);
 		_pageUp(new->stack);
-		*/
 
 	    if (old->tstatus == STATUS_RUNNING)
 	        Task.setStatus(old, STATUS_READY);
@@ -420,7 +424,8 @@ static void _task_cleaner(void)
 	Task.setStatus(task, STATUS_DEAD);
 	task->tid = 0;
 	
-	/*_sys_free((*task)->stack);*/
+	//Paging.freeMem(task->stack,1);
+	_sys_free(task->stack,1);
 	
 	Top.clearTask(task->tid);
 	
