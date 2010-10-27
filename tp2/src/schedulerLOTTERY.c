@@ -17,9 +17,7 @@ task_t lottery()
 {
 	int rand = random();
 	
-	task_t task, old;
-	
-	old = System.task;
+	task_t task, old = System.task;
 	
 	if (old->tid != 0 && old->trank == RANK_SERVER) {
 	    
@@ -211,7 +209,7 @@ task_t lottery()
 
 task_t findTask(int priority)
 {
-	static int max = 0, high = 0, medium = 0, low = 0, min = 0, index = 0;
+	static int max = 0, high = 0, medium = 0, low = 0, min = 0;
 	task_t task;
 	int counter = 0;
 	do

@@ -282,7 +282,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	}
 	else
 	{
-		Task.setParentTID(task, 1);
+		Task.setParentTID(task, System.idle->tid);
 	}
 	
 	_Sti();
@@ -295,6 +295,8 @@ void _task_kill(task_t task)
 {
 	int i;
 	task_t parent;
+	
+	int idleAndTTYs = 4;
 
 	_Cli();
 	
@@ -306,20 +308,17 @@ void _task_kill(task_t task)
 	/* Looking for task's children in order to kill them */
 	for(i = 0; i < NUM_TASKS; i++)
 	{
-		if(System.tasks[i].tid != 0 && Task.getParentTID(&(System.tasks[i])) == task->tid)
+		if(System.tasks[i].tid > idleAndTTYs && Task.getParentTID(&(System.tasks[i])) == task->tid)
 		{
 			Task.kill(&System.tasks[i]);
 		}
 	}
 	
 	/* Need to awake parent if it's not idle and it's waiting */
-	if(Task.getParentTID(task) != 0)
+	if(Task.getParentTID(task) > 1)
 	{
 		parent = Task.getByTID(Task.getParentTID(task));
-		if(parent->tid > 1)
-		{
-			Task.setStatus(parent, STATUS_READY);
-		}
+		Task.setStatus(parent, STATUS_READY);
 	}
 
     Task.setStatus(task, STATUS_DEAD);
