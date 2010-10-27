@@ -2,6 +2,8 @@
 
 #define NUM_COMMANDS 9
 
+#define SHELL_PROMPT "SuciOS_tty%d$ "
+
 static struct {
     char line[LINEBUF_LEN];
     int pos;

@@ -2,9 +2,24 @@
 
 int testTasks(char * a)
 {
-	Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, TTY0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, TTY0);
-    Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, TTY0);
+	int slot = Task.findSlot();
+		if(slot == -1)
+		{
+			return -1;
+		}
+	Task.new(&(System.tasks[slot]), "Task 3", task3, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
+		slot = Task.findSlot();
+		if(slot == -1)
+		{
+			return -1;
+		}
+    Task.new(&(System.tasks[slot]), "Task 1", task1, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
+    	slot = Task.findSlot();
+		if(slot == -1)
+		{
+			return -1;
+		}
+    Task.new(&(System.tasks[slot]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
     return 1;
 }
 
