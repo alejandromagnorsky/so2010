@@ -230,7 +230,7 @@ int _task_findSlot() {
 }
 
 int _task_new (task_t task, char* name, program_t program, int rank, 
-			int priority, int isFront) {
+			int priority, int running_mode, int tty) {
     /* Create a new task, given a program and its rank and priority */
     int i;
     char found;
@@ -243,6 +243,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     
 	strcpy(name, task->tname);
 	task->tid = Task.getNewTID();
+	Task.setTty(task, tty);
 	Task.setPriority(task, priority);
 	Task.setRank(task, rank);
     task->stack_size = DEFAULT_STACK_SIZE;
@@ -253,12 +254,9 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     task->stack = System.malloc(DEFAULT_STACK_SIZE);
     task->stack_start = task->stack + DEFAULT_STACK_SIZE - 1;
     
-    if(rank == RANK_SERVER)
-    {
+    if(rank == RANK_SERVER){
 		Task.setStatus(task, STATUS_WAITING);
-    }
-    else 
-    {
+    }else{
 	    Task.setStatus(task, STATUS_READY);
     }
 	
@@ -269,21 +267,17 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     //Paging.pageDown(task->stack);
 	_pageDown(task->stack);
 	
-	if(isFront){
+	if(running_mode == RUNNING_FRONT){
 		task->running_mode = RUNNING_FRONT;
-		Task.setTty(task, System.atty);
+		Task.setTty(task, tty);
 	}else{
 		Task.runInBackground(task);
-		task->tty = -1;
 	}
 
-	if(isFront && current->tid > 1)
-	{
+	if(running_mode == RUNNING_FRONT && current->tid > 1){
 		Task.setStatus(current, STATUS_WAITING);
 		Task.setParentTID(task, current->tid);
-	}
-	else
-	{
+	}else{
 		Task.setParentTID(task, System.idle->tid);
 	}
 	
@@ -348,6 +342,7 @@ int _task_scheduler(int esp)
 
 	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
+		//TTYS.switchTTY(new->tty) (NO PUEDO INCLUIR TTY.H!!!!!);	
 
 		//Paging.pageDown(old->stack);
 		//Paging.pageUp(new->stack);
@@ -357,8 +352,9 @@ int _task_scheduler(int esp)
 	    if (old->tstatus == STATUS_RUNNING)
 	        Task.setStatus(old, STATUS_READY);
 
-	    if (new != System.idle)        
+	    if (new != System.idle){      
     	    Task.setStatus(new, STATUS_RUNNING);
+		}
 	    
 	}
 	
@@ -447,8 +443,16 @@ void _task_setupScheduler ()
 	/* What we need to initialize is the idle task: */
 	
     idle_task = &(System.tasks[Task.findSlot()] );
-	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, 0);
+	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, RUNNING_BACK, NO_TTY);
     Task.setStatus(idle_task, STATUS_WAITING);
+    
+    //Task.new(&(System.tasks[Task.findSlot()]), "Task 3", task3, RANK_NORMAL, PRIORITY_HIGH, 0);
+    //Task.new(&(System.tasks[Task.findSlot()]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, 0);
+    
+    //Task.new(&(System.tasks[Task.findSlot()]), "Shell 1", task1, RANK_NORMAL, PRIORITY_LOW, 0, 0); 
+	//Task.new(&(System.tasks[Task.findSlot()]), "Shell 2", task1, RANK_NORMAL, PRIORITY_LOW, 0, 1);
+	//Task.new(&(System.tasks[Task.findSlot()]), "Shell 3", task1, RANK_NORMAL, PRIORITY_LOW, 0, 2);
+	//Task.new(&(System.tasks[Task.findSlot()]), "Shell 4", task1, RANK_NORMAL, PRIORITY_LOW, 0, 3);
     
     System.task = System.idle = idle_task;
     
