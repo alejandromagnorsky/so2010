@@ -364,6 +364,7 @@ int _task_scheduler(int esp)
 	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
 
+		switchTTY(new, old);		
 		//Paging.pageDown(old->stack);
 		//Paging.pageUp(new->stack);
 		_pageDown(old->stack);
@@ -375,8 +376,7 @@ int _task_scheduler(int esp)
 	    if (new != System.idle){      
     	    Task.setStatus(new, STATUS_RUNNING);
 		}
-	
-		switchTTY(new, old);	    
+			    
 	}
 	
 	/* saving process in last 100 executed*/
@@ -387,11 +387,16 @@ int _task_scheduler(int esp)
 }
 
 void switchTTY(task_t newt, task_t oldt){
-		ttys[oldt->tty].output.wpos = System.device[DEVICE_TTY]->wpos;
-		ttys[oldt->tty].output.rpos = System.device[DEVICE_TTY]->rpos;
-		System.device[DEVICE_TTY]->wpos = ttys[newt->tty].output.wpos;
-		System.device[DEVICE_TTY]->rpos = ttys[newt->tty].output.rpos;
-		System.device[DEVICE_TTY]->addr = (void*) ttys[newt->tty].output.address;
+	ttys[oldt->tty].output.wpos = System.device[DEVICE_TTY]->wpos;
+	ttys[oldt->tty].output.rpos = System.device[DEVICE_TTY]->rpos;
+	ttys[oldt->tty].input.inputbuffer.wpos = System.device[DEVICE_KEYBOARD]->wpos;
+	ttys[oldt->tty].input.inputbuffer.rpos = System.device[DEVICE_KEYBOARD]->rpos;
+	System.device[DEVICE_TTY]->wpos = ttys[newt->tty].output.wpos;
+	System.device[DEVICE_TTY]->rpos = ttys[newt->tty].output.rpos;
+	System.device[DEVICE_TTY]->addr = (void*) ttys[newt->tty].output.address;
+	System.device[DEVICE_KEYBOARD]->wpos = ttys[newt->tty].input.inputbuffer.wpos;
+	System.device[DEVICE_KEYBOARD]->rpos = ttys[newt->tty].input.inputbuffer.rpos;
+	System.device[DEVICE_KEYBOARD]->addr = ttys[newt->tty].input.inputbuffer.address;	
 }
 
 task_t _task_getByTID(int tid) {

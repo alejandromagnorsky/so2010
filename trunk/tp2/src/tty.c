@@ -20,7 +20,7 @@ struct TTYSNamespace TTYS = {
 };
 
 void _runShells(){
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);//Cambiar a la nueva forma
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY3);
@@ -45,7 +45,6 @@ void _initialize_tty(tty_t * tty){
 }
 
 void _initializeInput(input_t * input){
-	input->linebuffer.pos = 0;
 	input->flags.shift_status = 0;
 	input->flags.mayus_status = 0;
 	input->flags.num_status = 0;
@@ -63,26 +62,33 @@ void _initializeOutput(output_t * output){
 void _refresh(){
 	System.device[DEVICE_TTY]->wpos = ttys[System.atty].output.wpos;
 	System.device[DEVICE_TTY]->rpos = ttys[System.atty].output.rpos;
-	System.device[DEVICE_TTY]->addr = (void*) ttys[System.atty].output.address;	
+	System.device[DEVICE_TTY]->addr = (void*) ttys[System.atty].output.address;
+	System.device[DEVICE_KEYBOARD]->wpos = ttys[System.atty].input.inputbuffer.wpos;
+	System.device[DEVICE_KEYBOARD]->rpos = ttys[System.atty].input.inputbuffer.rpos;
+	System.device[DEVICE_KEYBOARD]->addr = ttys[System.atty].input.inputbuffer.address;
 
 	_memcpy(System.device[DEVICE_TTY]->addr, System.device[DEVICE_SCREEN]->addr, VIDEO_SIZE);
 
 	move_cursor(System.device[DEVICE_TTY]->wpos / 2);
 
-	System.device[DEVICE_SCREEN]->wpos = System.device[DEVICE_TTY]->wpos;
-	ttys[System.atty].output.wpos = System.device[DEVICE_SCREEN]->wpos;
-	
+	//System.device[DEVICE_SCREEN]->wpos = System.device[DEVICE_TTY]->wpos;
+	//ttys[System.atty].output.wpos = System.device[DEVICE_SCREEN]->wpos;
 }
 
 void _save(){
 	ttys[System.atty].output.wpos = System.device[DEVICE_SCREEN]->wpos;
 	ttys[System.atty].output.rpos = System.device[DEVICE_SCREEN]->rpos;
+	ttys[System.atty].input.inputbuffer.wpos =	System.device[DEVICE_KEYBOARD]->wpos;
+	ttys[System.atty].input.inputbuffer.rpos = System.device[DEVICE_KEYBOARD]->rpos;
 }
 
 void _load(){
 	System.device[DEVICE_TTY]->wpos = System.device[DEVICE_SCREEN]->wpos = ttys[System.atty].output.wpos;
 	System.device[DEVICE_TTY]->rpos = System.device[DEVICE_SCREEN]->rpos = ttys[System.atty].output.rpos;
 	System.device[DEVICE_TTY]->addr = (void*) ttys[System.atty].output.address;
+	System.device[DEVICE_KEYBOARD]->wpos = ttys[System.atty].input.inputbuffer.wpos;
+	System.device[DEVICE_KEYBOARD]->rpos = ttys[System.atty].input.inputbuffer.rpos;
+	System.device[DEVICE_KEYBOARD]->addr = ttys[System.atty].input.inputbuffer.address;	
 }
 
 void _jumpToTTY(int ntty){
@@ -91,7 +97,6 @@ void _jumpToTTY(int ntty){
 		System.atty = ntty;
 		TTYS.load();
 		TTYS.refresh();
-		Keyboard.updateLeds();
 	}
 }
 
