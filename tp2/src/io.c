@@ -229,9 +229,9 @@ void putchar(char c) {
 
 	System.write(DEVICE_TTY, ch, 1);
 	
-	//if(Task.getTty(System.task) == System.atty){
-	//	System.write(DEVICE_SCREEN, ch, 1);
-	//}
+	if(Task.getTty(System.task) == System.atty){
+		System.write(DEVICE_SCREEN, ch, 1);
+	}
 }
 
 void puts(char* str) {
