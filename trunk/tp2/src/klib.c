@@ -371,6 +371,14 @@ int _task_scheduler(int esp)
 	return new->esp;
 }
 
+void switchTTY(task_t newt, task_t oldt){
+		ttys[oldt->tty].output.wpos = System.device[DEVICE_TTY]->wpos;
+		ttys[oldt->tty].output.rpos = System.device[DEVICE_TTY]->rpos;
+		System.device[DEVICE_TTY]->wpos = ttys[newt->tty].output.wpos;
+		System.device[DEVICE_TTY]->rpos = ttys[newt->tty].output.rpos;
+		System.device[DEVICE_TTY]->addr = (void*) ttys[newt->tty].output.address;
+}
+
 task_t _task_getByTID(int tid) {
     /* Find a task by TID and return a pointer to its control block */
 	int i;

@@ -79,4 +79,71 @@ struct regs
 };
 
 
+
+/* <ttys> */
+
+#define NTTYS 4
+
+#define ROWS 25
+#define COLS 80
+#define VIDEO_SIZE (ROWS * COLS * 2)
+#define LAST_ROW VIDEO_SIZE - 2 * COLS
+
+#define LINEBUF_LEN 100
+
+enum{
+	NO_TTY = -1,
+	TTY0 = 0,
+	TTY1,
+	TTY2,
+	TTY3
+};
+
+typedef struct {
+    char name[LINEBUF_LEN];
+    char args[LINEBUF_LEN - 2];
+} command_t;
+
+typedef struct {
+    char line[LINEBUF_LEN];
+    int pos;
+} linebuffer_t;
+
+
+typedef struct{
+	unsigned char shift_status;
+	unsigned char mayus_status;
+	unsigned char num_status;
+	unsigned char scroll_status;
+	unsigned char accent_status;
+	unsigned char escaped;
+}flags_t;
+
+typedef struct {
+	char address[VIDEO_SIZE];
+	size_t wpos;
+	size_t rpos;
+} screen_t;
+
+typedef struct {
+	flags_t flags;
+	linebuffer_t linebuffer;
+	command_t command;
+}input_t;
+
+typedef screen_t output_t;
+
+typedef struct {
+	int status;
+	input_t input;
+	output_t output;
+}tty_t;
+
+enum {
+	TTY_READY = 0,
+	TTY_WRITTEN
+};
+
+/* </ttys> */
+
 #endif

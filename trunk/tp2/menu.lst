@@ -1,5 +1,5 @@
 hiddenmenu
-timeout 30
+timeout 0
 default 0
 
 title SuciOS 0.01 Superstable Beta
