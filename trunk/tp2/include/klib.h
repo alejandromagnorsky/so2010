@@ -4,8 +4,6 @@
 #include "defs.h"
 //#include "tty.h"
 
-extern struct PagingNamespace Paging;
-
 /************************************************
 ** Constants and definitions:
 *************************************************/
@@ -358,7 +356,5 @@ void _top_getPriority(char* buffer, task_t task);
 void _top_initialize(int tid);
 void _top_clearTask(int tid);
 int _top_run();
-
-void _task_testMultitasking();
 
 #endif
