@@ -1,9 +1,11 @@
 #ifndef _TTY_H_
 #define _TTY_H_
 
+#include "defs.h"
 #include "screen.h"
 #include "keyboard.h"
 
+/*
 #define NTTYS 4
 
 #define ROWS 25
@@ -15,6 +17,7 @@ enum {
 	TTY_READY = 0,
 	TTY_WRITTEN
 };
+
 
 typedef struct{
 	unsigned char shift_status;
@@ -43,7 +46,9 @@ typedef struct {
 	output_t output;
 }tty_t;
 
-void _initialize_ttys();
+*/
+
+void _initialize_ttys(int);
 void _refresh();
 void _save();
 
@@ -57,7 +62,7 @@ struct TTYSNamespace {
 	void (*save)();
 	void (*load)();
 	void (*jumpToTTY)(int);
-	void (*createTTYs)();
+	void (*runShells)();
 	void (*switchTTY)(int);
 };
 

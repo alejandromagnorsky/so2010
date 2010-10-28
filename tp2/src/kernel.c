@@ -244,8 +244,6 @@ void int_80() {
             				(program_t) ebx, RANK_NORMAL, PRIORITY_HIGH, 0);*/         
             MOVTO_EAX(ret);
             
-            
-            
             break;
      }
 
@@ -300,11 +298,11 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 	Task.setupScheduler();
 
-    TTYS.initialize();
+    TTYS.initialize(TTY0);
     TTYS.refresh();
 
 	System.atty = TTY0;
-	TTYS.createTTYs();
+	TTYS.runShells();
 	
     /* Gracias */
     _mascaraPIC1(0xFC);
@@ -318,10 +316,13 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 }
 
 shellloop(){
-	printf("Inicio shellloop con TTY: %d\n", System.task->tty);
+	int j = 0;
   	while(1)
 	{
-	    shell(System.atty);
+		j = 10000;
+		while(j-- != 0);
+		printf(" %d ", System.task->tty); 
+	    //shell(System.task->tty);
 	}
 }
 

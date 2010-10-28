@@ -4,7 +4,7 @@ void _initializeOutput(output_t * output);
 void _initialize_tty(tty_t * tty);
 void _load();
 void _jumpToTTY(int ntty);
-void _createTtys();
+void _runShells();
 int _createTty(char * a);
 void _switchTTY(int ntty);
 
@@ -15,11 +15,11 @@ struct TTYSNamespace TTYS = {
 	_save,
 	_load,
 	_jumpToTTY,
-	_createTtys,
+	_runShells,
 	_switchTTY
 };
 
-void _createTtys(){
+void _runShells(){
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2);
@@ -30,12 +30,12 @@ int _createTty(char * a){
 	shellloop();
 }
 
-void _initialize_ttys(){
+void _initialize_ttys(int def_tty){
 	int i = 0;
 	for(i = 0; i < NTTYS; i++){
 		_initialize_tty(&ttys[i]);
 	}
-	System.atty = 0;
+	System.atty = def_tty;
 }
 
 void _initialize_tty(tty_t * tty){
@@ -45,6 +45,7 @@ void _initialize_tty(tty_t * tty){
 }
 
 void _initializeInput(input_t * input){
+	input->linebuffer.pos = 0;
 	input->flags.shift_status = 0;
 	input->flags.mayus_status = 0;
 	input->flags.num_status = 0;
@@ -70,6 +71,7 @@ void _refresh(){
 
 	System.device[DEVICE_SCREEN]->wpos = System.device[DEVICE_TTY]->wpos;
 	ttys[System.atty].output.wpos = System.device[DEVICE_SCREEN]->wpos;
+	
 }
 
 void _save(){
@@ -84,11 +86,13 @@ void _load(){
 }
 
 void _jumpToTTY(int ntty){
-	TTYS.save();
-	System.atty = ntty;
-	TTYS.load();
-	TTYS.refresh();
-	Keyboard.updateLeds();
+	if(ntty != System.atty){
+		TTYS.save();
+		System.atty = ntty;
+		TTYS.load();
+		TTYS.refresh();
+		Keyboard.updateLeds();
+	}
 }
 
 void _switchTTY(int ntty){

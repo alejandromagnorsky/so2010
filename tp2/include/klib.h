@@ -9,8 +9,6 @@
 *************************************************/
 #pragma pack(1)
 
-#define LINEBUF_LEN 100
-
 #define KERNEL_DEVICES 2
 #define USER_DEVICES 10
 #define NUM_TTYS 4
@@ -65,13 +63,6 @@ enum {
 	DEVICE_TTY
 };
 
-enum{
-	NO_TTY = -1,
-	TTY0 = 0,
-	TTY1,
-	TTY2,
-	TTY3
-};
 
 enum {
 	RUNNING_FRONT = 0,
@@ -356,5 +347,7 @@ void _top_getPriority(char* buffer, task_t task);
 void _top_initialize(int tid);
 void _top_clearTask(int tid);
 int _top_run();
+
+extern tty_t ttys[NTTYS];
 
 #endif

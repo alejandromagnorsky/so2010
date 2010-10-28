@@ -11,6 +11,7 @@
 #include "cpuid.h"
 #include "gralprotection.h"
 #include "task.h"
+#include "defs.h"
 
 void input_handler();
 void parse_command();
@@ -25,4 +26,6 @@ int echo(char*);
 int alloc(char*);
 
 extern struct system_t System;
+extern tty_t ttys[NTTYS];
+
 #endif
