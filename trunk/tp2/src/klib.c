@@ -475,7 +475,7 @@ void _task_setupScheduler ()
 void _task_yield(task_t task)
 {
 	_Cli();
-	Task.setStatus(task, STATUS_WAITING);
+	Task.setStatus(task, STATUS_READY);
 	_Sti();
 	_scheduler();
 }
@@ -508,21 +508,20 @@ int _top_processCpuUsage(int tid)
 
 void _top_getStatusName(char* buffer, task_t task)
 {
-    /* [TODO] usar un array aca. Dale, Jime. Hace falta llamar a la funcion
-    *  cada vez que queres el status? Existen las variables. Jatejode. */
-	if(Task.getStatus(task) == STATUS_RUNNING)
+    int status = Task.getStatus(task);
+	if(status == STATUS_RUNNING)
 	{
 		strcpy("RUNNING", buffer);
 	}	
-	else if(Task.getStatus(task) == STATUS_READY)
+	else if(status == STATUS_READY)
 	{
 		strcpy("READY", buffer);
 	}
-	else if(Task.getStatus(task) == STATUS_WAITING)
+	else if(status == STATUS_WAITING)
 	{
 		strcpy("WAITING", buffer);
 	}
-	else if(Task.getStatus(task) == STATUS_DEAD)
+	else if(status == STATUS_DEAD)
 	{
 		strcpy("DEAD", buffer);
 	}
@@ -531,11 +530,12 @@ void _top_getStatusName(char* buffer, task_t task)
 
 void _top_getRankName(char* buffer, task_t task)
 {
-	if(Task.getRank(task) == RANK_SERVER)
+	int rank = Task.getRank(task);
+	if(rank == RANK_SERVER)
 	{
 		strcpy("SERVER", buffer);
 	}	
-	else if(Task.getRank(task) == RANK_NORMAL)
+	else if(rank == RANK_NORMAL)
 	{
 		strcpy("NORMAL", buffer);
 	}
@@ -544,23 +544,24 @@ void _top_getRankName(char* buffer, task_t task)
 
 void _top_getPriority(char* buffer, task_t task)
 {
-	if(Task.getPriority(task) == PRIORITY_LOW)
+	int priority = Task.getPriority(task);
+	if(priority == PRIORITY_LOW)
 	{
 		strcpy("LOW", buffer);
 	}	
-	else if(Task.getPriority(task) == PRIORITY_HIGH)
+	else if(priority == PRIORITY_HIGH)
 	{
 		strcpy("HIGH", buffer);
 	}
-	else if(Task.getPriority(task) == PRIORITY_MIN)
+	else if(priority == PRIORITY_MIN)
 	{
 		strcpy("MIN", buffer);
 	}
-	else if(Task.getPriority(task) == PRIORITY_MEDIUM)
+	else if(priority == PRIORITY_MEDIUM)
 	{
 		strcpy("MEDIUM", buffer);
 	}
-	else if(Task.getPriority(task) == PRIORITY_MAX)
+	else if(priority == PRIORITY_MAX)
 	{
 		strcpy("MAX", buffer);
 	}

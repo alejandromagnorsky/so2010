@@ -25,7 +25,7 @@ task_t priorityRoundRobin()
 	
 	if (old->tid != 0 && old->trank == RANK_SERVER) {
 	    
-	    if (old->tstatus == STATUS_READY)	
+	    if (old->tstatus == STATUS_RUNNING)	
 	    {
 		    return System.task;
 	    }

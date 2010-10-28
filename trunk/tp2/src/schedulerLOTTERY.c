@@ -21,7 +21,7 @@ task_t lottery()
 	
 	if (old->tid != 0 && old->trank == RANK_SERVER) {
 	    
-	    if (old->tstatus == STATUS_READY)	
+	    if (old->tstatus == STATUS_RUNNING)	
 	    {
 		    return System.task;
 	    }
@@ -207,6 +207,7 @@ task_t lottery()
 	return System.idle;
 }
 
+/* Looks for a task ready to run with the given priority */
 task_t findTask(int priority)
 {
 	static int max = 0, high = 0, medium = 0, low = 0, min = 0;
