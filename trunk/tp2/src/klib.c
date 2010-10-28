@@ -3,10 +3,9 @@
 #pragma pack(1)
 
 extern struct system_t System;
-extern struct PagingNamespace Paging;
 extern char scheduling;
 
-
+void switchTTY(task_t newt, task_t oldt);
 /************************************************
 ** System data structure manipulation:
 *************************************************/
@@ -230,7 +229,7 @@ int _task_findSlot() {
 	{
 		return i;
 	} else {
-		printf("Sorry, but there is no room available for more tasks\n");
+		printf("Sorry, but there is no room available for more tasks");
 		return -1;
 	}
 }
@@ -348,7 +347,6 @@ int _task_scheduler(int esp)
 
 	if(Task.getTID(new) != Task.getTID(old)) {
 		System.task = new;
-		//TTYS.switchTTY(new->tty) (NO PUEDO INCLUIR TTY.H!!!!!);	
 
 		//Paging.pageDown(old->stack);
 		//Paging.pageUp(new->stack);
@@ -361,7 +359,8 @@ int _task_scheduler(int esp)
 	    if (new != System.idle){      
     	    Task.setStatus(new, STATUS_RUNNING);
 		}
-	    
+	
+		switchTTY(new, old);	    
 	}
 	
 	/* saving process in last 100 executed*/
@@ -475,7 +474,6 @@ void _task_setupScheduler ()
 
 void _task_yield(task_t task)
 {
-	//[TODO] yield must set this status or not?
 	_Cli();
 	Task.setStatus(task, STATUS_WAITING);
 	_Sti();
@@ -510,20 +508,21 @@ int _top_processCpuUsage(int tid)
 
 void _top_getStatusName(char* buffer, task_t task)
 {
-    int status = Task.getStatus(task);
-	if(status == STATUS_RUNNING)
+    /* [TODO] usar un array aca. Dale, Jime. Hace falta llamar a la funcion
+    *  cada vez que queres el status? Existen las variables. Jatejode. */
+	if(Task.getStatus(task) == STATUS_RUNNING)
 	{
 		strcpy("RUNNING", buffer);
 	}	
-	else if(status == STATUS_READY)
+	else if(Task.getStatus(task) == STATUS_READY)
 	{
 		strcpy("READY", buffer);
 	}
-	else if(status == STATUS_WAITING)
+	else if(Task.getStatus(task) == STATUS_WAITING)
 	{
 		strcpy("WAITING", buffer);
 	}
-	else if(status == STATUS_DEAD)
+	else if(Task.getStatus(task) == STATUS_DEAD)
 	{
 		strcpy("DEAD", buffer);
 	}
@@ -532,12 +531,11 @@ void _top_getStatusName(char* buffer, task_t task)
 
 void _top_getRankName(char* buffer, task_t task)
 {
-	int rank = Task.getRank(task);
-	if(rank == RANK_SERVER)
+	if(Task.getRank(task) == RANK_SERVER)
 	{
 		strcpy("SERVER", buffer);
 	}	
-	else if(rank == RANK_NORMAL)
+	else if(Task.getRank(task) == RANK_NORMAL)
 	{
 		strcpy("NORMAL", buffer);
 	}
@@ -546,24 +544,23 @@ void _top_getRankName(char* buffer, task_t task)
 
 void _top_getPriority(char* buffer, task_t task)
 {
-	int priority = Task.getPriority(task);
-	if(priority == PRIORITY_LOW)
+	if(Task.getPriority(task) == PRIORITY_LOW)
 	{
 		strcpy("LOW", buffer);
 	}	
-	else if(priority == PRIORITY_HIGH)
+	else if(Task.getPriority(task) == PRIORITY_HIGH)
 	{
 		strcpy("HIGH", buffer);
 	}
-	else if(priority == PRIORITY_MIN)
+	else if(Task.getPriority(task) == PRIORITY_MIN)
 	{
 		strcpy("MIN", buffer);
 	}
-	else if(priority == PRIORITY_MEDIUM)
+	else if(Task.getPriority(task) == PRIORITY_MEDIUM)
 	{
 		strcpy("MEDIUM", buffer);
 	}
-	else if(priority == PRIORITY_MAX)
+	else if(Task.getPriority(task) == PRIORITY_MAX)
 	{
 		strcpy("MAX", buffer);
 	}
