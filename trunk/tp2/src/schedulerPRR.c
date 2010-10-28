@@ -41,18 +41,17 @@ task_t priorityRoundRobin()
 		do
 		{
 			new = &(System.tasks[(++index) % NUM_TASKS]);
-			if (new->tid != 0 && new->tstatus == STATUS_READY) {
-			
-			    if (new->trank == RANK_SERVER) {
-			        candidate = new;
-			        auxi = index;
-    			    break;
-    			    
-			    } else if (candidate == NULL) {
-    			    candidate = new;
-    			    auxi = index;
-			    }
-			
+			if (new->tid != 0 && (new->tstatus == STATUS_READY || new->tstatus == STATUS_DEAD)) {
+				
+				if (new->trank == RANK_SERVER) {
+				    candidate = new;
+				    auxi = index;
+				    break;
+				    
+				} else if (candidate == NULL) {
+				    candidate = new;
+				    auxi = index;
+				}
 			}
 			
 	    /* We wrap around the array as needed. When counter reaches NUM_TASKS,
@@ -61,8 +60,15 @@ task_t priorityRoundRobin()
 		
 		index = auxi;		
 		candidate = candidate ? candidate : System.idle;
-			
-		left = (CANT_PRIORITY - candidate->tpriority - 1) * RATIO;
+		
+		if(candidate->tstatus == STATUS_READY)
+		{
+			left = (CANT_PRIORITY - candidate->tpriority - 1) * RATIO;
+		}
+		else
+		{
+			left = 0;
+		}
 		
 		return candidate;
 		

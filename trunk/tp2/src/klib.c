@@ -229,7 +229,7 @@ int _task_findSlot() {
 	{
 		return i;
 	} else {
-		printf("Sorry, but there is no room available for more tasks");
+		printf("Sorry, but there is no room available for more tasks\n");
 		return -1;
 	}
 }
@@ -292,6 +292,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 }
 
 /* Kills the given task */
+// [TODO] check what to do with shells. Change function if we have time.
 void _task_kill(task_t task)
 {
 	int i;
@@ -303,15 +304,22 @@ void _task_kill(task_t task)
 	
 	if(task->tid == 0)
 	{
+		printf("The given task doesnt exist");
 		return;
 	}
 	
-	/* Looking for task's children in order to kill them */
+	if(task->tid == 1)
+	{
+		printf("Permission denied\n");
+		return;
+	}
+	
+	/* Looking for task's children in order to mark them as dead */
 	for(i = 0; i < NUM_TASKS; i++)
 	{
 		if(System.tasks[i].tid > idleAndTTYs && Task.getParentTID(&(System.tasks[i])) == task->tid)
 		{
-			Task.kill(&System.tasks[i]);
+			Task.setStatus(&System.tasks[i], STATUS_DEAD);
 		}
 	}
 	
@@ -321,6 +329,8 @@ void _task_kill(task_t task)
 		parent = Task.getByTID(Task.getParentTID(task));
 		Task.setStatus(parent, STATUS_READY);
 	}
+	
+	printf("Task [tid: %d, tname: %s] killed\n", task->tid, task->tname);
 
     Task.setStatus(task, STATUS_DEAD);
     task->tid = 0;
@@ -342,6 +352,12 @@ int _task_scheduler(int esp)
 	
     old = Task.getCurrent();       /* Obtain currently running task */
     new = (task_t) getNextTask(); 
+    
+	while(Task.getStatus(new) == STATUS_DEAD)	/* Finishing dead tasks */
+	{
+		Task.kill(new);
+		new = (task_t) getNextTask();
+	}    
     
     old->esp = esp;
 

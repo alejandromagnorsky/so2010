@@ -304,6 +304,8 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	System.atty = TTY0;
 	TTYS.runShells();
 	
+	testTasks('a');
+	
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
@@ -319,10 +321,10 @@ shellloop(){
 	int j = 0;
   	while(1)
 	{
-		j = 10000;
+		/*j = 10000;
 		while(j-- != 0);
-		printf(" %d ", System.task->tty); 
-	    //shell(System.task->tty);
+		printf(" %d ", System.task->tty); */
+	    shell(System.task->tty);
 	}
 }
 
