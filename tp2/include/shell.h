@@ -14,9 +14,9 @@
 #include "defs.h"
 
 void input_handler();
-void parse_command();
-int run_command();
-void clearCommand();
+void parse_command(linebuffer_t linebuffer, command_t command);
+int run_command(command_t command);
+void clearCommand(command_t command);
 
 int divideByZero(char*);
 int help(char*);

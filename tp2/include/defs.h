@@ -91,6 +91,8 @@ struct regs
 
 #define LINEBUF_LEN 100
 
+#define BUFFER_SIZE 1000
+
 enum{
 	NO_TTY = -1,
 	TTY0 = 0,
@@ -123,12 +125,17 @@ typedef struct {
 	char address[VIDEO_SIZE];
 	size_t wpos;
 	size_t rpos;
-} screen_t;
+}screen_t;
+
+typedef struct{
+	unsigned char address[BUFFER_SIZE];
+	size_t wpos;
+	size_t rpos;
+}inputbuffer_t;
 
 typedef struct {
 	flags_t flags;
-	linebuffer_t linebuffer;
-	command_t command;
+	inputbuffer_t inputbuffer;
 }input_t;
 
 typedef screen_t output_t;

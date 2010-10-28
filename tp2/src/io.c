@@ -227,12 +227,11 @@ void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
 
-	if(Task.getRunningMode(System.task) == RUNNING_FRONT){
-		System.write(DEVICE_TTY, ch, 1);
-		if(Task.getTty(System.task) == System.atty){
-			System.write(DEVICE_SCREEN, ch, 1);
-		}
-	}
+	System.write(DEVICE_TTY, ch, 1);
+	
+	//if(Task.getTty(System.task) == System.atty){
+	//	System.write(DEVICE_SCREEN, ch, 1);
+	//}
 }
 
 void puts(char* str) {
@@ -373,8 +372,7 @@ char printable(char c) {
 
 unsigned char getchar() {
     unsigned char c;
-    /* Block until an ascii character is read: */   
-    while ( (System.read(DEVICE_KEYBOARD, &c, 1) == 0) );
+	while ( (System.read(DEVICE_KEYBOARD, &c, 1) == 0) );
     return c;
 }
 

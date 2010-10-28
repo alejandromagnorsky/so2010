@@ -170,7 +170,7 @@ void int_21(){
 				TTYS.jumpToTTY(TTY1);
 				break;
 			case F3:
-				TTYS.jumpToTTY(TTY2);					
+				TTYS.jumpToTTY(TTY2);
 				break;
 			case F4:
 				TTYS.jumpToTTY(TTY3);
@@ -312,18 +312,12 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 	_Sti();
 
-	//System.atty = TTY0;
-	//TTYS.createTTYs();
-	
 }
 
 shellloop(){
-	int j = 0;
   	while(1)
 	{
-		/*j = 10000;
-		while(j-- != 0);
-		printf(" %d ", System.task->tty); */
+		//printf("kb: %d, tty: %d ", System.device[DEVICE_KEYBOARD]->addr, System.device[DEVICE_TTY]->addr);
 	    shell(System.task->tty);
 	}
 }
