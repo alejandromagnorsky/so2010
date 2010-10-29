@@ -20,10 +20,22 @@ struct TTYSNamespace TTYS = {
 };
 
 void _runShells(){
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);//Cambiar a la nueva forma
+	task_t task;
+	task = &(System.tasks[Task.findSlot()]);
+	Task.new(task, "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);//Cambiar a la nueva forma
+	System.ttysTids[0] = task->tid;
+	
+	task = &(System.tasks[Task.findSlot()]);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1);
+	System.ttysTids[1] = task->tid;
+	
+	task = &(System.tasks[Task.findSlot()]);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2);
+	System.ttysTids[2] = task->tid;
+	
+	task = &(System.tasks[Task.findSlot()]);
 	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY3);
+	System.ttysTids[3] = task->tid;
 }
 
 int _createTty(char * a){
