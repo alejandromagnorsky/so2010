@@ -31,6 +31,9 @@ int task1 (char* line) {
     {
     	i++;
     }
+    printf("task 1 going to sleep...\n");
+    Task.sleep(&(System.tasks[6]), 50);
+    printf("task 1 woke up\n");
 	printf("task 1 finishing... \n");
     return 1;
 }
@@ -42,7 +45,7 @@ int task2 (char* line) {
     {
     	i++;
     }
-    printf("task 2 ging to sleep...\n");
+    printf("task 2 going to sleep...\n");
     Task.sleep(&(System.tasks[7]), 100);
     printf("task 2 woke up\n");
     printf("task 2 killing task 3...\n");
