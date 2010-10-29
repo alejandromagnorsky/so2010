@@ -339,6 +339,8 @@ void _task_kill(task_t task)
 	//Paging.freeMem(task->stack,1);
 	_sys_free(task->stack,1);
 	
+	Top.run();
+	
 	_Sti();
 }
 

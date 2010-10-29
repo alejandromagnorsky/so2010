@@ -304,17 +304,18 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	System.atty = TTY0;
 	TTYS.runShells();
 	
-	testTasks('a');
-	
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
 	_Sti();
 
+	//shellloop();
+
 }
 
 shellloop(){
+	//testTasks('a');
   	while(1)
 	{
 		//printf("kb: %d, tty: %d ", System.device[DEVICE_KEYBOARD]->addr, System.device[DEVICE_TTY]->addr);
