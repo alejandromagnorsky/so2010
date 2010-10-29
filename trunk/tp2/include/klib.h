@@ -172,6 +172,8 @@ struct system_t {
     task_t		task;	              /* Running task */
     struct task_t   tasks[NUM_TASKS]; /* Static task array */
     
+    int			ttysTids[NUM_TTYS];		/* ttys tids */
+    
     int			last100[LASTS_QUANT];	/* For top */
     int			last100Counter;
     

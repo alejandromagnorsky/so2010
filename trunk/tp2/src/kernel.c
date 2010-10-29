@@ -54,6 +54,7 @@ struct system_t System = {     0,					/* Tick count */
                                NULL,				/* Idle task */
                                NULL,				/* Currently active task */
                                {0},					/* Tasks */
+                               {0},					/* ttys tids */
                                {0},					/* Last 100 tasks */
                                0,					/* Last 100 tasks counter */
                                _sys_addTick,
@@ -300,9 +301,11 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
     TTYS.initialize(TTY0);
     TTYS.refresh();
-
+    
 	System.atty = TTY0;
 	TTYS.runShells();
+	
+	//testTasks();
 	
     /* Gracias */
     _mascaraPIC1(0xFC);
@@ -315,7 +318,6 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 }
 
 shellloop(){
-	//testTasks('a');
   	while(1)
 	{
 		//printf("kb: %d, tty: %d ", System.device[DEVICE_KEYBOARD]->addr, System.device[DEVICE_TTY]->addr);

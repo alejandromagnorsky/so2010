@@ -291,12 +291,15 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     return task->tid;
 }
 
+int _createTty2(char * a){
+	shellloop();
+}
 /* Kills the given task */
 // [TODO] check what to do with shells. Change function if we have time.
 void _task_kill(task_t task)
 {
-	int i;
-	task_t parent;
+	int i, k, isTTY = 0, slot, parentTID;
+	task_t parent, auxTask;
 	
 	int idleAndTTYs = 4;
 
@@ -317,7 +320,15 @@ void _task_kill(task_t task)
 	/* Looking for task's children in order to mark them as dead */
 	for(i = 0; i < NUM_TASKS; i++)
 	{
-		if(System.tasks[i].tid > idleAndTTYs && Task.getParentTID(&(System.tasks[i])) == task->tid)
+		parentTID = Task.getParentTID(&(System.tasks[i]));
+		for(k = 0; k < NUM_TTYS; k++)
+		{
+			if(System.ttysTids[k] == parentTID)
+			{
+				isTTY = 1;
+			}
+		}
+		if(System.tasks[i].tid > 1 && !isTTY && parentTID == task->tid)
 		{
 			Task.setStatus(&System.tasks[i], STATUS_DEAD);
 		}
@@ -333,14 +344,27 @@ void _task_kill(task_t task)
 	printf("Task [tid: %d, tname: %s] killed\n", task->tid, task->tname);
 
     Task.setStatus(task, STATUS_DEAD);
-    task->tid = 0;
+    
     task->tname[0] = '\0';
     
 	//Paging.freeMem(task->stack,1);
 	_sys_free(task->stack,1);
 	
-	Top.run();
 	
+	for(k = 0;k < NUM_TTYS; k++)
+	{
+		if(task->tid == System.ttysTids[k])
+		{
+			auxTask = &(System.tasks[Task.findSlot()]);
+			// [TODO] check if i have to change it to the new way, check that createTty2 and task's name
+			//	if not... look for another solution
+			Task.new(auxTask, "Shell_", _createTty2, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, k);
+			System.ttysTids[k] = auxTask->tid;
+		}
+	}
+	
+	task->tid = 0;
+		
 	_Sti();
 }
 
