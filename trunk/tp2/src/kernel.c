@@ -67,7 +67,13 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_tellw,
                                _sys_malloc,
                                _sys_free,
-                               _sys_exec
+                               _sys_exec,
+                               _sys_gettid,
+                               _sys_nexttid,
+                               _sys_getrank,
+                               _sys_getprio,
+                               _sys_getcpuc,
+                               _sys_name
                            };
                                
 //system_t System = &_system_data;
@@ -184,12 +190,14 @@ void int_21(){
 
 void int_80() {
     /* SYSTEM CALL INTERRUPTION */
-    char syscall;
-    int ebx, ecx, edx, ret;
+    int syscall;
+    task_t task;
+    char* name;
+    int ebx, ecx, edx, ret, iter;
     
     /* The above instructions, as well as these macros, do not affect the
        general purpose registers, so we can read their values just fine. */
-    MOVFROM_AL(syscall);
+    MOVFROM_EAX(syscall);
     MOVFROM_EBX(ebx);
     MOVFROM_ECX(ecx);
     MOVFROM_EDX(edx);
@@ -239,15 +247,103 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-            ret = ((program_t) ebx)((char*) ecx);  
-            
-            /*ret = Task.new(&(System.tasks[Task.findSlot()]), "Task", 
-            				(program_t) ebx, RANK_NORMAL, PRIORITY_HIGH, 0);*/         
+            ret = Task.new(&(System.tasks[Task.findSlot()]), "TaskPUTO", 
+            				(program_t) ebx, RANK_NORMAL, PRIORITY_MEDIUM, RUNNING_FRONT, System.task->tty, (char*) ecx);
+
             MOVTO_EAX(ret);
             
             break;
+
+        case SYSTEM_CALL_GETTID:
+            ret = System.task->tid;
+            
+            MOVTO_EAX(ret)
+            break;
+
+        case SYSTEM_CALL_NEXTTID:
+            iter = (* (int*) ebx) % NUM_TASKS;
+            
+            while (System.tasks[iter = (iter + 1) % NUM_TASKS].tid == 0);
+            
+            ret = System.tasks[iter].tid;
+            
+            * (int*) ebx = iter;
+            
+            MOVTO_EAX(ret);
+            break;
+
+        case SYSTEM_CALL_GETRANK:
+            if (ebx == 0)
+                ebx = System.task->tid;
+                
+            ret = (task = Task.getByTID(ebx)) ? task->trank : -1;
+            MOVTO_EAX(ret);
+            break;
+
+        case SYSTEM_CALL_GETPRIO:
+            if (ebx == 0)
+                ebx = System.task->tid;
+            ret = (task = Task.getByTID(ebx)) ? task->tpriority : -1;
+            
+            MOVTO_EAX(ret);
+            break;
+
+        case SYSTEM_CALL_GETCPUC:
+            if (ebx == 0)
+                ebx = System.task->tid;
+            ret = (task = Task.getByTID(ebx)) ? _top_processCpuUsage(ebx) : -1;
+            
+            MOVTO_EAX(ret);
+            break;
+
+        case SYSTEM_CALL_NAME:
+            name = (char*) ebx;
+            
+            if (name != NULL) {
+                strncpy(name, System.task->tname, MAX_TASK_NAME);
+                name[MAX_TASK_NAME] = 0;
+            }
+            
+            MOVTO_EAX(System.task->tname);
+            break;
+
      }
 
+}
+
+int printTasks(char* line) {
+    int i;
+    task_t t;
+
+    //System.name("printTasks");
+    
+    for (i = 0; i < NUM_TASKS; i++)
+        if (System.tasks[i].tid != 0) {
+            t = &(System.tasks[i]);
+            printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
+
+        }
+
+    for(;;);
+    /*task_t hola;
+    int iter = 30, self, first, other;
+    int rank, prio, usage;
+    
+    self = System.gettid();
+
+    iter = 0;
+    other = first = System.nexttid(&iter);
+    
+    do {
+        rank = System.getrank(other);
+        prio = System.getprio(other);
+        usage = System.getcpuc(other);
+
+        hola = Task.getByTID(other);
+        
+        printf("Task %d\tPriority %d\tRank %d\tUsage %d\tName %s\n", other, rank, prio, usage, hola->tname);
+        other = System.nexttid(&iter);
+    } while (first != other);*/
 }
 
 /*************************************************
@@ -304,7 +400,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     
 	System.atty = TTY0;
 	TTYS.runShells();
-	
+    
 	//testTasks();
 	
     /* Gracias */
@@ -312,15 +408,15 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     _mascaraPIC2(0xFF);
 
 	_Sti();
-
-	//shellloop();
-
+    
+    shellloop();
 }
 
 shellloop(){
+	int j = 0;    
+    
   	while(1)
 	{
-		//printf("kb: %d, tty: %d ", System.device[DEVICE_KEYBOARD]->addr, System.device[DEVICE_TTY]->addr);
 	    shell(System.task->tty);
 	}
 }

@@ -1,7 +1,7 @@
 #include "../include/task.h"
 
 int testTasks(char * a)
-{
+{/*
 	int slot = Task.findSlot();
 		if(slot == -1)
 		{
@@ -20,7 +20,7 @@ int testTasks(char * a)
 			return -1;
 		}
     Task.new(&(System.tasks[slot]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
-    return 1;
+    return 1;*/
 }
 
 int task1 (char* line) {

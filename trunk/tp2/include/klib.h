@@ -81,7 +81,7 @@ typedef struct block_t * block_t;
 
 struct task_t {
     int tid;
-    char tname[MAX_TASK_NAME];
+    char tname[MAX_TASK_NAME + 1];
     int trank, tpriority;
     int tstatus;
     int isFront;
@@ -117,7 +117,13 @@ enum {
     SYSTEM_CALL_SEEKW,
     SYSTEM_CALL_TELLR,
     SYSTEM_CALL_TELLW,
-    SYSTEM_CALL_EXEC
+    SYSTEM_CALL_EXEC,
+    SYSTEM_CALL_GETTID,
+    SYSTEM_CALL_NEXTTID,
+    SYSTEM_CALL_GETRANK,
+    SYSTEM_CALL_GETPRIO,
+    SYSTEM_CALL_GETCPUC,
+    SYSTEM_CALL_NAME
 };
 
 struct driver_t {
@@ -189,6 +195,12 @@ struct system_t {
     void* (*malloc) (size_t size);
     void (*free) ();
     int    (*exec)  (int (*f) (char*), char* args);
+    int (*gettid) ();
+    int (*nexttid) (int*);
+    int (*getprio) (int);
+    int (*getrank) (int);
+    int (*getcpuc) (int);
+    char* (*name) (char*);
 };
 
 typedef struct system_t* system_t;
@@ -259,7 +271,12 @@ size_t _sys_tellr(int devcode);
 size_t _sys_tellw(int devcode);
 int _sys_exec(int (*f) (char*), char* args);
 
-
+int _sys_gettid();
+int _sys_nexttid(int* iter);
+int _sys_getrank(int pid);
+int _sys_getprio(int pid);
+int _sys_getcpuc(int pid);
+char* _sys_name(char* name);
 
 struct TaskNamespace {    
     void (*setPriority) (task_t, int);
@@ -272,7 +289,7 @@ struct TaskNamespace {
     int (*getTID) (task_t task);
     
     int (*findSlot) ();
-    int (*new) (task_t, char*, program_t, int, int, int, int);
+    int (*new) (task_t, char*, program_t, int, int, int, int, char*);
     void (*kill) (task_t task);
 
     task_t (*getByTID) (int);
@@ -326,7 +343,7 @@ void _task_setParentTID(task_t task, int parentTID);
 int _task_getParentTID(task_t task);
 
 int _task_new (task_t task, char* name, program_t program, int rank, 
-			int priority, int isFront, int tty);
+			int priority, int isFront, int tty, char* line);
 void _task_kill(task_t task);
 
 task_t _task_getByTID (int tid);
@@ -349,6 +366,8 @@ void _top_getPriority(char* buffer, task_t task);
 void _top_initialize(int tid);
 void _top_clearTask(int tid);
 int _top_run();
+
+
 
 extern tty_t ttys[NTTYS];
 

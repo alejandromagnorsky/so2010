@@ -19,6 +19,13 @@ void strcpy(char *s, char* t) {
     while(*t++ = *s++);
 }
 
+void strncpy(char* s, char* t, int n) {
+
+    int i = 0;
+    while ((*t++ = *s++) && (++i < n));
+
+}
+
 void memzero(void *mem, unsigned int size) {
     char *pos, *end;
     pos = (char*) mem;
