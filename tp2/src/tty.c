@@ -22,19 +22,19 @@ struct TTYSNamespace TTYS = {
 void _runShells(){
 	task_t task;
 	task = &(System.tasks[Task.findSlot()]);
-	Task.new(task, "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0);//Cambiar a la nueva forma
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1, NULL);
 	System.ttysTids[0] = task->tid;
 	
 	task = &(System.tasks[Task.findSlot()]);
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1, NULL);
 	System.ttysTids[1] = task->tid;
 	
 	task = &(System.tasks[Task.findSlot()]);
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2, NULL);
 	System.ttysTids[2] = task->tid;
 	
 	task = &(System.tasks[Task.findSlot()]);
-	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY3);
+	Task.new(&(System.tasks[Task.findSlot()]), "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY3, NULL);
 	System.ttysTids[3] = task->tid;
 }
 
@@ -57,6 +57,8 @@ void _initialize_tty(tty_t * tty){
 }
 
 void _initializeInput(input_t * input){
+	input->inputbuffer.wpos = 0;
+	input->inputbuffer.rpos = 0;
 	input->flags.shift_status = 0;
 	input->flags.mayus_status = 0;
 	input->flags.num_status = 0;

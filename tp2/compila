@@ -1,5 +1,4 @@
-cd /home/santiago/code/projects/so2010/tp2/bin
-pwd
+cd ./bin
 rm -rf *
 nasm -f aout ../src/libasm.asm -o libasm.o
 nasm -f aout ../src/kstart.asm -o kstart.o

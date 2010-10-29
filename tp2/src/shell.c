@@ -21,58 +21,8 @@ static struct {
 };
 
 
-void shell(int tty) {
-
-	linebuffer_t linebuffer = {{0}, 0};
-	command_t command;
-
-    static char show_prompt = 1;
-	unsigned char a;
-    int exit_status,i;
-    
-    if (show_prompt)
-        printf(SHELL_PROMPT, tty);
-
-	switch(a = getchar()) {
-	
-		case '\n':
-		    /* Print the newline and finalize the linebuffer string with 0: */
-			putchar('\n');
-			linebuffer.line[linebuffer.pos] = 0;
-		    
-		    parse_command(linebuffer, command);
-		    
-			/* Once parsing is over, reset the linebuffer and shell status: */
-		    show_prompt = 1;
-			linebuffer.line[0] = linebuffer.pos = 0;
-			
-			exit_status = run_command(command);
-			
-			break;
-			
-		case '\b':
-    		show_prompt = 0; /* Do not reprint prompt after backspace */
-			if(linebuffer.pos != 0) {
-				linebuffer.line[linebuffer.pos--] = 0x00;				
-				putchar('\b');
-			}
-			break;
-			
-		default:
-    		show_prompt = 0; /* Do not reprint prompt after character entry */		
-			if(linebuffer.pos < LINEBUF_LEN - 1) {
-				linebuffer.line[linebuffer.pos++] = a;
-				putchar(a);
-			}
-			
-			break;
-	}
-}
-
 void parse_command(linebuffer_t linebuffer, command_t command) {
     int initpos = 0;
-    
-    /* Remove preceding whitespaces: */
     while ( (linebuffer.line[initpos] == ' ') && (++initpos < LINEBUF_LEN - 1) );
     sscanf(linebuffer.line + initpos, "%s %s", command.name, command.args);
 }

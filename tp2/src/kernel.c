@@ -401,7 +401,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	System.atty = TTY0;
 	TTYS.runShells();
     
-	//testTasks();
+	//testTasks('a');
 	
     /* Gracias */
     _mascaraPIC1(0xFC);
@@ -412,14 +412,52 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     shellloop();
 }
 
+
+#define SHELL_PROMPT "SuciOS_tty%d$ "
+
 shellloop(){
-	int j = 0;    
-    
-  	while(1)
-	{
-	    shell(System.task->tty);
+	
+	linebuffer_t linebuffer = {{0},0};
+	command_t command;
+	int tty_number = Task.getTty(System.task);
+
+	char show_prompt = 1;
+	unsigned char a;
+    int exit_status,i;
+
+	while(1){
+		if(show_prompt)
+			printf(SHELL_PROMPT, tty_number);
+
+		switch(a = getchar()){
+			case '\n':
+				putchar('\n');
+				linebuffer.line[linebuffer.pos] = 0;
+				parse_command(linebuffer, command);
+				show_prompt = 1;
+				linebuffer.line[0] = linebuffer.pos = 0;
+				exit_status = run_command(command);
+				break;
+
+			case '\b':
+				show_prompt = 0; /* Do not reprint prompt after backspace */
+				if(linebuffer.pos != 0) {
+					linebuffer.line[linebuffer.pos--] = 0x00;				
+					putchar('\b');
+				}
+				break;
+
+			default:
+				show_prompt = 0; /* Do not reprint prompt after character entry */		
+				if(linebuffer.pos < LINEBUF_LEN - 1) {
+					linebuffer.line[linebuffer.pos++] = a;
+					putchar(a);
+				}
+				break;
+		}
 	}
 }
+
 
 void initializeIDT(){
 	/* set IRQ routines  */
