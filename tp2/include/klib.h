@@ -307,6 +307,7 @@ struct TaskNamespace {
 	void (*setParentTID)(task_t, int);
 	int (*getParentTID)(task_t);
 	void (*yield)(task_t);
+	int (*checkTTY)(int taskTID);
 };
 
 struct TopNamespace {
@@ -353,10 +354,9 @@ int _task_getNewTID();
 static void _task_cleaner (void);
 void _task_setupScheduler ();
 int _task_scheduler(int esp);
-
 int Idle (void);
-
 void _task_yield(task_t task);
+int _task_checkTTY(int taskTID);
 
 int _top_increment100Counter();
 int _top_processCpuUsage(int tid);
