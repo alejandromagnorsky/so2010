@@ -401,7 +401,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	System.atty = TTY0;
 	TTYS.runShells();
     
-	//testTasks('a');
+	testTasks('a');
 	
     /* Gracias */
     _mascaraPIC1(0xFC);

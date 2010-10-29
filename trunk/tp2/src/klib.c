@@ -193,7 +193,8 @@ struct TaskNamespace Task = {
 	_task_getRunningMode,
 	_task_setParentTID,
 	_task_getParentTID,
-	_task_yield
+	_task_yield,
+	_task_checkTTY
 };
 
 struct TopNamespace Top = {
@@ -299,6 +300,20 @@ int _task_findSlot() {
 	}
 }
 
+int _task_checkTTY(int taskTID)
+{
+	int i;
+	for(i = 0; i < NUM_TTYS; i++)
+	{
+		if(System.ttysTids[i] == taskTID)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+
 int _task_new (task_t task, char* name, program_t program, int rank, 
 			int priority, int running_mode, int tty, char* line) {
     /* Create a new task, given a program and its rank and priority */
@@ -372,12 +387,13 @@ void _task_kill(task_t task)
 	
 	if(task->tid == 0)
 	{
-		printf("The given task doesnt exist");
+		printf("The given task doesnt exist\n");
 		return;
 	}
 	
-	if(task->tid == 1)
+	if(task == System.idle)
 	{
+		/* Users are not allowed to kill the idle task */
 		printf("Permission denied\n");
 		return;
 	}
@@ -386,14 +402,7 @@ void _task_kill(task_t task)
 	for(i = 0; i < NUM_TASKS; i++)
 	{
 		parentTID = Task.getParentTID(&(System.tasks[i]));
-		for(k = 0; k < NUM_TTYS; k++)
-		{
-			if(System.ttysTids[k] == parentTID)
-			{
-				isTTY = 1;
-			}
-		}
-		if(System.tasks[i].tid > 1 && !isTTY && parentTID == task->tid)
+		if(System.tasks[i].tid > 1 && parentTID == task->tid)
 		{
 			Task.setStatus(&System.tasks[i], STATUS_DEAD);
 		}
@@ -406,7 +415,7 @@ void _task_kill(task_t task)
 		Task.setStatus(parent, STATUS_READY);
 	}
 	
-	printf("Task [tid: %d, tname: %s] killed\n", task->tid, task->tname);
+	printf("Task (tid: %d, tname: %s) killed\n", task->tid, task->tname);
 
     Task.setStatus(task, STATUS_DEAD);
     
@@ -415,17 +424,15 @@ void _task_kill(task_t task)
 	//Paging.freeMem(task->stack,1);
 	_sys_free(task->stack,1);
 	
-	
-	for(k = 0;k < NUM_TTYS; k++)
+	/* If for any reason a tty needs to be killed we have to recreate it */
+	k = Task.checkTTY(task->tid);
+	if(k != -1)
 	{
-		if(task->tid == System.ttysTids[k])
-		{
-			auxTask = &(System.tasks[Task.findSlot()]);
-			// [TODO] check if i have to change it to the new way, check that createTty2 and task's name
-			//	if not... look for another solution
-			//Task.new(auxTask, "Shell_", _createTty2, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, k);
-			System.ttysTids[k] = auxTask->tid;
-		}
+		auxTask = &(System.tasks[Task.findSlot()]);
+		// [TODO] check if i have to change it to the new way, check that createTty2 and task's name
+		//	if not... look for another solution
+		Task.new(auxTask, "Shell_", _createTty2, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, k, "");
+		System.ttysTids[k] = auxTask->tid;
 	}
 	
 	task->tid = 0;
