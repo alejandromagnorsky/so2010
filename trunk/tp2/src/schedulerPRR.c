@@ -32,7 +32,7 @@ task_t priorityRoundRobin()
 		    
 	}
 	
-	if(left == 0) {
+	if(left == 0 || old->tstatus != STATUS_RUNNING) {
 		candidate = NULL;
 		
         if (old->tstatus == STATUS_RUNNING)
@@ -43,14 +43,21 @@ task_t priorityRoundRobin()
 			new = &(System.tasks[(++index) % NUM_TASKS]);
 			if (new->tid != 0 && (new->tstatus == STATUS_READY || new->tstatus == STATUS_DEAD)) {
 				
-				if (new->trank == RANK_SERVER) {
-				    candidate = new;
-				    auxi = index;
-				    break;
-				    
-				} else if (candidate == NULL) {
-				    candidate = new;
-				    auxi = index;
+				if(new->sleep <= 0)
+				{
+					if (new->trank == RANK_SERVER) {
+						candidate = new;
+						auxi = index;
+						break;
+						
+					} else if (candidate == NULL) {
+						candidate = new;
+						auxi = index;
+					}
+				}
+				else
+				{
+					new->sleep --;
 				}
 			}
 			

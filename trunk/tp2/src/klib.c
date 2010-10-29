@@ -194,7 +194,11 @@ struct TaskNamespace Task = {
 	_task_setParentTID,
 	_task_getParentTID,
 	_task_yield,
-	_task_checkTTY
+	_task_checkTTY,
+	_task_sleep,
+	_task_setSleep,
+	_task_decSleep,
+	_task_getSleep
 };
 
 struct TopNamespace Top = {
@@ -283,6 +287,21 @@ int _task_getParentTID(task_t task)
 	return task->parentTID;
 }
 
+void _task_setSleep(task_t task, int ticks)
+{
+	task->sleep = ticks;
+}
+
+void _task_decSleep(task_t task)
+{
+	task->sleep --;
+}
+
+int _task_getSleep(task_t task)
+{
+	return task->sleep;
+}
+
 int _task_findSlot() {
     int i;
     char found;
@@ -333,6 +352,8 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     task->stack_size = DEFAULT_STACK_SIZE;
 
 	task->mem = NULL;
+	
+	Task.setSleep(task, 0);
 
     /* Reserve memory for the stack (grows downwards in x86): */
     task->stack = System.malloc(DEFAULT_STACK_SIZE);
@@ -594,6 +615,14 @@ void _task_yield(task_t task)
 {
 	_Cli();
 	Task.setStatus(task, STATUS_READY);
+	_Sti();
+	_scheduler();
+}
+
+void _task_sleep(task_t task, int ticks)
+{
+	_Cli();
+	Task.setSleep(task, ticks);
 	_Sti();
 	_scheduler();
 }

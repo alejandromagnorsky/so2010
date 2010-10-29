@@ -20,6 +20,7 @@ int testTasks(char * a)
 			return -1;
 		}
     Task.new(&(System.tasks[slot]), "Task 2", task2, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty, "");
+    
     return 1;
 }
 
@@ -41,6 +42,9 @@ int task2 (char* line) {
     {
     	i++;
     }
+    printf("task 2 ging to sleep...\n");
+    Task.sleep(&(System.tasks[7]), 100);
+    printf("task 2 woke up\n");
     printf("task 2 killing task 3...\n");
     Task.kill(&(System.tasks[5]));
     printf("task 3 killed...\n");
@@ -51,7 +55,7 @@ int task2 (char* line) {
 int task3 (char* line) {
     int i = 0;
     int slot = Task.findSlot();
-    printf("task 3 started...");
+    printf("task 3 started...\n");
     Task.new(&(System.tasks[slot]), "Task 4", task4, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty, NULL);
     while(i < 10000000)
     {

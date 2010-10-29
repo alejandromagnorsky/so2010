@@ -46,7 +46,8 @@ enum {
     STATUS_READY,
     STATUS_WAITING,
     STATUS_DEAD,
-    STATUS_RUNNING
+    STATUS_RUNNING,
+    STATUS_WAITING_RECV
 };
 
 typedef int (*program_t) (char*);
@@ -97,6 +98,8 @@ struct task_t {
 	char running_mode;	/* RUNNING_BACK | RUNNING_FRONT */
 
 	block_t mem;
+	
+	int sleep;
 
 	// [TODO] we are not using this:
     struct {
@@ -308,6 +311,10 @@ struct TaskNamespace {
 	int (*getParentTID)(task_t);
 	void (*yield)(task_t);
 	int (*checkTTY)(int taskTID);
+	void (*sleep)(task_t task, int ticks);
+	void (*setSleep)(task_t task, int ticks);
+	void (*decSleep)(task_t);
+	int (*getSleep)(task_t);
 };
 
 struct TopNamespace {
@@ -357,6 +364,10 @@ int _task_scheduler(int esp);
 int Idle (void);
 void _task_yield(task_t task);
 int _task_checkTTY(int taskTID);
+void _task_sleep(task_t task, int ticks);
+void _task_setSleep(task_t task, int ticks);
+void _task_decSleep(task_t task);
+int _task_getSleep(task_t task);
 
 int _top_increment100Counter();
 int _top_processCpuUsage(int tid);
