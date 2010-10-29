@@ -16,7 +16,7 @@ static struct {
 		         {"echo", "Prints string", echo},
 		         {"startx", "Start graphic OS", startx},
 		         {"clear", "Clear the screen", clear},
-		         {"top", "Shows active processes and it's CPU percentage of use", _top_run},
+		         {"top", "Shows active processes and statistics", top},
 		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks}
 };
 
@@ -146,3 +146,19 @@ int clear(char* line) {
 		printf(" ");
         //System.device[DEVICE_SCREEN]->driver->write(DEVICE_SCREEN, " ", 1);
 }
+
+int top (char* line) {
+    System.name("top");
+
+    int i;
+    task_t t;
+
+    //System.name("printTasks");
+    
+    for (i = 0; i < NUM_TASKS; i++)
+        if (System.tasks[i].tid != 0) {
+            t = &(System.tasks[i]);
+            printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
+
+        }
+}    

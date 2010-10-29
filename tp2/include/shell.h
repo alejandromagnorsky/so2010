@@ -24,6 +24,7 @@ int startx(char*);
 int clear(char*);
 int echo(char*);
 int alloc(char*);
+int top(char*);
 
 extern struct system_t System;
 extern tty_t ttys[NTTYS];

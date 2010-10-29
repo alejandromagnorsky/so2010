@@ -349,11 +349,14 @@ _newStack:
     
             mov eax, [ebp + 12] ; Pointer to the bottom of the new stack.
             mov esp, eax        ; We switch to the new stack
+
+            mov eax, [ebp + 16] ; This is the char* line argument
+            push eax            ; Pushed so it can be read.
             
-            mov eax, [ebp + 16] ; Function to clean-up after task is done.
+            mov eax, [ebp + 20] ; Function to clean-up after task is done.
             push eax            ; To the new stack it goes!
             
-            mov eax, 512        ; New flags register, to be popfd'd
+            mov eax, 512        ; New flags register, to be iret'd
             push eax            ; There we go.                       
             
             push cs             ; Code segment.
@@ -367,28 +370,6 @@ _newStack:
     mov esp, ebp
     pop ebp
     ret
-
-_nothignasd:    
-	pushfd					; Push flags
-        mov		ebp, esp
-        
-            mov		eax, [ebp + 12]	; Recover sp
-            mov		esp, eax		; Stack to use
-            mov		eax, [ebp + 8]  ; Task to execute
-            mov		edx, [ebp + 16]	; Task to end process
-            
-            push	edx				; Push of new ret
-            mov		ecx, 512		; Set bit for enabling interruptions
-            push	ecx				; Push flags (just for enabling int)
-            push	cs				; For iret
-            push	eax             ; Task IP
-            pushad					; Remaining registers
-            mov		eax, esp		; Return new esp
-            
-        mov		esp, ebp		; Restore original esp
-	popfd
-	ret
-
 ;-------------------------------------------------------------------------------
 
 

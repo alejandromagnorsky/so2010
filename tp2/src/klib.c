@@ -13,7 +13,7 @@ void switchTTY(task_t newt, task_t oldt);
 size_t _sys_write(int devcode, void* from, size_t nbytes) {
     size_t ret;
     
-    MOVTO_AL(SYSTEM_CALL_WRITE);
+    MOVTO_EAX(SYSTEM_CALL_WRITE);
     MOVTO_EBX(devcode)
     MOVTO_ECX(from);
     MOVTO_EDX(nbytes);
@@ -27,7 +27,7 @@ size_t _sys_write(int devcode, void* from, size_t nbytes) {
 size_t _sys_read(int devcode, void* to, size_t nbytes) {
     size_t ret;
     
-    MOVTO_AL(SYSTEM_CALL_READ);
+    MOVTO_EAX(SYSTEM_CALL_READ);
     MOVTO_EBX(devcode)
     MOVTO_ECX(to);
     MOVTO_EDX(nbytes);
@@ -41,7 +41,7 @@ size_t _sys_read(int devcode, void* to, size_t nbytes) {
 size_t _sys_seekr(int devcode, int offset, int from) {
     size_t ret;
 
-    MOVTO_AL(SYSTEM_CALL_SEEKR);
+    MOVTO_EAX(SYSTEM_CALL_SEEKR);
     MOVTO_EBX(devcode);
     MOVTO_ECX(offset);
     MOVTO_EDX(from);
@@ -55,7 +55,7 @@ size_t _sys_seekr(int devcode, int offset, int from) {
 size_t _sys_seekw(int devcode, int offset, int from) {
     size_t ret;
     
-    MOVTO_AL(SYSTEM_CALL_SEEKW);
+    MOVTO_EAX(SYSTEM_CALL_SEEKW);
     MOVTO_EBX(devcode);
     MOVTO_ECX(offset);
     MOVTO_EDX(from);
@@ -69,7 +69,7 @@ size_t _sys_seekw(int devcode, int offset, int from) {
 size_t _sys_tellr(int devcode) {
     size_t ret;
     
-    MOVTO_AL(SYSTEM_CALL_TELLR);
+    MOVTO_EAX(SYSTEM_CALL_TELLR);
     MOVTO_EBX(devcode);
     
     THROW_INT80;
@@ -81,7 +81,7 @@ size_t _sys_tellr(int devcode) {
 size_t _sys_tellw(int devcode) {
     size_t ret;
     
-    MOVTO_AL(SYSTEM_CALL_TELLW);
+    MOVTO_EAX(SYSTEM_CALL_TELLW);
     MOVTO_EBX(devcode);
     
     THROW_INT80;
@@ -93,7 +93,7 @@ size_t _sys_tellw(int devcode) {
 int _sys_exec(int (*f) (char*), char* args) {
     int ret;
     
-    MOVTO_AL(SYSTEM_CALL_EXEC);
+    MOVTO_EAX(SYSTEM_CALL_EXEC);
     MOVTO_EBX(f);
     MOVTO_ECX(args);
     
@@ -103,7 +103,72 @@ int _sys_exec(int (*f) (char*), char* args) {
     return ret;
 }
 
+int _sys_gettid() {
+    int ret;
 
+    MOVTO_EAX(SYSTEM_CALL_GETTID);
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
+}
+
+int _sys_nexttid(int *iter) {
+    int ret;
+
+    MOVTO_EAX(SYSTEM_CALL_NEXTTID);
+    MOVTO_EBX(iter);
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
+}
+
+int _sys_getrank(int tid) {
+    int ret;
+
+    MOVTO_EAX(SYSTEM_CALL_GETRANK);
+    MOVTO_EBX(tid);
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
+}
+
+int _sys_getprio(int tid) {
+    int ret;
+
+    MOVTO_EAX(SYSTEM_CALL_GETPRIO);
+    MOVTO_EBX(tid);
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
+}
+
+int _sys_getcpuc(int tid) {
+
+    int ret;
+    MOVTO_EAX(SYSTEM_CALL_GETCPUC);
+    MOVTO_EBX(tid);
+    
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
+}
+
+char* _sys_name(char* name) {
+    int ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_NAME);
+    MOVTO_EBX(name);
+
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+    
+    return (char*) ret;
+}
 
 struct TaskNamespace Task = {
     _task_setPriority,
@@ -235,11 +300,10 @@ int _task_findSlot() {
 }
 
 int _task_new (task_t task, char* name, program_t program, int rank, 
-			int priority, int running_mode, int tty) {
+			int priority, int running_mode, int tty, char* line) {
     /* Create a new task, given a program and its rank and priority */
     int i;
     char found;
-    
 	_Cli();
 
     task_t current = Task.getCurrent();
@@ -268,7 +332,8 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	//Paging.pageUp(task->stack);
 	_pageUp(task->stack);
 
-    task->esp = _newStack (program, task->stack_start, Task.cleaner);
+    task->esp = _newStack (program, task->stack_start, line, Task.cleaner);
+    
     //Paging.pageDown(task->stack);
 	_pageDown(task->stack);
 	
@@ -461,7 +526,6 @@ int _task_getNewTID() {
 	scheduler in order to run a new task */
 static void _task_cleaner(void)
 {
-	
 	_Cli();
 	task_t task, parent;
 	task = Task.getCurrent();
@@ -508,7 +572,7 @@ void _task_setupScheduler ()
 	/* What we need to initialize is the idle task: */
 	
     idle_task = &(System.tasks[slot] );
-	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, RUNNING_BACK, NO_TTY);
+	Task.new(idle_task, "Idle", idle, RANK_NORMAL, PRIORITY_MIN, RUNNING_BACK, NO_TTY, "");
     Task.setStatus(idle_task, STATUS_WAITING);
     
     System.task = System.idle = idle_task;
@@ -550,7 +614,7 @@ int _top_processCpuUsage(int tid)
 		}
 	}
 
-	return (count*100)/LASTS_QUANT;
+	return count;
 }
 
 void _top_getStatusName(char* buffer, task_t task)
