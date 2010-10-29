@@ -1,0 +1,118 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[pdftex]{graphicx}
+
+\makeindex
+
+%opening
+\title{\underline{\textbf{Trabajo práctico 2: Multitasker}}}
+\author{
+Lezica, Santiago. (Leg. 49147).\\
+Ballesty, Pablo Andrés. (Leg. 49359).\\
+Pose, Jimena Belén. (Leg. 49015).\\
+}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+\tableofcontents
+
+\newpage
+\section{Introducción}
+\subsection{Objetivo}
+Realizar un programa que conmute diferentes procesos, asignándoles a cada 
+uno un tiempo de ejecución. El multitasker no corre sobre ningún Sistema 
+Operativo, se ubica en memoria utilizando un bootloader GRUB.
+
+
+\subsection{Enunciado}
+El trabajo consta de la realización de un Multitasker, cuyo objetivo es asignar
+tiempo de ejecución a diferentes procesos en memoria. El sistema deberá ser
+implementado para plataformas Intel de 32 bits, utilizando el procesador en
+modo protegido. El multitasker debe ser preemptivo, es decir, cualquier tarea
+puede ser desalojada del microprocesador. El encargado de administrar el CPU
+es el scheduler el cual tomará como base de tiempo la interrupción de hardware
+INT8 correspondiente al timer tick, para realizar la asignación de tiempo ( time
+slot ).
+
+\subsection{Contexto de tareas}
+Cada grupo deberá elegir la forma en resguardar el contexto de cada tarea, las
+opciones son: utilizar los TSS que provee el microprocesador Intel 386 o una
+implementación propia de código.
+
+\subsection{Scheduler}
+El Multitasker deberá implementar 2 (dos) tipos de scheduling distintos. Al
+menos uno de ellos deberá considerar la prioridad de los procesos para asignar
+los slots de tiempo.
+
+\subsection{Estados de procesos}
+El sistema deberá estar programado de manera que se diferencien los estados
+básicos de ”Corriendo”, ”Esperando” y ”Listo”. Por otra parte, cada proceso
+deberá tener un valor de prioridad entre 0 y 4 que indique la importancia del
+proceso. Además se deberá demostrar el funcionamiento de los mismos con
+programas de prueba y se deberá poder corroborar el estado del proceso y el
+porcentaje de procesador que esté ocupando con la ayuda del comando ”top”.
+También deberá haber un comando kill que permita matar procesos en ejecución.
+Tener en cuenta que kill debe matar también a todos los hijos de ese proceso.
+Deberán desarrollar una system call (simil a yield) que fuerce al proceso actual
+a ceder procesador.
+
+\subsection{Terminales}
+El usuario debe poder tener al menos 4 terminales distintas y alternar entre
+ellas de manera similar a Linux.
+
+\subsection{Intérprete de comandos}
+El usuario debe poder ejecutar las diferentes tareas a través de comandos ingresados 
+por teclado. La forma de los comandos quedan a elección del alumno.
+
+\subsection{Procesos en background}
+El sistema debe tener la posibilidad de correr los mismos procesos tanto en
+foreground como en background. Para este último se deberá utilizar el caracter
+"\&" al igual que en UNIX.
+
+\subsection{Administración de memoria}
+El sistema debe tener un módulo de administración de memoria mediante paginación 
+para los procesos, el mismo se encargará de lo siguiente:
+
+\begin{itemize}
+ \item Cada proceso tendrá su stack propio en una página, a la cual solamente él
+	tendrá acceso. Cada proceso podrá leer y escribir libremente sobre esta
+	página pero no páginas de otros procesos.      
+ \item Los procesos no poseerán un heap propio, ya que están corriendo sobre la
+	misma zona de datos del SO.
+ \item Ningún proceso deberá leer o escribir directamente ninguna variable global
+	del SO. En caso de que haya variables globales que estén pensadas para
+	ser leidas por procesos usuario, deberán tener una función que las copie a
+	una zona de heap propia al proceso, simulando un system call.
+\end{itemize}
+
+\subsection{Proveedor de Servicios}
+Deberán implementar dos procesos proveedores de servicios, que estarán corriendo 
+desde la inicialización del sistema. Estos procesos estarán constantemente
+bloqueados esperando pedidos. Cuando algún proceso usuario requiera algún
+servicio de algún servidor, lo llamará mediante un IPC (puede ser cualquiera,
+incluso sencillo). El proceso servidor correrá con máxima prioridad y no podrá
+ser interrumpido por otros procesos usuario, salvo que decida ceder procesador
+voluntariamente.
+
+\subsection{Programas de prueba}
+Cada grupo deberá desarrollar tareas, que funcionarán como programas de
+prueba, los mismos deberán demostrar vulnerabilidades y virtudes del trabajo,
+y servirán para demostrar la implementación del TP.
+
+
+\newpage
+
+
+\section{Desarrollo}
+
+
+\newpage
+\section{Conclusiones}
+
+\bigskip
+\end{document}
