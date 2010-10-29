@@ -13,6 +13,8 @@
 #include "task.h"
 #include "defs.h"
 
+void shell(int tty, linebuffer_t linebuffer, command_t command);
+
 void input_handler();
 void parse_command(linebuffer_t linebuffer, command_t command);
 int run_command(command_t command);

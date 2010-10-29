@@ -73,16 +73,17 @@ size_t _dread(device_t dev, void* to, size_t nbytes) {
     
         case DEVICE_KEYBOARD:
             // To simplify matters, keyboard buffer is read 1 byte at a time.
-            
-            nbytes = (dev->rpos != dev->wpos) ? 1 : 0;
-            
-            if (nbytes > 0) { /* Key data available */
-                if (dev->rpos + 1 > dev->size)
-                    dev->rpos = 0; // This makes the buffer circular
-                
-                _memcpy(dev->addr + dev->rpos, to, 1);
-                dev->rpos++;
-            }
+			if(System.atty == Task.getTty(System.task)){
+		        nbytes = (dev->rpos != dev->wpos) ? 1 : 0;
+		        
+		        if (nbytes > 0) { /* Key data available */
+		            if (dev->rpos + 1 > dev->size)
+		                dev->rpos = 0; // This makes the buffer circular
+		            
+		            _memcpy(dev->addr + dev->rpos, to, 1);
+		            dev->rpos++;
+		        }
+			}
             break;
     
         case DEVICE_SCREEN:
@@ -372,6 +373,7 @@ char printable(char c) {
 
 unsigned char getchar() {
     unsigned char c;
+	
 	while ( (System.read(DEVICE_KEYBOARD, &c, 1) == 0) );
     return c;
 }

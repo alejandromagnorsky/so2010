@@ -52,7 +52,7 @@ int task3 (char* line) {
     int i = 0;
     int slot = Task.findSlot();
     printf("task 3 started...");
-    Task.new(&(System.tasks[slot]), "Task 4", task4, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
+    Task.new(&(System.tasks[slot]), "Task 4", task4, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty, NULL);
     while(i < 10000000)
     {
     	i++;
@@ -65,7 +65,7 @@ int task4 (char* line) {
     int i = 0;
     int slot = Task.findSlot();
     printf("task 4 started... \n");
-    Task.new(&(System.tasks[slot]), "Task 5", task5, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
+    Task.new(&(System.tasks[slot]), "Task 5", task5, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty, NULL);
     while(1);
 	printf("task 4 finishing... \n");
     return 1;
@@ -75,7 +75,7 @@ int task5 (char* line) {
     int i = 0;
     int slot = Task.findSlot();
     printf("task 5 started... \n");
-    Task.new(&(System.tasks[slot]), "Task 6", task6, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty);
+    Task.new(&(System.tasks[slot]), "Task 6", task6, RANK_NORMAL, PRIORITY_LOW, RUNNING_FRONT, System.atty, NULL);
     while(1);
 	printf("task 5 finishing... \n");
     return 1;

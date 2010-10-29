@@ -423,7 +423,7 @@ void _task_kill(task_t task)
 			auxTask = &(System.tasks[Task.findSlot()]);
 			// [TODO] check if i have to change it to the new way, check that createTty2 and task's name
 			//	if not... look for another solution
-			Task.new(auxTask, "Shell_", _createTty2, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, k);
+			//Task.new(auxTask, "Shell_", _createTty2, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, k);
 			System.ttysTids[k] = auxTask->tid;
 		}
 	}
@@ -485,9 +485,9 @@ void switchTTY(task_t newt, task_t oldt){
 	System.device[DEVICE_TTY]->wpos = ttys[newt->tty].output.wpos;
 	System.device[DEVICE_TTY]->rpos = ttys[newt->tty].output.rpos;
 	System.device[DEVICE_TTY]->addr = (void*) ttys[newt->tty].output.address;
-	System.device[DEVICE_KEYBOARD]->wpos = ttys[newt->tty].input.inputbuffer.wpos;
-	System.device[DEVICE_KEYBOARD]->rpos = ttys[newt->tty].input.inputbuffer.rpos;
-	System.device[DEVICE_KEYBOARD]->addr = ttys[newt->tty].input.inputbuffer.address;	
+	//System.device[DEVICE_KEYBOARD]->wpos = ttys[newt->tty].input.inputbuffer.wpos;
+	//System.device[DEVICE_KEYBOARD]->rpos = ttys[newt->tty].input.inputbuffer.rpos;
+	//System.device[DEVICE_KEYBOARD]->addr = ttys[newt->tty].input.inputbuffer.address;	
 }
 
 task_t _task_getByTID(int tid) {

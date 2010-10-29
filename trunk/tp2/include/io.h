@@ -60,5 +60,6 @@ int scanf(char* fstr, ...);
 extern struct system_t System;
 extern struct TTYSNamespace TTYS;
 extern struct TaskNamespace Task;
+extern tty_t ttys[NTTYS];
 
 #endif
