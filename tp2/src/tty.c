@@ -125,6 +125,6 @@ void _saveTTY(int ntty){
 }
 
 void _saveKeyboard(int ntty){
-	ttys[ntty].input.inputbuffer.wpos = System.device[DEVICE_TTY]->wpos;
-	ttys[ntty].input.inputbuffer.rpos = System.device[DEVICE_TTY]->rpos;
+	ttys[ntty].input.inputbuffer.wpos = System.device[DEVICE_KEYBOARD]->wpos;
+	ttys[ntty].input.inputbuffer.rpos = System.device[DEVICE_KEYBOARD]->rpos;
 }

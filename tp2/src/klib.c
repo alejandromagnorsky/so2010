@@ -393,7 +393,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 }
 
 int _createTty2(char * a){
-	shellloop();
+	shell();
 }
 /* Kills the given task */
 // [TODO] check what to do with shells. Change function if we have time.
@@ -506,17 +506,20 @@ int _task_scheduler(int esp)
 }
 
 void switchTTY(task_t newt, task_t oldt){
+	_Cli();
 	ttys[oldt->tty].output.wpos = System.device[DEVICE_TTY]->wpos;
 	ttys[oldt->tty].output.rpos = System.device[DEVICE_TTY]->rpos;
-	ttys[oldt->tty].input.inputbuffer.wpos = System.device[DEVICE_KEYBOARD]->wpos;
-	ttys[oldt->tty].input.inputbuffer.rpos = System.device[DEVICE_KEYBOARD]->rpos;
+//	ttys[oldt->tty].input.inputbuffer.wpos = System.device[DEVICE_KEYBOARD]->wpos;
+//	ttys[oldt->tty].input.inputbuffer.rpos = System.device[DEVICE_KEYBOARD]->rpos;
 
 	System.device[DEVICE_TTY]->wpos = ttys[newt->tty].output.wpos;
 	System.device[DEVICE_TTY]->rpos = ttys[newt->tty].output.rpos;
 	System.device[DEVICE_TTY]->addr = ttys[newt->tty].output.address;
-	System.device[DEVICE_KEYBOARD]->wpos = ttys[newt->tty].input.inputbuffer.wpos;
-	System.device[DEVICE_KEYBOARD]->rpos = ttys[newt->tty].input.inputbuffer.rpos;
-	System.device[DEVICE_KEYBOARD]->addr = ttys[newt->tty].input.inputbuffer.address;
+//	System.device[DEVICE_KEYBOARD]->wpos = ttys[newt->tty].input.inputbuffer.wpos;
+//	System.device[DEVICE_KEYBOARD]->rpos = ttys[newt->tty].input.inputbuffer.rpos;
+//	System.device[DEVICE_KEYBOARD]->addr = ttys[newt->tty].input.inputbuffer.address;
+	_Sti();
+
 }
 
 task_t _task_getByTID(int tid) {

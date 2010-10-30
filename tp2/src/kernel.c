@@ -244,7 +244,7 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-            ret = Task.new(&(System.tasks[Task.findSlot()]), "TaskPUTO", 
+            ret = Task.new(&(System.tasks[Task.findSlot()]), "Task", 
             				(program_t) ebx, RANK_NORMAL, PRIORITY_MEDIUM, RUNNING_FRONT, System.task->tty, (char*) ecx);
 
             MOVTO_EAX(ret);
@@ -395,79 +395,18 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     TTYS.initialize(TTY0);
 	TTYS.runShells();
     
-	testTasks('a');
-	
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
 	_Sti();
-	
-	/*
-	while(1){
-		char a = getchar();
-		printf("%c\n", a);
-	}
-	*/
-    //shellloop();
+
 }
 
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
-/*
-shellloop(){
-	char a = 0;
-	while(1){
-		a = getchar();
-		printf("%c\n", a);
-	}
-}
-*/
-shellloop(){
-	//shell();
-	
-	linebuffer_t linebuffer = {{0},0};
-	command_t command;
-	int tty_number = Task.getTty(System.task);
-	char show_prompt = 1;
-	unsigned char a;
-    int exit_status,i;
-
-	while(1){
-		if(show_prompt)
-			printf(SHELL_PROMPT, tty_number);
-
-		switch(a = getchar()){
-			case '\n':
-				putchar('\n');
-				linebuffer.line[linebuffer.pos] = 0;
-				parse_command(linebuffer, command);
-				show_prompt = 1;
-				linebuffer.line[0] = linebuffer.pos = 0;
-				exit_status = run_command(command);
-				break;
-
-			case '\b':
-				show_prompt = 0; /* Do not reprint prompt after backspace */
-				if(linebuffer.pos != 0) {
-					linebuffer.line[linebuffer.pos--] = 0x00;				
-					putchar('\b');
-				}
-				break;
-
-			default:
-				show_prompt = 0; /* Do not reprint prompt after character entry */
-				if(linebuffer.pos < LINEBUF_LEN - 1) {
-					linebuffer.line[linebuffer.pos++] = a;
-					putchar(a);
-				}
-				break;
-		}
-	}
-}
-
-
 int shell(){
+
 	int myTTY = Task.getTty(System.task);
 	int status;
 	
