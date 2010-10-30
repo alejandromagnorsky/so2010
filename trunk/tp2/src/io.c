@@ -70,33 +70,17 @@ struct driver_t TtyDriver = {
 size_t _dread(device_t dev, void* to, size_t nbytes) {
 
     switch (dev->id) {
-    
         case DEVICE_KEYBOARD:
-			/*
-			if(Task.getTty(System.task) == System.atty && Task.getRunningMode(System.task) == RUNNING_FRONT){
-				nbytes = ttys[System.atty].input.inputbuffer.rpos != ttys[System.atty].input.inputbuffer.wpos ? 1 : 0;
+			TTYS.saveKeyboard(System.atty);
+			TTYS.setKeyboard(Task.getTty(System.task));
+				nbytes = dev->wpos != dev->rpos ? 1 : 0; 
 				if(nbytes > 0){
-					if(ttys[System.atty].input.inputbuffer.rpos + 1 > BUFFER_SIZE)
-						ttys[System.atty].input.inputbuffer.rpos = 0;
-					_memcpy(ttys[System.atty].input.inputbuffer.address + ttys[System.atty].input.inputbuffer.rpos, to, 1);
-					ttys[System.atty].input.inputbuffer.rpos++;
+					_memcpy(dev->addr + dev->rpos, to, nbytes);
+					dev->rpos++;
 				}
-			}
-			*/
-						
-			nbytes = 0;
-			if(System.task->tty == System.atty && Task.getRunningMode(System.task) == RUNNING_FRONT){
-			    nbytes = (dev->rpos != dev->wpos) ? 1 : 0;
-				if (nbytes > 0) {
-		            if (dev->rpos + 1 > dev->size)
-		                dev->rpos = 0;
-		            
-		            _memcpy(dev->addr + dev->rpos, to, 1);
-		            dev->rpos++;
-		        }
-			}
-			
-            break;
+			TTYS.saveKeyboard(Task.getTty(System.task));
+			TTYS.setKeyboard(System.atty);
+			break;
     
         case DEVICE_SCREEN:
             return 0;
@@ -127,26 +111,17 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
     switch (dev->id) {
                    
         case DEVICE_KEYBOARD:
-			nbytes = 1;
-			if(ttys[System.atty].input.inputbuffer.wpos + 1 > BUFFER_SIZE)
-				ttys[System.atty].input.inputbuffer.wpos = 0;
+				
+				TTYS.setKeyboard(System.atty);
+				nbytes = 1;
+				if(dev->wpos + 1 > dev->size){
+					dev->wpos = 0;
+				}
 
-			_memcpy(from, ttys[System.atty].input.inputbuffer.address + ttys[System.atty].input.inputbuffer.wpos, 1);
-			ttys[System.atty].input.inputbuffer.wpos++;
-			/*
-            TTYS.saveKeyboard(System.task->tty);
-			TTYS.setKeyboard(System.atty);  
-			nbytes = 1;
-            
-            if (dev->wpos + 1 > dev->size)
-               dev->wpos = 0;
-            
-            _memcpy(from, dev->addr + dev->wpos, 1);
-            dev->wpos++;
-			TTYS.saveKeyboard(System.atty); 
-			TTYS.setKeyboard(System.task->tty);
-			*/
-            break;
+				_memcpy(from, dev->addr + dev->wpos, nbytes);
+				dev->wpos++;
+				TTYS.saveKeyboard(System.atty);
+			break;
 
 		case DEVICE_TTY:
 			nbytes = video_write(dev,from,nbytes);
@@ -155,6 +130,7 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
 			}
 			break;
         case DEVICE_SCREEN:
+			return video_write(dev,from,nbytes);
 			break;			       
 
         default:
