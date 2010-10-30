@@ -33,3 +33,30 @@ void memzero(void *mem, unsigned int size) {
     
     while (!(*pos = 0) && ++pos < end);
 }
+
+int
+strcmp(char * s1, char * s2)
+{
+	int diff = 0 ;
+
+	while(*s1 != '\0' && *s2 != '\0' && diff == 0)
+		diff += *s1++ - *s2++ ;    
+
+	if ( diff == 0 && *s1 - *s2 < 0 )
+		return -1 ;
+	if ( diff == 0 && *s1 - *s2 > 0 )
+		return 1 ;
+
+	return diff ;
+}
+
+int
+strlen(char* str)
+{
+	int length = 0 ;
+
+	while ( str[length] != '\0' )
+		length++ ;
+
+	return length ;
+}

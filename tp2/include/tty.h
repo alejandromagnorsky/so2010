@@ -21,7 +21,10 @@ struct TTYSNamespace {
 	void (*load)();
 	void (*jumpToTTY)(int);
 	void (*runShells)();
-	void (*switchTTY)(int);
+	void (*setTTY)(int);
+	void (*setKeyboard)(int);
+	void (*saveTTY)(int);
+	void (*saveKeyboard)(int);
 };
 
 

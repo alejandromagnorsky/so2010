@@ -150,14 +150,11 @@ void fault_handler(struct regs *r)
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
 	System.addTick();
-	//static char * vid = (char*) 0xB8000;
-	//vid++;
-	//vid = 'a';
-	//printf("tick ");
 }
 
 /* Routine for IRQ1: keyboard */
 void int_21(){
+
     unsigned char scan;
     unsigned char ascii;
 
@@ -396,9 +393,6 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	Task.setupScheduler();
 
     TTYS.initialize(TTY0);
-    TTYS.refresh();
-    
-	System.atty = TTY0;
 	TTYS.runShells();
     
 	testTasks('a');
@@ -409,18 +403,32 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 	_Sti();
 	
-    shellloop();
+	/*
+	while(1){
+		char a = getchar();
+		printf("%c\n", a);
+	}
+	*/
+    //shellloop();
 }
 
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
-
+/*
 shellloop(){
+	char a = 0;
+	while(1){
+		a = getchar();
+		printf("%c\n", a);
+	}
+}
+*/
+shellloop(){
+	//shell();
 	
 	linebuffer_t linebuffer = {{0},0};
 	command_t command;
 	int tty_number = Task.getTty(System.task);
-
 	char show_prompt = 1;
 	unsigned char a;
     int exit_status,i;
@@ -448,13 +456,26 @@ shellloop(){
 				break;
 
 			default:
-				show_prompt = 0; /* Do not reprint prompt after character entry */		
+				show_prompt = 0; /* Do not reprint prompt after character entry */
 				if(linebuffer.pos < LINEBUF_LEN - 1) {
 					linebuffer.line[linebuffer.pos++] = a;
 					putchar(a);
 				}
 				break;
 		}
+	}
+}
+
+
+int shell(){
+	int myTTY = Task.getTty(System.task);
+	int status;
+	
+	while(1){
+		command_t command;
+		printf(SHELL_PROMPT, myTTY);
+		clearCommand(&command);
+		get_command(&command);
 	}
 }
 

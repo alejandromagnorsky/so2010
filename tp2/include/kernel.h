@@ -30,6 +30,11 @@ void update_pointer(int row, int col);
 typedef enum eINT_80 {WRITE=0, READ} tINT_80;
 typedef enum eUSER {U_KERNEL=0, U_NORMAL} tUSERS;
 
+enum{
+	NO_CMD = 0,
+	CMD
+};
+
 /************************************************
 ** Macros for system functions:
 *************************************************/
