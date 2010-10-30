@@ -110,6 +110,45 @@ y servirán para demostrar la implementación del TP.
 
 \section{Desarrollo}
 
+\subsection{Contexto de tareas}
+Para guardar el contexto de las tareas se decidió realizar una implementación propia, 
+la cual guarda en el stack de la tarea los valores necesarios. Al crear una tarea se crea
+su stack, en el que se ubican (en el siguiente orden) una función de limpieza (para que 
+cuando la tarea termine esta pueda liberar su stack y borrarse del vector de procesos), 
+los eflags, el cs, el nuevo ip y los registros de uso general. \\
+El cambio de contexto se lleva a cabo en la interrupción 20 (timer tick), por lo tanto 
+en el manejadro de esta, se busca la nueva tarea a correr y se hace apuntar el esp al stack 
+de esta nueva tarea. Por último se levantan del stack los registros de uso general (los últimos 
+empujados en la creación del mismo) y se hace un iret, que se encarga de levantar el ip, el cs 
+y los flags. En caso que la tarea haya terminado, el ip que levanta el iret es el de la tarea 
+de limpieza.
+
+\subsection{Scheduler}
+Para este trabajo se implementaron dos scheduler, uno similar al \textit{Priority Round Robin} 
+y otro similar al \textit{Lottery}, ambos consideran prioridades. En ambos casos se considera 
+que si la tarea que estaba corriendo era un servidor no se le puede sacar el procesador y se 
+la debe dejar corriendo. Por último, si no hay ninguna tarea lista para correr se retorna la 
+tarea idle.
+
+\subsubsection{Priority Round Robin}
+En el caso del \textit{Priority Round Robin} se decidió darle mas prioridad a los procesos 
+servidores, si bien estos corren con la máxima prioridad, se los prioriza por encima de procesos 
+con la misma prioridad que no sean servidores. En caso de no haber ningún proceso servidor listo 
+para correr se corre el resto de los procesos en orden, asignándoles un tiempo de ejecución según 
+su prioridad.
+
+\subsubsection{Lottery}
+Para el \textit{Lottery} se decidió armar una función que devuelva un número random entre 0 y 100, basándose 
+en la cantidad de ticks del procesador. El siguiente proceso a correr se elige según lo que devuelva esta función, 
+si devuelve un valor entre 0 y 49 se le da la oportunidad de correr a un proceso con prioridad 0, 
+si devuelve un valor entre 50 y 69 se busca uno de prioridad 1, entre 70 y 84 uno de prioridad 2, entre 85 y 94 
+uno de prioridad 3, y por último, entre 95 y 100 uno de prioridad 4.\\
+En caso que no se encuentre un proceso con la prioridad deseada, se busca otro pasando desde prioridad 0 hasta 
+prioridad 4. Si bien esto no es muy eficiente (se puede llegar a estar recorriendo el vector de prioridades muchas 
+veces) se consideró que si hay alguna tarea lista para correr el scheduler no debe devolver el proceso idle, por lo 
+tanto si no encuentra la tarea con la prioridad determinada por la función random debe buscar otra con la mayor 
+prioridad posible.
+
 
 \newpage
 \section{Conclusiones}
