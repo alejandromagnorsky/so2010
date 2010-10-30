@@ -111,7 +111,6 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
     switch (dev->id) {
                    
         case DEVICE_KEYBOARD:
-				
 				TTYS.setKeyboard(System.atty);
 				nbytes = 1;
 				if(dev->wpos + 1 > dev->size){
@@ -125,9 +124,9 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
 
 		case DEVICE_TTY:
 			nbytes = video_write(dev,from,nbytes);
-			if(Task.getTty(System.task) == System.atty){
-				TTYS.refresh();
-			}
+			//if(Task.getTty(System.task) == System.atty){
+			//	TTYS.refresh();
+			//}
 			break;
         case DEVICE_SCREEN:
 			return video_write(dev,from,nbytes);
@@ -231,7 +230,6 @@ size_t _dseekr(device_t dev, int offset, int from) {
 void putchar(char c) {
     static char ch[2] = {0, 0x07};
     ch[0] = c;
-
 	System.write(DEVICE_TTY, ch, 1);
 }
 

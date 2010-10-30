@@ -150,6 +150,9 @@ void fault_handler(struct regs *r)
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
 	System.addTick();
+	if(System.getTicks() % 5 == 0){
+		TTYS.refresh();
+	}
 }
 
 /* Routine for IRQ1: keyboard */
