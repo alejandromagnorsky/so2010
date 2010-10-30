@@ -16,9 +16,11 @@
 void shell(int tty, linebuffer_t linebuffer, command_t command);
 
 void input_handler();
-void parse_command(linebuffer_t linebuffer, command_t command);
-int run_command(command_t command);
-void clearCommand(command_t command);
+void parse_command(linebuffer_t* linebuffer, command_t* command);
+int run_command(command_t* command);
+void clearCommand(command_t* command);
+int get_command(command_t* command);
+void getting_command(linebuffer_t* bufferinput);
 
 int divideByZero(char*);
 int help(char*);

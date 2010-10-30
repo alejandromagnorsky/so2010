@@ -72,18 +72,30 @@ size_t _dread(device_t dev, void* to, size_t nbytes) {
     switch (dev->id) {
     
         case DEVICE_KEYBOARD:
-            // To simplify matters, keyboard buffer is read 1 byte at a time.
-			if(System.atty == Task.getTty(System.task)){
-		        nbytes = (dev->rpos != dev->wpos) ? 1 : 0;
-		        
-		        if (nbytes > 0) { /* Key data available */
+			/*
+			if(Task.getTty(System.task) == System.atty && Task.getRunningMode(System.task) == RUNNING_FRONT){
+				nbytes = ttys[System.atty].input.inputbuffer.rpos != ttys[System.atty].input.inputbuffer.wpos ? 1 : 0;
+				if(nbytes > 0){
+					if(ttys[System.atty].input.inputbuffer.rpos + 1 > BUFFER_SIZE)
+						ttys[System.atty].input.inputbuffer.rpos = 0;
+					_memcpy(ttys[System.atty].input.inputbuffer.address + ttys[System.atty].input.inputbuffer.rpos, to, 1);
+					ttys[System.atty].input.inputbuffer.rpos++;
+				}
+			}
+			*/
+						
+			nbytes = 0;
+			if(System.task->tty == System.atty && Task.getRunningMode(System.task) == RUNNING_FRONT){
+			    nbytes = (dev->rpos != dev->wpos) ? 1 : 0;
+				if (nbytes > 0) {
 		            if (dev->rpos + 1 > dev->size)
-		                dev->rpos = 0; // This makes the buffer circular
+		                dev->rpos = 0;
 		            
 		            _memcpy(dev->addr + dev->rpos, to, 1);
 		            dev->rpos++;
 		        }
 			}
+			
             break;
     
         case DEVICE_SCREEN:
@@ -115,19 +127,35 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
     switch (dev->id) {
                    
         case DEVICE_KEYBOARD:
-            // To simplify matters, keyboard buffer is written 1 byte at a time.
-            nbytes = 1;
+			nbytes = 1;
+			if(ttys[System.atty].input.inputbuffer.wpos + 1 > BUFFER_SIZE)
+				ttys[System.atty].input.inputbuffer.wpos = 0;
+
+			_memcpy(from, ttys[System.atty].input.inputbuffer.address + ttys[System.atty].input.inputbuffer.wpos, 1);
+			ttys[System.atty].input.inputbuffer.wpos++;
+			/*
+            TTYS.saveKeyboard(System.task->tty);
+			TTYS.setKeyboard(System.atty);  
+			nbytes = 1;
             
             if (dev->wpos + 1 > dev->size)
-               dev->wpos = 0; // This makes the buffer circular.
+               dev->wpos = 0;
             
             _memcpy(from, dev->addr + dev->wpos, 1);
             dev->wpos++;
+			TTYS.saveKeyboard(System.atty); 
+			TTYS.setKeyboard(System.task->tty);
+			*/
             break;
 
 		case DEVICE_TTY:
+			nbytes = video_write(dev,from,nbytes);
+			if(Task.getTty(System.task) == System.atty){
+				TTYS.refresh();
+			}
+			break;
         case DEVICE_SCREEN:
-			return video_write(dev,from,nbytes);        
+			break;			       
 
         default:
             if (dev->wpos + nbytes > dev->size)
@@ -229,10 +257,6 @@ void putchar(char c) {
     ch[0] = c;
 
 	System.write(DEVICE_TTY, ch, 1);
-	
-	if(Task.getTty(System.task) == System.atty){
-		System.write(DEVICE_SCREEN, ch, 1);
-	}
 }
 
 void puts(char* str) {
@@ -373,10 +397,10 @@ char printable(char c) {
 
 unsigned char getchar() {
     unsigned char c;
-	
 	while ( (System.read(DEVICE_KEYBOARD, &c, 1) == 0) );
     return c;
 }
+
 
 int scanf(char* fmt, ...) {
     int ret, pos;

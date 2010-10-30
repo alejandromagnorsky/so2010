@@ -66,9 +66,11 @@ size_t video_write(device_t dev, void* from, size_t nbytes){
 			*((char*)dev->addr + dev->wpos++) = ascii;
 			*((char*)dev->addr + dev->wpos++) = 0x07;
 	}
+	/*
 	if(dev->id == DEVICE_SCREEN)	
 		move_cursor(dev->wpos/2);
 	return nbytes;
+	*/
 }
 
 void move_cursor_rc(int row, int col){

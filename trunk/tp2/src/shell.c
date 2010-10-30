@@ -21,35 +21,54 @@ static struct {
 };
 
 
-void parse_command(linebuffer_t linebuffer, command_t command) {
+int get_command(command_t* command){
+	linebuffer_t bufferinput = {{0},0};
+
+	getting_command(&bufferinput);
+	putchar('\n');
+	parse_command(&bufferinput, command) ;
+	bufferinput.line[0] = bufferinput.pos = 0;
+	run_command(command);
+}
+
+void getting_command(linebuffer_t* bufferinput){
+	unsigned char c;	
+	while( (c = getchar()) != '\n' && bufferinput->pos < (LINEBUF_LEN - 1) ){
+		bufferinput->line[bufferinput->pos++] = c;
+		putchar(c);
+	}
+	bufferinput->line[bufferinput->pos] = '\0';
+}
+
+void parse_command(linebuffer_t* linebuffer, command_t* command) {
     int initpos = 0;
-    while ( (linebuffer.line[initpos] == ' ') && (++initpos < LINEBUF_LEN - 1) );
-    sscanf(linebuffer.line + initpos, "%s %s", command.name, command.args);
+    while ( (linebuffer->line[initpos] == ' ') && (++initpos < LINEBUF_LEN - 1) );
+    sscanf(linebuffer->line + initpos, "%s %s", command->name, command->args);
 }
 
 void input_handler(){
 
 }
 
-int run_command(command_t command){
+int run_command(command_t* command){
 	int i;
-	if(streq(command.name, ""))
+	if(streq(command->name, ""))
 		return 0;
 		
 	for (i = 0; i < NUM_COMMANDS; i++) {
-	    if (streq(command.name, commands[i].name)) {
+	    if (streq(command->name, commands[i].name)) {
 	        clearCommand(command);
-	        return System.exec(commands[i].function, command.args);
+	        return System.exec(commands[i].function, command->args);
 	    }
 	}
 
-	printf("%s: command not found\n", command.name);	
+	printf("%s: command not found\n", command->name);	
 	clearCommand(command);
 	return 1;
 }
 
-void clearCommand(command_t command){
-	command.name[0] = 0;
+void clearCommand(command_t* command){
+	command->name[0] = 0;
 }
 
 int divideByZero(char* line){
@@ -60,7 +79,7 @@ int divideByZero(char* line){
 	return 0; /* Not happening anyway */
 }
 
-int echo(char * text)
+int echo(char* text)
 {
 	printf(text);
 	printf("\n");
@@ -80,7 +99,7 @@ int help(char* line) {
 	return 0;
 }
 
-int startx(char * line){
+int startx(char* line){
 	printf("This computer does not meet the requirements for the graphical interface\n");
 	printf("Requirements:\n");
 	printf("\t5TB of system memory.\n");
@@ -109,6 +128,5 @@ int top (char* line) {
         if (System.tasks[i].tid != 0) {
             t = &(System.tasks[i]);
             printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
-
         }
 }    
