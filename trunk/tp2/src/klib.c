@@ -336,7 +336,7 @@ int _task_checkTTY(int taskTID)
 int _task_new (task_t task, char* name, program_t program, int rank, 
 			int priority, int running_mode, int tty, char* line) {
     /* Create a new task, given a program and its rank and priority */
-    int i;
+    int i, sched = 0;
     char found;
 	_Cli();
 
@@ -383,11 +383,16 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	if(running_mode == RUNNING_FRONT && current->tid > 1){
 		Task.setStatus(current, STATUS_WAITING);
 		Task.setParentTID(task, current->tid);
+		sched = 1;
 	}else{
 		Task.setParentTID(task, System.idle->tid);
 	}
 	
 	_Sti();
+	if(sched)
+	{
+		_scheduler();
+	}
 	
     return task->tid;
 }
