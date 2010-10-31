@@ -74,7 +74,9 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_getprio,
                                _sys_getcpuc,
                                _sys_name,
-                               _sys_sleep
+                               _sys_sleep,
+                               _sys_yield,
+                               _sys_kill
                            };
                                
 //system_t System = &_system_data;
@@ -314,7 +316,16 @@ void int_80() {
 
             MOVTO_EAX(0);
             break;
-
+            
+		case SYSTEM_CALL_YIELD:
+			Task.yield(ebx);
+			MOVTO_EAX(0);
+			break;
+		
+		case SYSTEM_CALL_KILL:
+			Task.kill(ebx);
+			MOVTO_EAX(0);
+			break;
      }
 
 }

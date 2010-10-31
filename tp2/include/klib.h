@@ -128,7 +128,9 @@ enum {
     SYSTEM_CALL_GETPRIO,
     SYSTEM_CALL_GETCPUC,
     SYSTEM_CALL_NAME,
-    SYSTEM_CALL_SLEEP
+    SYSTEM_CALL_SLEEP,
+    SYSTEM_CALL_YIELD,
+    SYSTEM_CALL_KILL
 };
 
 struct driver_t {
@@ -207,6 +209,8 @@ struct system_t {
     int (*getcpuc) (int);
     char* (*name) (char*);
     int (*sleep) (int);
+    void (*yield)(int);
+    void (*kill)(int);
 };
 
 typedef struct system_t* system_t;
@@ -285,6 +289,8 @@ int _sys_getcpuc(int pid);
 char* _sys_name(char* name);
 
 int _sys_sleep(int);
+void _sys_yield(int tid);
+void _sys_kill(int tid);
 
 struct TaskNamespace {    
     void (*setPriority) (task_t, int);
@@ -298,7 +304,7 @@ struct TaskNamespace {
     
     int (*findSlot) ();
     int (*new) (task_t, char*, program_t, int, int, int, int, char*);
-    void (*kill) (task_t task);
+    void (*kill) (int);
 
     task_t (*getByTID) (int);
     task_t (*getCurrent) ();
@@ -314,7 +320,7 @@ struct TaskNamespace {
 	int (*getRunningMode)(task_t);
 	void (*setParentTID)(task_t, int);
 	int (*getParentTID)(task_t);
-	void (*yield)(task_t);
+	void (*yield)(int);
 	int (*checkTTY)(int taskTID);
 	void (*setSleep)(task_t task, int ticks);
 	int (*decSleep)(task_t);
@@ -357,7 +363,7 @@ int _task_getParentTID(task_t task);
 
 int _task_new (task_t task, char* name, program_t program, int rank, 
 			int priority, int isFront, int tty, char* line);
-void _task_kill(task_t task);
+void _task_kill(int tid);
 
 task_t _task_getByTID (int tid);
 task_t _task_getCurrent();
@@ -367,7 +373,7 @@ static void _task_cleaner (void);
 void _task_setupScheduler ();
 int _task_scheduler(int esp);
 int Idle (void);
-void _task_yield(task_t task);
+void _task_yield(int tid);
 int _task_checkTTY(int taskTID);
 void _task_setSleep(task_t task, int ticks);
 int _task_decSleep(task_t task);

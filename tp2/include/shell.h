@@ -29,6 +29,7 @@ int clear(char*);
 int echo(char*);
 int alloc(char*);
 int top(char*);
+int kill(char* tid);
 
 extern struct system_t System;
 extern tty_t ttys[NTTYS];
