@@ -60,6 +60,7 @@ _lidt:				; Carga el IDTR
 
 
 _int_00_hand:
+    mov [0xB8000], dword 65
     push byte 0
     push byte 0
     jmp isr_common_stub

@@ -51,7 +51,7 @@ void _runShells(){
 	Task.setParentTID(task, System.idle->tid);
 }
 
-int _createTty(char * a){
+int _createTty(char * a) {
 	shell();
 }
 
