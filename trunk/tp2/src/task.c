@@ -1,14 +1,14 @@
 #include "../include/task.h"
 
 int testTasks(char * a) {
-   //System.name("Testing");
+	System.name("Testing");
     System.exec(task1, "mensaje de prueba");
     
 }
 
 int task1(char* line) {
 
-	//System.name("Test Task1");
+	System.name("Test Task1");
 
     printf("%s\n", line);
     System.sleep(50);
@@ -23,8 +23,15 @@ int task1(char* line) {
 	printf("Trying to kill idle: ");
     System.kill(1);
     
-    /*printf("Test Task1 is going to kill itself\n");
+    printf("Test Task1 is going to kill itself\n");
     System.kill(7);
     
-    printf("This shouldnt be printed, i should be dead\n");*/
+	System.sleep(200);
+    printf("This shouldnt be printed, i should be dead\n");
+}
+
+int infinite(char* line)
+{
+	System.name("infinite");
+	while(1);
 }

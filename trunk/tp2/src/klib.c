@@ -442,7 +442,7 @@ void _task_kill(int tid)
 	
 	task = Task.getByTID(tid);
 	
-	if(task->tid == 0)
+	if(task->tid <= 0)
 	{
 		printf("The given task doesnt exist\n");
 		return;

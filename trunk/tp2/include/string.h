@@ -12,4 +12,5 @@ void strcpy(char *s, char* t);
 void memzero(void *mem, unsigned int size);
 int strlen(char*);
 int strcmp(char *, char *);
+int atoi(char *buffer, int base);
 #endif
