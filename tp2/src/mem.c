@@ -10,6 +10,7 @@ int _checkPageStatus(address_t address);
 void _setPageUsed(address_t address);
 void _setPageUnused(address_t address);
 void _initializeMemMan();
+address_t getPage(void * addr);
 
 void* _malloc(block_t block, size_t size);
 
@@ -92,8 +93,8 @@ void _initializeMemMan(){
 }
 
 
-int _pageUp(void * pg){
-	address_t address = (address_t) pg;
+int _pageUp(void * addr){
+	address_t address = getPage(addr);
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;		
 	int i = 0;
 	if(!ISPRESENT(directoryTbl[GETDIRENTRY(address)])){
@@ -107,8 +108,8 @@ int _pageUp(void * pg){
 	}
 }
 
-int _pageDown(void * pg){
-	address_t address = (address_t) pg;
+int _pageDown(void * addr){
+	address_t address = getPage(addr);
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
 	int i = 0;
 	tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
@@ -116,6 +117,11 @@ int _pageDown(void * pg){
 	tbl[GETTBLENTRY(address)] ^= PRESENT;
 	//printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]);	
 	address += PAGESIZE;
+}
+
+address_t getPage(void * addr){
+	address_t pgoffset = (address_t) addr % PAGESIZE;
+	return (address_t) addr - pgoffset; 
 }
 
 void _setCR3(){
@@ -219,7 +225,6 @@ struct block_t {
 void* malloc(size_t size){
 	block_t newBlock = NULL;
 	int npages = 0;
-	printf("SYSTEM.TASK = %d\n", System.task);
 	if(System.task->mem == NULL){
 		newBlock = _sys_malloc(size);
 		if(newBlock == NULL){
@@ -230,7 +235,8 @@ void* malloc(size_t size){
 		newBlock->freeSpace = newBlock->npages * PAGESIZE - sizeof(struct block_t);
 		newBlock->ptrFreeMemory = newBlock + sizeof(struct block_t); 
 		System.task->mem = newBlock;
-		return (void*) _malloc(newBlock->next, size);
+		return (void*) newBlock->ptrFreeMemory;
+		//return (void*) _malloc(newBlock->next, size);
 	}else{
 		return (void*) _malloc(System.task->mem, size);
 	}	

@@ -365,12 +365,10 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	    Task.setStatus(task, STATUS_READY);
     }
 	
-	//Paging.pageUp(task->stack);
 	_pageUp(task->stack);
 
     task->esp = _newStack (program, task->stack_start, line, Task.cleaner);
     
-    //Paging.pageDown(task->stack);
 	_pageDown(task->stack);
 	
 	if(running_mode == RUNNING_FRONT){
@@ -447,7 +445,6 @@ void _task_kill(task_t task)
     
     task->tname[0] = '\0';
     
-	//Paging.freeMem(task->stack,1);
 	_sys_free(task->stack,1);
 	
 	/* If for any reason a tty needs to be killed we have to recreate it */
@@ -489,8 +486,6 @@ int _task_scheduler(int esp)
 		System.task = new;
 
 		switchTTY(new, old);	
-		//Paging.pageDown(old->stack);
-		//Paging.pageUp(new->stack);
 		_pageDown(old->stack);
 		_pageUp(new->stack);
 

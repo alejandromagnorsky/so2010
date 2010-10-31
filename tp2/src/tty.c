@@ -67,7 +67,6 @@ void _initialize_ttys(int def_tty){
 }
 
 void _initialize_tty(tty_t * tty){
-	tty->status = TTY_READY;
 	_initializeInput(&tty->input);
 	_initializeOutput(&tty->output);
 }

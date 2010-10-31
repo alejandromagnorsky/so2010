@@ -390,7 +390,9 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
     printf("Memory detected: %d KB\n", (mbd->mem_lower + mbd->mem_upper));
     printf("Paging the memory ............. ");
-    Paging.start(mbd->mem_lower + mbd->mem_upper);
+    
+	//Paging.start(mbd->mem_upper - mbd->mem_lower);
+	Paging.start(mbd->mem_lower + mbd->mem_upper);
     printf("OK\n\n");
 
 	Task.setupScheduler();
@@ -406,8 +408,19 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 
 }
 
+/*
+int shell(){
+	while(1){
+		int* a = (int*) System.malloc(sizeof(int*));
+		*a = 1;
+		printf("ALLOC: %d\n", (unsigned int) a);
+	}
+	while(1);	
+}
+*/
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
+
 int shell(){
 
 	int myTTY = Task.getTty(System.task) + 1;
