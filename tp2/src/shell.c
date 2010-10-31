@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 11
+#define NUM_COMMANDS 10
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -17,9 +17,8 @@ static struct {
 		         {"startx", "Start graphic OS", startx},
 		         {"clear", "Clear the screen", clear},
 		         {"top", "Shows active processes and statistics", top},
-		         {"kill", "Kills the task with the id you give", kill},
 		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks},
-		         {"infinite", "Runs a task forever, or untill it's killed", infinite}
+				 {"demo_malloc", "demo malloc", demo_malloc}
 };
 
 
@@ -31,6 +30,15 @@ int get_command(command_t* command){
 	parse_command(&bufferinput, command) ;
 	bufferinput.line[0] = bufferinput.pos = 0;
 	run_command(command);
+}
+
+int demo_malloc(char * a){
+	int qty = 1000;
+	while(qty--){
+		void * a = malloc(100);
+		printf("%d ", (unsigned int) a);
+	}
+	printf("\n");
 }
 
 void getting_command(linebuffer_t* bufferinput){

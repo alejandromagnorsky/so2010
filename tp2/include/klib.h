@@ -158,20 +158,7 @@ struct device_t {
 };
 
 typedef struct device_t* device_t;
-/*
-struct stScreenDeviceData {
-    int  id;
-    char name[11];
-*/
-    //void* addr;     /* Starting address of the device's memory area */
-    //size_t wpos;        /* Current writing position */
-   // size_t rpos;	/* Current Reading position */
- //   size_t size;       /* Size of the device's memory area */
-    
- //   char buffer[80 * 25 * 2];
-//};
 
-//typedef struct stScreenDeviceData* device_screen_t;
 
 struct system_t {
     long int    ticks;      /* Tick count since system boot */

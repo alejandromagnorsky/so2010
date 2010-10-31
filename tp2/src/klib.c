@@ -626,6 +626,7 @@ static void _task_cleaner(void)
 	
 	//Paging.freeMem(task->stack,1);
 	_sys_free(task->stack,1);
+	_sys_free_mem(task->mem);
 	
 	Top.clearTask(task->tid);
 	
