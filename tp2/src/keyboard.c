@@ -53,7 +53,7 @@ keyEntry scan2ascii(byte scan_code) {
 	switch (scan_code) {
 	case CAPS:
 		ans.type = PRIVATE_KEY;
-		ttys[System.atty].input.flags.mayus_status = ttys[System.atty].input.flags.mayus_status == 0 ? 1 : 0;
+		ttys[System.atty].input.flags.mayus_status = (ttys[System.atty].input.flags.mayus_status == 0) ? 1 : 0;
 		updateLeds();
 		break;
 	case L_SHIFT:
@@ -212,29 +212,13 @@ escapedKey(unsigned int scan_code){
 	unsigned char ascii;	
 	switch(scan_code) {
 		case F5:
-			printf("F5");
-			break;
 		case F6:
-			printf("F6");
-			break;
 		case F7:
-			printf("F7");
-			break;
 		case F8:
-			printf("F8");
-			break;
 		case F9:
-			printf("F9");
-			break;
 		case F10:
-			printf("F10");
-			break;
 		case F11:
-			printf("F11");
-			break;
-		case F12:
-			printf("F12");
-			break;	
+		case F12:		
 		case R_CTRL:
 		case L_GUI:
 		case R_GUI:

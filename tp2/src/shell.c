@@ -44,8 +44,19 @@ int demo_malloc(char * a){
 void getting_command(linebuffer_t* bufferinput){
 	unsigned char c;	
 	while( (c = getchar()) != '\n' && bufferinput->pos < (LINEBUF_LEN - 1) ){
-		bufferinput->line[bufferinput->pos++] = c;
-		putchar(c);
+		
+		switch(c){
+			case '\b':
+				if(bufferinput->pos > 0){
+					bufferinput->pos--;
+					putchar(c);
+				}
+				break;
+			default:
+				bufferinput->line[bufferinput->pos++] = c;
+				putchar(c);
+				break;
+		}		
 	}
 	bufferinput->line[bufferinput->pos] = '\0';
 }
@@ -103,8 +114,6 @@ int help(char* line) {
     
 	for (i = 0; i < NUM_COMMANDS; i++)
 	    printf("%s\t\t%s\n", commands[i].name, commands[i].description);
-	    
-	printf("\n");
 	
 	return 0;
 }
