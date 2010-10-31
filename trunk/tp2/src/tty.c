@@ -16,8 +16,6 @@ void _saveKeyboard(int ntty);
 struct TTYSNamespace TTYS = {
 	_initialize_ttys,
 	_refresh,
-	_save,
-	_load,
 	_jumpToTTY,
 	_runShells,
 	_setTTY,
@@ -85,25 +83,16 @@ void _initializeOutput(output_t * output){
 
 void _refresh(){
 	_memcpy(ttys[System.atty].output.address, System.device[DEVICE_SCREEN]->addr, VIDEO_SIZE);
-	move_cursor(ttys[System.atty].output.wpos / 2);
-}
-
-void _save(){
-	TTYS.saveTTY(System.atty);
-	TTYS.saveKeyboard(System.atty);
-}
-
-void _load(){
-	TTYS.setTTY(System.atty);
-	TTYS.setKeyboard(System.atty);
 }
 
 void _jumpToTTY(int ntty){
+	int oldwpos, oldaddress, newwpos, newaddress;
 	if(ntty != System.atty){
-		TTYS.save();
+		TTYS.saveKeyboard(System.atty);
 		System.atty = ntty;
-		TTYS.load();
+		TTYS.setKeyboard(System.atty);
 		TTYS.refresh();
+		move_cursor(ttys[System.atty].output.wpos / 2);
 	}
 }
 

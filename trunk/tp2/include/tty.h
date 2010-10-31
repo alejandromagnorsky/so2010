@@ -8,7 +8,6 @@
 
 void _initialize_ttys(int);
 void _refresh();
-void _save();
 
 extern tty_t ttys[NTTYS];
 extern struct system_t System;
@@ -17,8 +16,6 @@ extern struct KBNamespace Keyboard;
 struct TTYSNamespace {
 	void (*initialize)();
 	void (*refresh)();
-	void (*save)();
-	void (*load)();
 	void (*jumpToTTY)(int);
 	void (*runShells)();
 	void (*setTTY)(int);

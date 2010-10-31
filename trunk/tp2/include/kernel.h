@@ -27,6 +27,8 @@ void update_pointer(int row, int col);
 
 #define OS_PID	0
 
+#define REFRESH_RATE 1
+
 typedef enum eINT_80 {WRITE=0, READ} tINT_80;
 typedef enum eUSER {U_KERNEL=0, U_NORMAL} tUSERS;
 

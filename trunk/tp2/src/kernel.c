@@ -36,7 +36,7 @@ struct device_t _sys_screen = {	DEVICE_SCREEN,     /* Device ID */
 struct device_t _sys_tty = {DEVICE_TTY,
 							"tty",
 							&TtyDriver,
-							NULL,
+							(void*) 0xb8000,
 							VIDEO_SIZE,
 							0,
 							0,
@@ -150,7 +150,7 @@ void fault_handler(struct regs *r)
 /* Routine for IRQ0: Timer Tick. */
 void int_20() {
 	System.addTick();
-	if(System.getTicks() % 5 == 0){
+	if(System.getTicks() % REFRESH_RATE == 0){
 		TTYS.refresh();
 	}
 }
@@ -410,7 +410,7 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 int shell(){
 
-	int myTTY = Task.getTty(System.task);
+	int myTTY = Task.getTty(System.task) + 1;
 	int status;
 	
 	while(1){
