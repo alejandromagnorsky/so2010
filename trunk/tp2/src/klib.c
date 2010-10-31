@@ -182,6 +182,24 @@ int _sys_sleep(int ticks) {
     return ret;
 }
 
+void _sys_yield(int tid) {
+    MOVTO_EAX(SYSTEM_CALL_YIELD);
+    MOVTO_EBX(tid);
+
+    THROW_INT80;
+
+    return;
+}
+
+void _sys_kill(int tid) {
+    MOVTO_EAX(SYSTEM_CALL_KILL);
+    MOVTO_EBX(tid);
+
+    THROW_INT80;
+    
+    return;
+}
+
 struct TaskNamespace Task = {
     _task_setPriority,
     _task_setRank,
@@ -413,14 +431,16 @@ int _createTty2(char * a){
 }
 /* Kills the given task */
 // [TODO] check what to do with shells. Change function if we have time.
-void _task_kill(task_t task)
+void _task_kill(int tid)
 {
 	int i, k, isTTY = 0, slot, parentTID;
-	task_t parent, auxTask;
+	task_t parent, auxTask, task;
 	
 	int idleAndTTYs = 4;
 
 	_Cli();
+	
+	task = Task.getByTID(tid);
 	
 	if(task->tid == 0)
 	{
@@ -490,7 +510,7 @@ int _task_scheduler(int esp)
     
 	while(Task.getStatus(new) == STATUS_DEAD)	/* Finishing dead tasks */
 	{
-		Task.kill(new);
+		Task.kill(new->tid);
 		new = (task_t) getNextTask();
 	}
     
@@ -643,9 +663,11 @@ void _task_setupScheduler ()
 	return;
 }
 
-void _task_yield(task_t task)
+void _task_yield(int tid)
 {
+	task_t task;
 	_Cli();
+	task = Task.getByTID(tid);
 	Task.setStatus(task, STATUS_READY);
 	_Sti();
 	_scheduler();

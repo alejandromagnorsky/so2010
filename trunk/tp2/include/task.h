@@ -12,10 +12,5 @@ extern struct TaskNamespace Task;
 
 int testTasks(char * a);
 int task1 (char* line);
-int task2 (char* line);
-int task3 (char* line);
-int task4 (char* line);
-int task5 (char* line);
-int task6 (char* line);
 
 #endif
