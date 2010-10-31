@@ -141,15 +141,9 @@ typedef struct {
 typedef screen_t output_t;
 
 typedef struct {
-	int status;
 	input_t input;
 	output_t output;
 }tty_t;
-
-enum {
-	TTY_READY = 0,
-	TTY_WRITTEN
-};
 
 /* </ttys> */
 

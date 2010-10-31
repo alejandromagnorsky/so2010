@@ -2,7 +2,6 @@
 #define _KLIB_H_
 
 #include "defs.h"
-//#include "tty.h"
 
 /************************************************
 ** Constants and definitions:
@@ -378,8 +377,7 @@ void _top_initialize(int tid);
 void _top_clearTask(int tid);
 int _top_run();
 
-
-
+extern struct PagingNamespace Paging;
 extern tty_t ttys[NTTYS];
 
 #endif
