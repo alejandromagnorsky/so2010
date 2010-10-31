@@ -86,6 +86,25 @@ struct task_t {
     char tname[MAX_TASK_NAME + 1];
     int trank, tpriority;
     int tstatus;
+    
+    union {
+        
+        struct {
+            int tid, len;
+            char msg[128];
+        } send;
+
+        struct {
+            int tid, len;
+            char msg[128];
+        } recv;
+
+        struct {
+            int ticks;
+        } sleep;
+        
+    } tsdata; /* Status additional information */
+    
     int isFront;
         
     void* stack;		/* Memory direction where stack starts */
@@ -96,11 +115,9 @@ struct task_t {
     int parentTID;
 
 	int tty;			/* TTY where is running */
-	char running_mode;	/* RUNNING_BACK | RUNNING_FRONT */
+	char running_mode;	/* RUNNING_BACK || RUNNING_FRONT */
 
 	block_t mem;
-	
-	int sleep;
 
 	// [TODO] we are not using this:
     struct {
@@ -129,6 +146,10 @@ enum {
     SYSTEM_CALL_GETCPUC,
     SYSTEM_CALL_NAME,
     SYSTEM_CALL_SLEEP,
+    SYSTEM_CALL_RECV,
+    SYSTEM_CALL_SEND,
+    SYSTEM_CALL_GETMSG,
+    SYSTEM_CALL_CLSMSG,
     SYSTEM_CALL_YIELD,
     SYSTEM_CALL_KILL
 };
@@ -196,8 +217,12 @@ struct system_t {
     int (*getcpuc) (int);
     char* (*name) (char*);
     int (*sleep) (int);
-    void (*yield)(int);
-    void (*kill)(int);
+    int (*send) (int, void*, int);
+    int (*recv) ();
+    int (*getmsg) (void*, int);
+    int (*clsmsg) ();
+    int (*yield) ();
+    int (*kill) (int);
 };
 
 typedef struct system_t* system_t;
@@ -268,16 +293,21 @@ size_t _sys_tellr(int devcode);
 size_t _sys_tellw(int devcode);
 int _sys_exec(int (*f) (char*), char* args);
 
-int _sys_gettid();
+int _sys_gettid(char* name);
 int _sys_nexttid(int* iter);
 int _sys_getrank(int pid);
 int _sys_getprio(int pid);
 int _sys_getcpuc(int pid);
 char* _sys_name(char* name);
 
+int _sys_send(int to, void* buf, int len);
+int _sys_recv();
+int _sys_getmsg(void* buf, int len);
+int _sys_clsmsg();
+
 int _sys_sleep(int);
-void _sys_yield(int tid);
-void _sys_kill(int tid);
+int _sys_yield();
+int _sys_kill(int tid);
 
 struct TaskNamespace {    
     void (*setPriority) (task_t, int);
@@ -295,6 +325,7 @@ struct TaskNamespace {
 
     task_t (*getByTID) (int);
     task_t (*getCurrent) ();
+    task_t (*getByName) (char*);
 
     int (*getNewTID) ();
     void (*setupScheduler) ();
@@ -313,6 +344,8 @@ struct TaskNamespace {
 	int (*decSleep)(task_t);
 	int (*getSleep)(task_t);
     void (*maintenance) ();
+    int (*setSend) (task_t, int, void*, int);
+    int (*setRecv) (task_t);
 };
 
 struct TopNamespace {
@@ -352,8 +385,9 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 			int priority, int isFront, int tty, char* line);
 void _task_kill(int tid);
 
-task_t _task_getByTID (int tid);
 task_t _task_getCurrent();
+task_t _task_getByTID (int tid);
+task_t _task_getByName(char*);
 
 int _task_getNewTID();
 static void _task_cleaner (void);
@@ -362,10 +396,15 @@ int _task_scheduler(int esp);
 int Idle (void);
 void _task_yield(int tid);
 int _task_checkTTY(int taskTID);
+
+void _task_maintenance();
+
 void _task_setSleep(task_t task, int ticks);
 int _task_decSleep(task_t task);
 int _task_getSleep(task_t task);
-void _task_maintenance();
+
+int _task_setSend(task_t, int to, void* buf, int len);
+int _task_setRecv(task_t);
 
 int _top_increment100Counter();
 int _top_processCpuUsage(int tid);
