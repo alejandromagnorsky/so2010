@@ -146,3 +146,7 @@ int kill(char* tid)
 	printf("%d\n", atoi(tid, 10));
 	System.kill(atoi(tid, 10));
 }
+
+int infinite(char* line) {
+    for(;;);
+}

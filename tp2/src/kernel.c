@@ -75,6 +75,8 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_getcpuc,
                                _sys_name,
                                _sys_sleep,
+                               _sys_send,
+                               _sys_recv,
                                _sys_yield,
                                _sys_kill
                            };
@@ -196,7 +198,7 @@ void int_80() {
     int syscall;
     task_t task;
     char* name;
-    int ebx, ecx, edx, ret, iter;
+    int ebx, ecx, edx, ret, iter, len;
     
     /* The above instructions, as well as these macros, do not affect the
        general purpose registers, so we can read their values just fine. */
@@ -250,6 +252,7 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
+            printf("Exec with line: %s\n", (char*) ecx);
             ret = Task.new(&(System.tasks[Task.findSlot()]), "Task", 
             				(program_t) ebx, RANK_NORMAL, PRIORITY_MEDIUM, RUNNING_FRONT, System.task->tty, (char*) ecx);
 
@@ -258,7 +261,11 @@ void int_80() {
             break;
 
         case SYSTEM_CALL_GETTID:
-            ret = System.task->tid;
+
+            if (ebx == 0)
+                ret = System.task->tid;
+            else
+                ret = (task = Task.getByName((char*) ebx)) ? task->tid : 0;
             
             MOVTO_EAX(ret)
             break;
@@ -326,6 +333,34 @@ void int_80() {
 			Task.kill(ebx);
 			MOVTO_EAX(0);
 			break;
+        case SYSTEM_CALL_SEND:
+            Task.setSend(System.task, ebx, (void*) ecx, edx);
+            _scheduler();
+            
+            MOVTO_EAX(0);
+            break;
+
+        case SYSTEM_CALL_RECV:
+            Task.setRecv(System.task);
+            _scheduler();
+            MOVTO_EAX(System.task->tsdata.recv.len);
+            break;
+
+        case SYSTEM_CALL_GETMSG:
+            if (ret = System.task->tsdata.recv.tid) {
+                
+                if (ret = (ecx == System.task->tsdata.recv.len))          
+                    strncpy(System.task->tsdata.recv.msg, (void*) ebx, ecx);
+                
+            }
+
+            MOVTO_EAX(ret ? 0 : -1);
+            break;
+
+        case SYSTEM_CALL_CLSMSG:
+            System.task->tsdata.recv.tid = 0;
+            MOVTO_EAX(0);
+            break;
      }
 
 }
@@ -444,7 +479,7 @@ int shell(){
 
 	int myTTY = Task.getTty(System.task) + 1;
 	int status;
-	
+	printf("(Shell) My tid is %d\n", System.gettid(NULL));
 	while(1) {
 		command_t command;
 		printf(SHELL_PROMPT, myTTY);

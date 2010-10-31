@@ -103,10 +103,11 @@ int _sys_exec(int (*f) (char*), char* args) {
     return ret;
 }
 
-int _sys_gettid() {
+int _sys_gettid(char* name) {
     int ret;
 
     MOVTO_EAX(SYSTEM_CALL_GETTID);
+    MOVTO_EBX(name);
     THROW_INT80;
     MOVFROM_EAX(ret);
 
@@ -182,16 +183,67 @@ int _sys_sleep(int ticks) {
     return ret;
 }
 
-void _sys_yield(int tid) {
+int _sys_send(int to, void* msg, int len) {
+
+    int ret;
+    MOVTO_EAX(SYSTEM_CALL_SEND);
+    MOVTO_EBX(to);
+    MOVTO_ECX(msg);
+    MOVTO_EDX(len);
+
+    THROW_INT80;
+    
+    MOVFROM_EAX(ret);
+    return ret;
+
+}
+
+int _sys_recv() {
+    int ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_RECV);
+    
+    THROW_INT80;
+    
+    MOVFROM_EAX(ret);
+    return ret;
+}
+
+int _sys_getmsg(void* buf, int len) {
+
+    int ret;
+
+    MOVTO_EAX(SYSTEM_CALL_GETMSG);
+    MOVTO_EBX(buf);
+    MOVTO_ECX(len);
+
+    THROW_INT80;
+
+    MOVFROM_EAX(ret);
+    return ret;
+
+}
+
+int _sys_clsmsg() {
+    
+    int ret;
+    MOVTO_EAX(SYSTEM_CALL_CLSMSG);
+
+    THROW_INT80;
+
+    MOVFROM_EAX(ret);
+    return ret;
+}
+
+int _sys_yield() {
     MOVTO_EAX(SYSTEM_CALL_YIELD);
-    MOVTO_EBX(tid);
 
     THROW_INT80;
 
     return;
 }
 
-void _sys_kill(int tid) {
+int _sys_kill(int tid) {
     MOVTO_EAX(SYSTEM_CALL_KILL);
     MOVTO_EBX(tid);
 
@@ -213,6 +265,7 @@ struct TaskNamespace Task = {
     _task_kill,
     _task_getByTID,
     _task_getCurrent,
+    _task_getByName,
     _task_getNewTID,
     _task_setupScheduler,
     _task_scheduler,
@@ -228,7 +281,9 @@ struct TaskNamespace Task = {
 	_task_setSleep,
 	_task_decSleep,
 	_task_getSleep,
-    _task_maintenance
+    _task_maintenance,
+    _task_setSend,
+    _task_setRecv
 };
 
 struct TopNamespace Top = {
@@ -319,18 +374,56 @@ int _task_getParentTID(task_t task)
 
 void _task_setSleep(task_t task, int ticks)
 {
-	task->sleep = ticks;
+	task->tsdata.sleep.ticks = ticks;
     Task.setStatus(task, STATUS_WAITING_SLEEP);
 }
 
 int _task_decSleep(task_t task)
 {
-	return task->sleep--;
+	return task->tsdata.sleep.ticks--;
 }
 
 int _task_getSleep(task_t task)
 {
-	return task->sleep;
+	return task->tsdata.sleep.ticks;
+}
+
+int _task_setSend(task_t task, int to, void* buf, int len) {
+
+    if (len > 128)
+        return -1;
+        
+    strncpy(buf, task->tsdata.send.msg, len);
+    task->tsdata.send.tid = to;
+    task->tsdata.send.len = len;
+    
+    task->tstatus = STATUS_WAITING_SEND;
+
+    return 0;
+}
+
+int _task_setRecv(task_t task) {
+    
+    task->tsdata.recv.tid = 0;  
+    task->tstatus = STATUS_WAITING_RECV;
+
+    return 0;
+}
+
+task_t _task_getByName(char* name) {
+    
+    int i;
+    task_t task;
+    
+    for (i = 0; i < NUM_TASKS; i++) {
+        task = &(System.tasks[i]);
+        
+        if (task->tid != 0 && streq(name, task->tname))
+            return task;
+
+    }
+
+    return NULL;
 }
 
 int _task_findSlot() {
@@ -542,7 +635,7 @@ int _task_scheduler(int esp)
 void _task_maintenance() {
 
     int i;
-    task_t task;
+    task_t task, other;
 
     for (i = 0; i < NUM_TASKS; i++) {
 
@@ -553,6 +646,20 @@ void _task_maintenance() {
             case STATUS_WAITING_SLEEP:
                 if (Task.decSleep(task) == 0)
                     Task.setStatus(task, STATUS_READY);
+                    
+                break;
+
+            case STATUS_WAITING_SEND:
+            
+                if (other = Task.getByTID(task->tsdata.send.tid))
+                    if (other->tstatus == STATUS_WAITING_RECV) {
+                        
+                        other->tsdata.recv.tid = task->tid;
+                        other->tsdata.recv.len = task->tsdata.send.len;
+                        strncpy(task->tsdata.send.msg, other->tsdata.recv.msg);
+                        
+                    }
+                    
                 break;
             
         }

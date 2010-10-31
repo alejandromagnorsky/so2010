@@ -4,8 +4,8 @@
 ** String manipulation functions:
 *************************************************/
 
-char streq(char* s, char* t) {
-
+int streq(char* s, char* t) {
+    
     for(; *s == *t; s++, t++)
         if (*s == 0)
             return 1;
@@ -15,7 +15,7 @@ char streq(char* s, char* t) {
 }
 
 void strcpy(char *s, char* t) {
-    /* WARNING: JUST AS DANGEROUS AS ITS UNIX COUNTER-PART */
+    /* WARNING: JUST AS DANGEROUS AS ITS CSTDLIB COUNTER-PART */
     while(*t++ = *s++);
 }
 
