@@ -44,9 +44,11 @@ enum {
 enum {
     STATUS_READY,
     STATUS_WAITING,
+    STATUS_WAITING_SLEEP,
+    STATUS_WAITING_RECV,
+    STATUS_WAITING_SEND,
     STATUS_DEAD,
     STATUS_RUNNING,
-    STATUS_WAITING_RECV
 };
 
 typedef int (*program_t) (char*);
@@ -125,7 +127,8 @@ enum {
     SYSTEM_CALL_GETRANK,
     SYSTEM_CALL_GETPRIO,
     SYSTEM_CALL_GETCPUC,
-    SYSTEM_CALL_NAME
+    SYSTEM_CALL_NAME,
+    SYSTEM_CALL_SLEEP
 };
 
 struct driver_t {
@@ -203,6 +206,7 @@ struct system_t {
     int (*getrank) (int);
     int (*getcpuc) (int);
     char* (*name) (char*);
+    int (*sleep) (int);
 };
 
 typedef struct system_t* system_t;
@@ -280,6 +284,8 @@ int _sys_getprio(int pid);
 int _sys_getcpuc(int pid);
 char* _sys_name(char* name);
 
+int _sys_sleep(int);
+
 struct TaskNamespace {    
     void (*setPriority) (task_t, int);
     void (*setRank)    (task_t, int);
@@ -310,10 +316,10 @@ struct TaskNamespace {
 	int (*getParentTID)(task_t);
 	void (*yield)(task_t);
 	int (*checkTTY)(int taskTID);
-	void (*sleep)(task_t task, int ticks);
 	void (*setSleep)(task_t task, int ticks);
-	void (*decSleep)(task_t);
+	int (*decSleep)(task_t);
 	int (*getSleep)(task_t);
+    void (*maintenance) ();
 };
 
 struct TopNamespace {
@@ -363,10 +369,10 @@ int _task_scheduler(int esp);
 int Idle (void);
 void _task_yield(task_t task);
 int _task_checkTTY(int taskTID);
-void _task_sleep(task_t task, int ticks);
 void _task_setSleep(task_t task, int ticks);
-void _task_decSleep(task_t task);
+int _task_decSleep(task_t task);
 int _task_getSleep(task_t task);
+void _task_maintenance();
 
 int _top_increment100Counter();
 int _top_processCpuUsage(int tid);

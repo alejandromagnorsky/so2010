@@ -73,7 +73,8 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_getrank,
                                _sys_getprio,
                                _sys_getcpuc,
-                               _sys_name
+                               _sys_name,
+                               _sys_sleep
                            };
                                
 //system_t System = &_system_data;
@@ -291,7 +292,7 @@ void int_80() {
         case SYSTEM_CALL_GETCPUC:
             if (ebx == 0)
                 ebx = System.task->tid;
-            ret = (task = Task.getByTID(ebx)) ? _top_processCpuUsage(ebx) : -1;
+            ret = (task = Task.getByTID(ebx)) ? Top.processCpuUsage(ebx) : -1;
             
             MOVTO_EAX(ret);
             break;
@@ -305,6 +306,13 @@ void int_80() {
             }
             
             MOVTO_EAX(System.task->tname);
+            break;
+
+        case SYSTEM_CALL_SLEEP:
+            Task.setSleep(System.task, ebx);
+            _scheduler();
+
+            MOVTO_EAX(0);
             break;
 
      }
@@ -426,12 +434,14 @@ int shell(){
 	int myTTY = Task.getTty(System.task) + 1;
 	int status;
 	
-	while(1){
+	while(1) {
 		command_t command;
 		printf(SHELL_PROMPT, myTTY);
 		clearCommand(&command);
 		get_command(&command);
 	}
+    char* b = (char*) 0xB8000;
+    *b = 'x';
 }
 
 

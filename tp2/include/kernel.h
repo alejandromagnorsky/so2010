@@ -55,6 +55,7 @@ extern struct PagingNamespace Paging;
 extern struct TaskNamespace Task;
 extern struct TTYSNamespace TTYS;
 extern struct KBNamespace Keyboard;
+extern struct TopNamespace Top;
 
 
 #endif

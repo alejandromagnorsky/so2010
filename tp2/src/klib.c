@@ -159,7 +159,7 @@ int _sys_getcpuc(int tid) {
 }
 
 char* _sys_name(char* name) {
-    int ret;
+    char* ret;
     
     MOVTO_EAX(SYSTEM_CALL_NAME);
     MOVTO_EBX(name);
@@ -167,7 +167,19 @@ char* _sys_name(char* name) {
     THROW_INT80;
     MOVFROM_EAX(ret);
     
-    return (char*) ret;
+    return ret;
+}
+
+int _sys_sleep(int ticks) {
+    int ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_SLEEP);
+    MOVTO_EBX(ticks);
+
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
 }
 
 struct TaskNamespace Task = {
@@ -195,10 +207,10 @@ struct TaskNamespace Task = {
 	_task_getParentTID,
 	_task_yield,
 	_task_checkTTY,
-	_task_sleep,
 	_task_setSleep,
 	_task_decSleep,
-	_task_getSleep
+	_task_getSleep,
+    _task_maintenance
 };
 
 struct TopNamespace Top = {
@@ -290,11 +302,12 @@ int _task_getParentTID(task_t task)
 void _task_setSleep(task_t task, int ticks)
 {
 	task->sleep = ticks;
+    Task.setStatus(task, STATUS_WAITING_SLEEP);
 }
 
-void _task_decSleep(task_t task)
+int _task_decSleep(task_t task)
 {
-	task->sleep --;
+	return task->sleep--;
 }
 
 int _task_getSleep(task_t task)
@@ -468,8 +481,9 @@ void _task_kill(task_t task)
 int _task_scheduler(int esp)
 {
     int i;
-    static int stop = 0;
 	task_t old, new;
+
+    Task.maintenance();
 	
     old = Task.getCurrent();       /* Obtain currently running task */
     new = (task_t) getNextTask(); 
@@ -478,7 +492,7 @@ int _task_scheduler(int esp)
 	{
 		Task.kill(new);
 		new = (task_t) getNextTask();
-	}    
+	}
     
     old->esp = esp;
 
@@ -503,6 +517,28 @@ int _task_scheduler(int esp)
 	Top.increment100Counter();
 	
 	return new->esp;
+}
+
+void _task_maintenance() {
+
+    int i;
+    task_t task;
+
+    for (i = 0; i < NUM_TASKS; i++) {
+
+        task = &(System.tasks[i]);
+
+        switch (Task.getStatus(task)) {
+
+            case STATUS_WAITING_SLEEP:
+                if (Task.decSleep(task) == 0)
+                    Task.setStatus(task, STATUS_READY);
+                break;
+            
+        }
+
+    }
+
 }
 
 void switchTTY(task_t newt, task_t oldt){
@@ -611,14 +647,6 @@ void _task_yield(task_t task)
 {
 	_Cli();
 	Task.setStatus(task, STATUS_READY);
-	_Sti();
-	_scheduler();
-}
-
-void _task_sleep(task_t task, int ticks)
-{
-	_Cli();
-	Task.setSleep(task, ticks);
 	_Sti();
 	_scheduler();
 }
