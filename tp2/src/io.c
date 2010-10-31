@@ -124,12 +124,12 @@ size_t _dwrite(device_t dev, void* from, size_t nbytes) {
 
 		case DEVICE_TTY:
 			nbytes = video_write(dev,from,nbytes);
-			//if(Task.getTty(System.task) == System.atty){
-			//	TTYS.refresh();
-			//}
+			if(Task.getTty(System.task) == System.atty){
+				move_cursor(System.device[DEVICE_TTY]->wpos / 2);
+			}				
 			break;
         case DEVICE_SCREEN:
-			return video_write(dev,from,nbytes);
+			return 0;
 			break;			       
 
         default:

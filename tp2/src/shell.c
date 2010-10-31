@@ -111,7 +111,7 @@ int startx(char* line){
 
 int clear(char* line) {
     int i;
-    for (i = 0; i < 4000; i++)
+    for (i = 0; i < VIDEO_SIZE; i++)
 		printf(" ");
         //System.device[DEVICE_SCREEN]->driver->write(DEVICE_SCREEN, " ", 1);
 }
