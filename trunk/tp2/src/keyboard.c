@@ -197,8 +197,8 @@ void initializeKeyboard() {
 void updateLeds() {
 
 	unsigned char leds = ttys[System.atty].input.flags.scroll_status | 
-		(ttys[System.atty].input.flags.num_status * 2) | 
-		(ttys[System.atty].input.flags.mayus_status * 4);
+						(ttys[System.atty].input.flags.num_status * 0x10) | 
+						(ttys[System.atty].input.flags.mayus_status * 0x100);
 
 	while ((_inport(0x64) & 2) != 0)
 		;
