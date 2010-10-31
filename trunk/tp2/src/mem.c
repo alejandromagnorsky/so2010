@@ -113,9 +113,7 @@ int _pageDown(void * addr){
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
 	int i = 0;
 	tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;
-	//printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]); 
 	tbl[GETTBLENTRY(address)] ^= PRESENT;
-	//printf("ENTRY: %d\n", tbl[GETTBLENTRY(address)]);	
 	address += PAGESIZE;
 }
 
@@ -211,17 +209,10 @@ void _sys_free(void *pointer, int npages){
 	for( i = 0; i < npages; i++){
 		_setPageUnused(((address_t) pointer) + i * PAGESIZE);
 	}
+	lastPageDelivered = (address_t) pointer - PAGESIZE;
 }
 
-/*
-struct block_t {
-	struct block_t * next;
-	void * firstPage;
-	unsigned int npages;
-	unsigned int freeSpace;
-	void * freeMemory;
-};
-*/
+
 void* malloc(size_t size){
 	block_t newBlock = NULL;
 	int npages = 0;
@@ -236,20 +227,17 @@ void* malloc(size_t size){
 		newBlock->ptrFreeMemory = newBlock + sizeof(struct block_t); 
 		System.task->mem = newBlock;
 		return (void*) newBlock->ptrFreeMemory;
-		//return (void*) _malloc(newBlock->next, size);
 	}else{
 		return (void*) _malloc(System.task->mem, size);
 	}	
 }
 
 void* _malloc(block_t block, size_t size){
-	
 	void * ret = NULL;
 	block_t newBlock = NULL; 
 
 	if(size > block->freeSpace){
 		if(block->next == NULL){
-			printf("pide nuevo bloque\n");
 			newBlock = _sys_malloc(size);
 			if(newBlock == NULL){
 				return NULL;
@@ -269,11 +257,21 @@ void* _malloc(block_t block, size_t size){
 		block->freeSpace -= size;
 		return ret;
 	}
-
 }
 
 
 
 void free(void *pointer){
-	return _sys_free(pointer, 1);
+	//Memory is freed only when the process ends
+}
+
+void _sys_free_mem(block_t mem){
+	if(mem != NULL){
+		if(mem->next == NULL){
+			_sys_free(mem, mem->npages);
+		}else{
+			_sys_free_mem(mem->next);
+			_sys_free(mem, mem->npages);
+		}
+	}	
 }
