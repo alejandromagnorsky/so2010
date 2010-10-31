@@ -13,4 +13,6 @@ extern struct TaskNamespace Task;
 int testTasks(char * a);
 int task1 (char* line);
 
+int infinite(char* line);
+
 #endif
