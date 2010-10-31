@@ -73,10 +73,14 @@ size_t _dread(device_t dev, void* to, size_t nbytes) {
         case DEVICE_KEYBOARD:
 			TTYS.saveKeyboard(System.atty);
 			TTYS.setKeyboard(Task.getTty(System.task));
-				nbytes = dev->wpos != dev->rpos ? 1 : 0; 
-				if(nbytes > 0){
-					_memcpy(dev->addr + dev->rpos, to, nbytes);
-					dev->rpos++;
+				if(Task.getRunningMode(System.task) == RUNNING_FRONT){
+					nbytes = dev->wpos != dev->rpos ? 1 : 0; 
+					if(nbytes > 0){
+						_memcpy(dev->addr + dev->rpos, to, nbytes);
+						dev->rpos++;
+					}
+				}else{
+					nbytes = 0;
 				}
 			TTYS.saveKeyboard(Task.getTty(System.task));
 			TTYS.setKeyboard(System.atty);
