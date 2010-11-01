@@ -75,15 +75,19 @@ void input_handler(){
 }
 
 int run_command(command_t* command){
-	int i, ret;
+	int i, ret, bk = 0;
 	if(streq(command->name, ""))
 		return 0;
-		
+	if(streq(command->args, "&")){
+		bk = 1;
+	}
 	for (i = 0; i < NUM_COMMANDS; i++) {
-	    if (streq(command->name, commands[i].name)) {
-	        clearCommand(command);
+	    if(streq(command->name, commands[i].name)) {
 	        ret = System.exec(commands[i].function, command->args);
-            System.wait();
+			if(!bk){				
+				System.wait();
+			}
+			clearCommand(command);
             return ret;
 	    }
 	}
@@ -95,6 +99,7 @@ int run_command(command_t* command){
 
 void clearCommand(command_t* command){
 	command->name[0] = 0;
+	command->args[0] = 0;
 }
 
 int divideByZero(char* line){

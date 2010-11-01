@@ -91,6 +91,7 @@ void _jumpToTTY(int ntty){
 		System.atty = ntty;
 		TTYS.setKeyboard(System.atty);
 		TTYS.refresh();
+		Keyboard.updateLeds();
 		move_cursor(ttys[System.atty].output.wpos / 2);
 	}
 }
