@@ -70,13 +70,15 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_exec,
                                _sys_gettid,
                                _sys_nexttid,
-                               _sys_getrank,
                                _sys_getprio,
+                               _sys_getrank,
                                _sys_getcpuc,
                                _sys_name,
                                _sys_sleep,
                                _sys_send,
                                _sys_recv,
+                               _sys_getmsg,
+                               _sys_clsmsg,
                                _sys_yield,
                                _sys_kill,
                                _sys_getmsg,
@@ -254,7 +256,6 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-           // printf("Exec with line: %s\n", (char*) ecx);
             ret = Task.new(&(System.tasks[Task.findSlot()]), "Task", 
             				(program_t) ebx, RANK_NORMAL, PRIORITY_MEDIUM, RUNNING_FRONT, System.task->tty, (char*) ecx);
 
@@ -335,6 +336,7 @@ void int_80() {
 			ret = Task.kill(ebx);
 			MOVTO_EAX(ret);
 			break;
+            
         case SYSTEM_CALL_SEND:
             Task.setSend(System.task, ebx, (void*) ecx, edx);
             _scheduler();
@@ -351,8 +353,8 @@ void int_80() {
         case SYSTEM_CALL_GETMSG:
             if (ret = System.task->tsdata.recv.tid) {
                 
-                if (ret = (ecx == System.task->tsdata.recv.len))          
-                    strncpy(System.task->tsdata.recv.msg, (void*) ebx, ecx);
+                if (ret = (ecx == System.task->tsdata.recv.len))
+                    strncpy(System.task->tsdata.recv.msg, (char*) ebx, ecx);
                 
             }
 
@@ -481,7 +483,6 @@ int shell(){
 
 	int myTTY = Task.getTty(System.task) + 1;
 	int status;
-	printf("(Shell) My tid is %d\n", System.gettid(NULL));
 	while(1) {
 		command_t command;
 		printf(SHELL_PROMPT, myTTY);

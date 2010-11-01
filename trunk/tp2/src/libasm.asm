@@ -47,16 +47,32 @@ _read_msw:
         retn
 
 
-_lidt:				; Carga el IDTR
-        push    ebp
-        mov     ebp, esp
-        push    ebx
-        mov     ebx, [ss: ebp + 6] ; ds:bx = puntero a IDTR 
-	rol	ebx,16		    	
-	lidt    [ds: ebx]          ; carga IDTR
-        pop     ebx
-        pop     ebp
-        retn
+; _lidt
+; Loads IDTR with a value sent as a parameter.
+
+_lidt:
+
+    ; Stack frame is built.
+    push        EBP
+    mov        EBP, ESP
+
+    ; Registers are backed-up.
+    push        EBX
+
+    ; IDTR pointer is loaded.
+    mov        EBX, [SS: EBP+8]
+
+    ; IDTR is loaded.
+    lidt        [DS: EBX]
+
+    ; Backed-up registers are loaded.
+    pop        EBX
+
+    ; Stack frame is destroyed.
+    mov        ESP, EBP
+    pop        EBP
+
+    retn
 
 
 _int_00_hand:

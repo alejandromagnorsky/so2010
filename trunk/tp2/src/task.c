@@ -1,28 +1,26 @@
 #include "../include/task.h"
 
+static char* x = "Task 2 (Msg len:%d) \"%s\"\n";
+static char* y = "Task 3 (Msg len:%d) \"%s\"\n";
+
+static char* test_message = "prueba";
+static char* test_message2 = "uno mas largo";
+static char* test_message3 = "aca tenes largo, gil";
+static char* basta = "basta";
+
 int testTasks(char * a) {
 
     System.name("testTasks");
 
-    System.exec(task2, "hola");
-    System.exec(task3, "chau chau chau");
+    System.exec(task3, "3");
+    System.sleep(100);
+    System.exec(task2, "2");
     
 }
 
 int task1(char* line) {
     // Esto prueba el sleep
-    System.name("testTask 1");
-	System.name("Test Task1");
-
-    printf("%s\n", line);
-    System.sleep(50);
-    printf("%s\n", line);
-    System.sleep(100);
-    printf("%s\n", line);
-    System.sleep(150);
-    printf("%s\n", line);
-    System.sleep(200);
-    printf("%s\n", line);
+    System.name("1");
     
 	/*printf("Trying to kill idle: ");
     System.kill(1);
@@ -34,22 +32,46 @@ int task1(char* line) {
 }
 
 int task2(char* line) {
+    int a, len;
+    char msg[128];
+    System.name("2");
+
+    while ((a = System.gettid("3")) == 0);
     
-    System.name("testTask 2");
-    System.send(System.gettid("testTask 3"), "prueba", 7);
-    while(1);
+    System.send(a, test_message, 7);
+    System.send(a, test_message2, 14);
+    System.send(a, basta, 6);
+    
+    len = System.recv();
+
+    System.getmsg(msg, len);
+
+    printf(x, len, msg);
+
+    System.clsmsg();
+    
 }
 
 int task3(char* line) {
-    int len;
+    int i, len, stop = 0;
     char msg[128];
     
-    System.name("testTask 3");
-    len = System.recv();
-    System.getmsg(msg, len);
+    System.name("3");
 
-    printf("Len: %d, msg: %s\n", msg, len);
+    while(!stop) {
+        len = System.recv();
+        System.getmsg(msg, len);
 
-    System.clsmsg();
+        printf(y, len, msg);
 
+        System.clsmsg();
+
+        stop = streq(msg, basta);
+        
+    }
+
+    System.send(System.gettid("2"), test_message3, 21);
+    System.sleep(100);
+    System.sleep(1);
+    printf("a");
 }

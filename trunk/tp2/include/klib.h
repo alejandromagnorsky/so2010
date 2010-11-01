@@ -2,6 +2,7 @@
 #define _KLIB_H_
 
 #include "defs.h"
+#include "string.h"
 
 /************************************************
 ** Constants and definitions:
@@ -205,7 +206,6 @@ struct system_t {
     
     void (*addTick) ();
     long int (*getTicks) ();
-    
     size_t (*write) (int devcode, void* from, size_t nbytes);
     size_t (*read)  (int devcode, void* to, size_t nbytes);
     size_t (*seekr) (int devcode, int offset, int from);
