@@ -224,10 +224,10 @@ struct system_t {
     int (*sleep) (int);
     int (*send) (int, void*, int);
     int (*recv) ();
-    int (*yield) ();
-    int (*kill) (int);
     int (*getmsg) (void*, int);
     int (*clsmsg) ();
+    int (*yield) ();
+    int (*kill) (int);
 };
 
 typedef struct system_t* system_t;

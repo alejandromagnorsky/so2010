@@ -506,7 +506,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 		Task.runInBackground(task);
 	}
 
-	if(running_mode == RUNNING_FRONT && current->tid > 1){
+	if(running_mode == RUNNING_FRONT && current->tid > 1 && Task.checkTTY(current->tid) != -1){
 		Task.setStatus(current, STATUS_WAITING);
 		Task.setParentTID(task, current->tid);
 		sched = 1;
@@ -517,7 +517,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	_Sti();
 	if(sched)
 	{
-		//_scheduler();
+		_scheduler();
 	}
 	
     return task->tid;
