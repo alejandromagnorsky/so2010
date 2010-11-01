@@ -178,7 +178,6 @@ int top (char* line) {
         rm = System.getRMode(other);
 
         task = Task.getByTID(other);
-        // [TODO] change name for a sys call
         printf("TID: %d\tPriority: %d\tRank: %d\tUsage: %d\t RunningMode: %d\tName: %s (%d)\n", 
         		other, rank, prio, usage, rm, name, status);
         other = System.nexttid(&iter);

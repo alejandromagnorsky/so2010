@@ -239,10 +239,35 @@ el proceso muere se eliminan todos los bloques generados por el mismo.
 \subsection{Proveedor de Servicios}
 
 \subsection{Programas de prueba}
+\begin{itemize}
+ \item \textbf{demo\_malloc}\\
+      \noindent Este comando ejecuta una función la cual realiza 1000 mallocs de size 100 bytes, logrando hacer un testing suficiente para ver
+      que se adhieren nuevos bloques a la memoria de la tarea. Si éste se corre varias veces, se nota que al haber terminado una tarea, se liberan los
+      bloques que esta tomo, y la nueva ejecución toma ese mismo espacio liberado.
+ \item \textbf{doNothing}\\
+      \noindent Este comando ejecuta una función que crea una tarea que a su vez crea otra, para armar una rama de tareas y poder hacer un correcto testing del
+	kill.
+ \item \textbf{echoserver}
+ \item \textbf{doGetChar} \\
+      \noindent Este comando ejecuta una función que realiza un getchar, y termina cuando el usuario presiona una tecla. Esto nos permite hacer un testing
+	  de tareas corriendo en background. Si ejecutamos este comando en background, el programa queda colgado en el getchar(), y deberemos matarlo con
+	  kill.
+\end{itemize}
 
 
 \newpage
 \section{Conclusiones}
+Luego del desarrollo del trabajo práctico especial llegamos a las siguientes conclusiones:
+\begin{itemize}
+ \item Entendimos qué era realmente un sistema operativo con multitasking, y que esto no es lo más complejo del 
+    desarrollo de un sistema operativo. Aunque es realmente importante.
+ \item Comprendimos las ventajas de un sistema con memoria paginada, y la seguridad que brinda esta característica. Aunque
+    lograr un eficiente y seguro manejo de memoria es muy complejo.
+ \item Haber logrado un acercamiento a un sistema operativo multitasking con manejo de tareas, terminales, procesos en background, fue un gran
+      esfuerzo, pero luego de este gran esfuerzo nos resulta muy gratificante poder jugar creando procesos, matarlos, ejecutarlos en background, etc.
+ \item Viendo lo que nos costó hacer un mínimo sistema operativo, vemos la real magnitud de trabajo que tienen encima los sitemas operativos modernos,
+      que cotidianamete utilizamos.
+\end{itemize}
 
 \bigskip
 \end{document}
