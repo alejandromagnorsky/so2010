@@ -68,3 +68,35 @@ int task3(char* line) {
     System.sleep(1);
     printf("a");
 }
+
+
+
+int doNothing4Times(char* line) {
+	System.name("doNothing1");
+	System.exec(doNothing2, "2");
+    for(;;);
+    return 0;
+}
+
+int doNothing2(char * line)
+{
+	System.name("doNothing2");
+	System.exec(doNothing3, "3");
+	for(;;);
+	return 0;
+}
+
+int doNothing3(char * line)
+{
+	System.name("doNothing3");
+	System.exec(doNothing4, "4");
+	for(;;);
+	return 0;
+}
+
+int doNothing4(char * line)
+{
+	System.name("doNothing4");
+	for(;;);
+	return 0;
+}

@@ -19,7 +19,7 @@ static struct {
 		         {"top", "Shows active processes and statistics", top},
 		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks},
 				 {"demo_malloc", "demo malloc", demo_malloc},
-				 {"doNothing", "Runs a task that doesn't end", doNothing},
+				 {"doNothing", "Runs a task that doesn't end 4 times as children", doNothing4Times},
 				 {"kill", "kills a task with the id you give", kill}
 };
 
@@ -178,8 +178,4 @@ int kill(char* tid)
 	return 0;
 }
 
-int doNothing(char* line) {
-	System.name("doNothing");
-    for(;;);
-    return 0;
-}
+
