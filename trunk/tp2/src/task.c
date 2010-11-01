@@ -22,13 +22,6 @@ int task1(char* line) {
     // Esto prueba el sleep
     System.name("1");
     
-	/*printf("Trying to kill idle: ");
-    System.kill(1);
-    
-    printf("Test Task1 is going to kill itself\n");
-    System.kill(6);
-    
-    printf("This shouldnt be printed, i should be dead\n"); */
 }
 
 int task2(char* line) {
