@@ -29,26 +29,18 @@ void _runShells(){
 	task = &(System.tasks[Task.findSlot()]);
 	Task.new(task, "Shell_1", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY0, NULL);
 	System.ttysTids[0] = task->tid;
-	Task.setStatus(task, STATUS_READY);
-	Task.setParentTID(task, System.idle->tid);
 	
 	task = &(System.tasks[Task.findSlot()]);
 	Task.new(task, "Shell_2", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY1, NULL);
 	System.ttysTids[1] = task->tid;
-	Task.setStatus(task, STATUS_READY);
-	Task.setParentTID(task, System.idle->tid);
 	
 	task = &(System.tasks[Task.findSlot()]);
 	Task.new(task, "Shell_3", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY2, NULL);
 	System.ttysTids[2] = task->tid;
-	Task.setStatus(task, STATUS_READY);
-	Task.setParentTID(task, System.idle->tid);
 	
 	task = &(System.tasks[Task.findSlot()]);
 	Task.new(task, "Shell_4", _createTty, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, TTY3, NULL);
 	System.ttysTids[3] = task->tid;
-	Task.setStatus(task, STATUS_READY);
-	Task.setParentTID(task, System.idle->tid);
 }
 
 int _createTty(char * a) {

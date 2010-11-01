@@ -506,7 +506,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 		Task.runInBackground(task);
 	}
 
-	if(running_mode == RUNNING_FRONT && current->tid > 1 && Task.checkTTY(current->tid) != -1){
+	if(running_mode == RUNNING_FRONT && current->tid > 1 /*&& Task.checkTTY(current->tid) != -1*/){
 		Task.setStatus(current, STATUS_WAITING);
 		Task.setParentTID(task, current->tid);
 		sched = 1;
@@ -515,10 +515,10 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	}
 	
 	_Sti();
-	if(sched)
+	/*if(sched)
 	{
 		_scheduler();
-	}
+	}*/
 	
     return task->tid;
 }
@@ -527,7 +527,7 @@ int _createTty2(char * a){
 	shell();
 }
 /* Kills the given task */
-// [TODO] check what to do with shells. Change function if we have time.
+// [TODO] check what to do with shells.
 int _task_kill(int tid)
 {
 	int i, k, isTTY = 0, slot, parentTID;
@@ -606,12 +606,6 @@ int _task_scheduler(int esp)
     old = Task.getCurrent();       /* Obtain currently running task */
     new = (task_t) getNextTask(); 
     
-	while(Task.getStatus(new) == STATUS_DEAD)	/* Finishing dead tasks */
-	{
-		Task.kill(new->tid);
-		new = (task_t) getNextTask();
-	}
-    
     old->esp = esp;
 
 	if(Task.getTID(new) != Task.getTID(old)) {
@@ -666,11 +660,13 @@ void _task_maintenance() {
                     }
                     
                 break;
+                
+			case STATUS_DEAD:
+				Task.kill(task->tid);
+				break;
             
         }
-
     }
-
 }
 
 void switchTTY(task_t newt, task_t oldt){
