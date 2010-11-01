@@ -247,14 +247,7 @@ task_t findTask(int priority)
 			if (task->tpriority == priority && 
 				(task->tstatus == STATUS_READY))
 			{
-				if(task->sleep <= 0)
-				{
 					return task;
-				}
-				else
-				{
-					task->sleep --;
-				}
 			}
 		}
 		counter++;

@@ -157,7 +157,6 @@ enum {
     SYSTEM_CALL_KILL,
     SYSTEM_CALL_SETPRIO,
     SYSTEM_CALL_SETRANK,
-    SYSTEM_CALL_SETRMODE,
     SYSTEM_CALL_WAIT,
     SYSTEM_CALL_GETRMODE,
     SYSTEM_CALL_GETSTATUS
@@ -225,7 +224,7 @@ struct system_t {
     int (*getprio) (int);
     int (*getcpuc) (int);
     char* (*name) (char*);
-    char* (*getName)(int);
+    int (*getName)(void*, int);
     int (*sleep) (int);
     int (*send) (int, void*, int);
     int (*recv) ();
@@ -235,7 +234,6 @@ struct system_t {
     int (*kill) (int);
     int (*setPrio)(int);
 	int (*setRank)(int);
-	int (*setRMode)(int);
 	int (*getRMode)(int);
 	int (*getStatus)(int);
 	int (*wait)();
@@ -317,7 +315,7 @@ int _sys_getrank(int pid);
 int _sys_getprio(int pid);
 int _sys_getcpuc(int pid);
 char* _sys_name(char* name);
-char* _sys_getName(int tid);
+int _sys_getName(void* buf, int tid);
 
 int _sys_send(int to, void* buf, int len);
 int _sys_recv();
@@ -330,7 +328,6 @@ int _sys_kill(int tid);
 
 int _sys_setPrio(int prio);
 int _sys_setRank(int rank);
-int _sys_setRMode(int rm);
 int _sys_getRMode(int tid);
 int _sys_getStatus(int tid);
 int _sys_wait();

@@ -184,11 +184,12 @@ char* _sys_name(char* name) {
     return ret;
 }
 
-char* _sys_getName(int tid) {
-    char* ret;
+int _sys_getName(void* buf, int tid) {
+    int ret;
     
     MOVTO_EAX(SYSTEM_CALL_GETNAME);
-    MOVTO_EBX(tid);
+    MOVTO_EBX(buf);
+    MOVTO_ECX(tid);
 
     THROW_INT80;
     MOVFROM_EAX(ret);
@@ -295,17 +296,6 @@ int _sys_setRank(int rank) {
 	int ret;
     MOVTO_EAX(SYSTEM_CALL_SETRANK);
     MOVTO_EBX(rank);
-
-    THROW_INT80;
-    
-    MOVFROM_EAX(ret);
-    return ret;
-}
-
-int _sys_setRMode(int rm) {
-	int ret;
-    MOVTO_EAX(SYSTEM_CALL_SETRMODE);
-    MOVTO_EBX(rm);
 
     THROW_INT80;
     
