@@ -13,6 +13,7 @@
 #include "task.h"
 #include "defs.h"
 
+void init();
 void shell(int tty, linebuffer_t linebuffer, command_t command);
 
 void input_handler();

@@ -481,11 +481,14 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     TTYS.initialize(TTY0);
 	TTYS.runShells();
     
+    
+    init();
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
 	_Sti();
+
 
 }
 
