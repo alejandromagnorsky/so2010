@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 10
+#define NUM_COMMANDS 12
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -18,7 +18,9 @@ static struct {
 		         {"clear", "Clear the screen", clear},
 		         {"top", "Shows active processes and statistics", top},
 		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks},
-				 {"demo_malloc", "demo malloc", demo_malloc}
+				 {"demo_malloc", "demo malloc", demo_malloc},
+				 {"infinite", "Runs a task that doesnt end, e", infinite},
+				 {"kill", "kills a task with the id you give", kill}
 };
 
 
@@ -152,10 +154,11 @@ int top (char* line) {
 
 int kill(char* tid)
 {
-	printf("%d\n", atoi(tid, 10));
+	//System.name("kill");
 	System.kill(atoi(tid, 10));
 }
 
 int infinite(char* line) {
+	System.name("infinite");
     for(;;);
 }

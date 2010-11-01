@@ -30,6 +30,8 @@ int echo(char*);
 int alloc(char*);
 int top(char*);
 int demo_malloc(char * a);
+int kill(char* tid);
+int infinite(char* line);
 
 extern struct system_t System;
 extern tty_t ttys[NTTYS];

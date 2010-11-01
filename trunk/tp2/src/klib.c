@@ -236,20 +236,24 @@ int _sys_clsmsg() {
 }
 
 int _sys_yield() {
+	int ret;
     MOVTO_EAX(SYSTEM_CALL_YIELD);
 
     THROW_INT80;
-
-    return;
+    
+	MOVFROM_EAX(ret);
+    return ret;
 }
 
 int _sys_kill(int tid) {
+	int ret;
     MOVTO_EAX(SYSTEM_CALL_KILL);
     MOVTO_EBX(tid);
 
     THROW_INT80;
     
-    return;
+    MOVFROM_EAX(ret);
+    return ret;
 }
 
 struct TaskNamespace Task = {
@@ -541,7 +545,8 @@ void _task_kill(int tid)
 		return;
 	}
 	
-	if(task == System.idle)
+	k = Task.checkTTY(task->tid);
+	if(task == System.idle || k != -1)
 	{
 		/* Users are not allowed to kill the idle task */
 		printf("Permission denied\n");
@@ -574,19 +579,21 @@ void _task_kill(int tid)
 	_sys_free(task->stack,1);
 	
 	/* If for any reason a tty needs to be killed we have to recreate it */
-	k = Task.checkTTY(task->tid);
+	/*k = Task.checkTTY(task->tid);
 	if(k != -1)
 	{
 		auxTask = &(System.tasks[Task.findSlot()]);
-		// [TODO] check if i have to change it to the new way, check that createTty2 and task's name
-		//	if not... look for another solution
+		// [TODO] check that createTty2 and task's name if not... look for another solution
+		// [TODO] if this is fixed, allow the permission to kill a tty
 		Task.new(auxTask, "Shell_", _createTty2, RANK_NORMAL, PRIORITY_HIGH, RUNNING_FRONT, k, "");
 		System.ttysTids[k] = auxTask->tid;
-	}
+	}*/
 	
 	task->tid = 0;
 		
 	_Sti();
+	
+	_scheduler();
 }
 
 /* Checks if the scheduler brings a new task, in that case it changes to the
