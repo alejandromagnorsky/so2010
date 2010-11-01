@@ -528,7 +528,7 @@ int _createTty2(char * a){
 }
 /* Kills the given task */
 // [TODO] check what to do with shells. Change function if we have time.
-void _task_kill(int tid)
+int _task_kill(int tid)
 {
 	int i, k, isTTY = 0, slot, parentTID;
 	task_t parent, auxTask, task;
@@ -541,16 +541,14 @@ void _task_kill(int tid)
 	
 	if(task->tid <= 0)
 	{
-		printf("The given task doesnt exist\n");
-		return;
+		return KILL_INVALID_TASK;
 	}
 	
 	k = Task.checkTTY(task->tid);
 	if(task == System.idle || k != -1)
 	{
 		/* Users are not allowed to kill the idle task */
-		printf("Permission denied\n");
-		return;
+		return KILL_PERMISSION_DENIED;
 	}
 	
 	/* Looking for task's children in order to mark them as dead */
@@ -570,8 +568,6 @@ void _task_kill(int tid)
 		Task.setStatus(parent, STATUS_READY);
 	}
 	
-	printf("Task (tid: %d, tname: %s) killed\n", task->tid, task->tname);
-
     Task.setStatus(task, STATUS_DEAD);
     
     task->tname[0] = '\0';
@@ -594,6 +590,8 @@ void _task_kill(int tid)
 	_Sti();
 	
 	_scheduler();
+	
+	return KILL_SUCCEEDED;
 }
 
 /* Checks if the scheduler brings a new task, in that case it changes to the
