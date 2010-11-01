@@ -8,6 +8,11 @@ static char* test_message2 = "uno mas largo";
 static char* test_message3 = "aca tenes largo, gil";
 static char* basta = "basta";
 
+static char* doNothingName1 = "doNothing1";
+static char* doNothingName2 = "doNothing2";
+static char* doNothingName3 = "doNothing3";
+static char* doNothingName4 = "doNothing4";
+
 int testTasks(char * a) {
 
     int len;
@@ -83,7 +88,7 @@ int task3(char* line) {
 
 
 int doNothing4Times(char* line) {
-	System.name("doNothing1");
+	System.name(doNothingName1);
 	System.exec(doNothing2, "2");
     for(;;);
     return 0;
@@ -91,7 +96,7 @@ int doNothing4Times(char* line) {
 
 int doNothing2(char * line)
 {
-	System.name("doNothing2");
+	System.name(doNothingName2);
 	System.exec(doNothing3, "3");
 	for(;;);
 	return 0;
@@ -99,7 +104,7 @@ int doNothing2(char * line)
 
 int doNothing3(char * line)
 {
-	System.name("doNothing3");
+	System.name(doNothingName3);
 	System.exec(doNothing4, "4");
 	for(;;);
 	return 0;
@@ -107,7 +112,10 @@ int doNothing3(char * line)
 
 int doNothing4(char * line)
 {
-	System.name("doNothing4");
+	//System.name(doNothingName4);
+	//System.setPrio(3);
+	//System.setRank(0);
+	System.setRMode(RUNNING_BACK);
 	for(;;);
 	return 0;
 }

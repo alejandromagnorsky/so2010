@@ -171,6 +171,17 @@ char* _sys_name(char* name) {
     return ret;
 }
 
+char* _sys_getName(int tid) {
+    char* ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_GETNAME);
+    MOVTO_EBX(tid);
+
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+    return ret;
+}
+
 int _sys_sleep(int ticks) {
     int ret;
     
@@ -257,15 +268,58 @@ int _sys_kill(int tid) {
 }
 
 int _sys_setPrio(int prio) {
-	
+	int ret;
+    MOVTO_EAX(SYSTEM_CALL_SETPRIO);
+    MOVTO_EBX(prio);
+
+    THROW_INT80;
+    
+    MOVFROM_EAX(ret);
+    return ret;
 }
 
 int _sys_setRank(int rank) {
-	
+	int ret;
+    MOVTO_EAX(SYSTEM_CALL_SETRANK);
+    MOVTO_EBX(rank);
+
+    THROW_INT80;
+    
+    MOVFROM_EAX(ret);
+    return ret;
 }
 
 int _sys_setRMode(int rm) {
+	int ret;
+    MOVTO_EAX(SYSTEM_CALL_SETRMODE);
+    MOVTO_EBX(rm);
 
+    THROW_INT80;
+    
+    MOVFROM_EAX(ret);
+    return ret;
+}
+
+int _sys_getRMode(int tid) {
+	int ret;
+
+    MOVTO_EAX(SYSTEM_CALL_GETRMODE);
+    MOVTO_EBX(tid);
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
+}
+
+int _sys_getStatus(int tid) {
+	int ret;
+
+    MOVTO_EAX(SYSTEM_CALL_GETSTATUS);
+    MOVTO_EBX(tid);
+    THROW_INT80;
+    MOVFROM_EAX(ret);
+
+    return ret;
 }
 
 int _sys_wait() {

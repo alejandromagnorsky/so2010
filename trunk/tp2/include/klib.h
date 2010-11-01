@@ -146,6 +146,7 @@ enum {
     SYSTEM_CALL_GETPRIO,
     SYSTEM_CALL_GETCPUC,
     SYSTEM_CALL_NAME,
+    SYSTEM_CALL_GETNAME,
     SYSTEM_CALL_SLEEP,
     SYSTEM_CALL_RECV,
     SYSTEM_CALL_SEND,
@@ -156,7 +157,9 @@ enum {
     SYSTEM_CALL_SETPRIO,
     SYSTEM_CALL_SETRANK,
     SYSTEM_CALL_SETRMODE,
-    SYSTEM_CALL_WAIT
+    SYSTEM_CALL_WAIT,
+    SYSTEM_CALL_GETRMODE,
+    SYSTEM_CALL_GETSTATUS
 };
 
 struct driver_t {
@@ -220,6 +223,7 @@ struct system_t {
     int (*getprio) (int);
     int (*getcpuc) (int);
     char* (*name) (char*);
+    char* (*getName)(int);
     int (*sleep) (int);
     int (*send) (int, void*, int);
     int (*recv) ();
@@ -227,9 +231,11 @@ struct system_t {
     int (*clsmsg) ();
     int (*yield) ();
     int (*kill) (int);
-    int (*setPrio)(int prio);
-	int (*setRank)(int rank);
-	int (*setRMode)(int rm);
+    int (*setPrio)(int);
+	int (*setRank)(int);
+	int (*setRMode)(int);
+	int (*getRMode)(int);
+	int (*getStatus)(int);
 	int (*wait)();
 };
 
@@ -307,6 +313,7 @@ int _sys_getrank(int pid);
 int _sys_getprio(int pid);
 int _sys_getcpuc(int pid);
 char* _sys_name(char* name);
+char* _sys_getName(int tid);
 
 int _sys_send(int to, void* buf, int len);
 int _sys_recv();
@@ -320,7 +327,10 @@ int _sys_kill(int tid);
 int _sys_setPrio(int prio);
 int _sys_setRank(int rank);
 int _sys_setRMode(int rm);
+int _sys_getRMode(int tid);
+int _sys_getStatus(int tid);
 int _sys_wait();
+
 
 struct TaskNamespace {    
     void (*setPriority) (task_t, int);

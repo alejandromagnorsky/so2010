@@ -3,7 +3,7 @@ rm -rf *
 nasm -f aout ../src/libasm.asm -o libasm.o
 nasm -f aout ../src/kstart.asm -o kstart.o
 nasm -f aout ../src/loader.asm -o kstart.o
-gcc -c ../src/kernel.c -o kernel.o -fno-builtin -march=i386 -mtune=i386 -m32
+gcc -c ../src/kernel.c -o kernel.o -fno-builtin -march=i386 -mtune=i386 -m32 -fno-stack-protector
 gcc -c ../src/libc.c  -o libc.o -fno-builtin -march=i386 -mtune=i386 -m32
 gcc -c ../src/io.c  -o io.o -fno-builtin -march=i386 -mtune=i386 -m32
 gcc -c ../src/string.c  -o string.o -fno-builtin -march=i386 -mtune=i386 -m32
