@@ -6,13 +6,13 @@
 \makeindex
 
 %opening
-\title{\underline{\textbf{Trabajo práctico 2: Multitasker}}}
+\title{\underline{\textbf{SuciOS}} \\ \small Standard Useless Command-line Interface Operating System}
 \author{
 Lezica, Santiago. (Leg. 49147).\\
 Ballesty, Pablo Andrés. (Leg. 49359).\\
 Pose, Jimena Belén. (Leg. 49015).\\
 }
-\date{}
+\date{Lunes 1 de Noviembre}
 
 \begin{document}
 
@@ -117,7 +117,7 @@ su stack, en el que se ubican (en el siguiente orden) una función de limpieza (
 cuando la tarea termine esta pueda liberar su stack y borrarse del vector de procesos), 
 los eflags, el cs, el nuevo ip y los registros de uso general. \\
 El cambio de contexto se lleva a cabo en la interrupción 20 (timer tick), por lo tanto 
-en el manejadro de esta, se busca la nueva tarea a correr y se hace apuntar el esp al stack 
+en el manejador de esta, se busca la nueva tarea a correr y se hace apuntar el esp al stack 
 de esta nueva tarea. Por último se levantan del stack los registros de uso general (los últimos 
 empujados en la creación del mismo) y se hace un iret, que se encarga de levantar el ip, el cs 
 y los flags. En caso que la tarea haya terminado, el ip que levanta el iret es el de la tarea 
@@ -192,12 +192,55 @@ al scheduler para que una nueva tarea pueda ser elegida.
 % a ceder procesador.
 
 \subsection{Terminales}
+En el trabajo de arquitectura, el kernel poseía varias estructuras denominadas ``devices'' en las cuales se 
+especificaban la dirección de memoria, un offset de escritura, un offset de lectura, y el tamaño de memoria que
+utilizaba un device. Para el diseño de las terminales, se agregó un device denominado ``DEVICE\_TTY'' en el cual
+se alojaba la terminal en la que corría el proceso que tenía dominio del procesador, este device funciona como el
+``output''. El DEVICE\_TTY arranca inicializado sobre la dirección de memoria de video, permitiendo
+al kernel imprimir mensajes de inicialización. Para el ``input'' el kernel ya tenía el DEVICE\_KEYBOARD, el cual fue utilizado
+para enrutar la entrada a la terminal activa. En la función de ``scheduling'' se hizo que al realizarse un cambio de tarea,
+se haga el correspondiente switch de DEVICE\_TTY, en cambio para la entrada, se hizo que esta siempre escriba en la terminal
+activa, y siempre lea de la terminal que le pertenece al proceso. De esta manera las funciones getchar() y putchar() funcionaban
+con su correspondiente terminal. Para mantener la terminal activa sobre la pantalla, por motivos de comodidad, se decidió hacer
+un update de pantalla desde la interrupción del timer tick, con un REFRESH\_RATE definido.\\
+\noindent A continuación se presenta un gráfico esquemático con la terminal TTY0 activa, suponiendo que hay un proceso corriendo sobre ella.
+
+\begin{center}
+ \includegraphics[scale=0.45]{./terminales.jpeg}
+ % terminales.jpeg: 661x496 pixel, 72dpi, 23.32x17.50 cm, bb=0 0 661 496
+\end{center}
+
 
 \subsection{Intérprete de comandos}
+Para el intérprete de comandos se reutilizó el desarrollado en arquitectura, es simplemente una función llamada \textbf{shell()}, la
+cual posee un buffer interno para ir recibiendo el comando, y una vez que se presiona \textit{Enter} se lo parsea y se lo ejecuta en caso
+de existir. Cabe aclarar que la función shell() es totalmente independiente de la terminal, al comenzar el kernel se crean 4 procesos
+corriendo ésta función sobre cada terminal.
+
 
 \subsection{Procesos en background}
+Cuando se crean tareas se pide un runningMode el cual podrá ser RUNNING\_FRONT y RUNNING\_BACK, cuando un proceso tiene como runningMode 
+RUNNING\_BACK sus read a DEVICE\_KEYBOARD no surgen efecto, por lo tanto queda aislado del ``input''.
+
 
 \subsection{Administración de memoria}
+Al arrancar el Sistem operativo, se obtiene la cantidad de memoria existente, ésta se le pasa a la función Paging.start(), la cual se encarga de
+armar la estructura de directorios y tablas para paginar la memoria, setear el registro CR3 y activar la paginación en CR0. Por motivos
+de complejidad se decidió hacer ``Indentity Mapping'' en toda la memoria, es decir, que las direcciones físicas y lógicas coinciden.
+Los primeros 4MB de memoria fueron destinados exclusivamente al Kernel, alojando en su última página el directorio, y detrás de éste un bitmap para
+el manejo de páginas libres. Los próximos 4MB fueron destinados para alojar las tablas, en este espacio hay lugar para alojar todas las tablas necesarias
+para paginar 4GB aunque se utilizarán solamente las necesarias.\\
+Se desarrolló la función \_sys\_malloc la cuál retorna un bloque de páginas contiguas necesarias para alojar la cantidad de memoria pedida. La función malloc
+que se le brinda al usuario, buscará espacio libre en los bloques ya pedidos por la tarea que realiza el malloc, y si no encuentra, pedirá un nuevo bloque
+al sistema y lo adherirá a la tarea.\\
+\noindent A continuación se presenta un gráfico esquemático, en el cual el usuario hace por primera vez malloc y aloja datos, luego hace otro y los datos se
+alojan en el mismo bloque, y luego hace otra vez malloc y se genera un nuevo bloque. Cabe aclarar que los free que realiza el usuario no hacen nada, cuando
+el proceso muere se eliminan todos los bloques generados por el mismo.
+
+\begin{center}
+ \includegraphics[scale=0.45]{./malloc.jpeg}
+ % terminales.jpeg: 661x496 pixel, 72dpi, 23.32x17.50 cm, bb=0 0 661 496
+\end{center}
 
 \subsection{Proveedor de Servicios}
 
