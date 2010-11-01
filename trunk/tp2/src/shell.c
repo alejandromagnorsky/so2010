@@ -20,7 +20,7 @@ static struct {
 		         {"daemontest", "Queries the echo and reverse echo system servers", daemontest},
 				 {"demo_malloc", "demo malloc", demo_malloc},
 				 {"doNothing", "Runs a task that doesn't end 4 times as children", doNothing4Times},
-				 {"kill", "kills a task with the id you give", kill},
+				 {"kill", "kills a task with the id you give and its children", kill},
                  {"echoserver", "A server that echoes messages sent to it", echoserver},
                  {"ohceserver", "ti ot tnes segassem seohce taht revres A", ohceserver},
 				 {"doGetChar", "Makes a getchar to try running in background", do_getchar}
@@ -173,7 +173,7 @@ int top (char* line) {
         rank = System.getrank(other);
         prio = System.getprio(other);
         usage = System.getcpuc(other);
-		strcpy(System.getName(other), name);
+		System.getName(name, other);
         status = System.getStatus(other);
         rm = System.getRMode(other);
 
