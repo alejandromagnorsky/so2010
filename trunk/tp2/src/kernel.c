@@ -80,9 +80,7 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_getmsg,
                                _sys_clsmsg,
                                _sys_yield,
-                               _sys_kill,
-                               _sys_getmsg,
-							   _sys_clsmsg
+                               _sys_kill
                            };
                                
 //system_t System = &_system_data;
