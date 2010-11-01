@@ -517,7 +517,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 	_Sti();
 	if(sched)
 	{
-		_scheduler();
+		//_scheduler();
 	}
 	
     return task->tid;
@@ -658,11 +658,11 @@ void _task_maintenance() {
             
                 if (other = Task.getByTID(task->tsdata.send.tid))
                     if (other->tstatus == STATUS_WAITING_RECV) {
-                        
+
                         other->tsdata.recv.tid = task->tid;
                         other->tsdata.recv.len = task->tsdata.send.len;
-                        strncpy(task->tsdata.send.msg, other->tsdata.recv.msg);
-                        
+                        strncpy(task->tsdata.send.msg, other->tsdata.recv.msg, task->tsdata.send.len);
+                        task->tstatus = other->tstatus = STATUS_READY;
                     }
                     
                 break;
