@@ -120,7 +120,7 @@ El cambio de contexto se lleva a cabo en la interrupción 20 (timer tick), por l
 en el manejador de esta, se busca la nueva tarea a correr y se hace apuntar el esp al stack 
 de esta nueva tarea. Por último se levantan del stack los registros de uso general (los últimos 
 empujados en la creación del mismo) y se hace un iret, que se encarga de levantar el ip, el cs 
-y los flags. En caso que la tarea haya terminado, el ip que levanta el iret es el de la tarea 
+y los eflags. En caso que la tarea haya terminado, el ip que levanta el iret es el de la tarea 
 de limpieza.
 
 \subsection{Scheduler}
@@ -206,7 +206,7 @@ un update de pantalla desde la interrupción del timer tick, con un REFRESH\_RAT
 \noindent A continuación se presenta un gráfico esquemático con la terminal TTY0 activa, suponiendo que hay un proceso corriendo sobre ella.
 
 \begin{center}
- \includegraphics[scale=0.45]{./terminales.jpeg}
+%  \includegraphics[scale=0.45]{./terminales.jpeg}
  % terminales.jpeg: 661x496 pixel, 72dpi, 23.32x17.50 cm, bb=0 0 661 496
 \end{center}
 
@@ -238,7 +238,7 @@ alojan en el mismo bloque, y luego hace otra vez malloc y se genera un nuevo blo
 el proceso muere se eliminan todos los bloques generados por el mismo.
 
 \begin{center}
- \includegraphics[scale=0.45]{./malloc.jpeg}
+%  \includegraphics[scale=0.45]{./malloc.jpeg}
  % terminales.jpeg: 661x496 pixel, 72dpi, 23.32x17.50 cm, bb=0 0 661 496
 \end{center}
 

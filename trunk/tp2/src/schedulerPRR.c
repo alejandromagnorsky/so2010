@@ -41,7 +41,7 @@ task_t priorityRoundRobin()
 		do
 		{
 			new = &(System.tasks[(++index) % NUM_TASKS]);
-			if (new->tid != 0 && (new->tstatus == STATUS_READY || new->tstatus == STATUS_DEAD)) {
+			if (new->tid != 0 && (new->tstatus == STATUS_READY)) {
 
                 if (new->trank == RANK_SERVER) {
                     candidate = new;

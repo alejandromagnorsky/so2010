@@ -245,7 +245,7 @@ task_t findTask(int priority)
 		if(task->tid > 1)
 		{
 			if (task->tpriority == priority && 
-				(task->tstatus == STATUS_READY || task->tstatus == STATUS_DEAD))
+				(task->tstatus == STATUS_READY))
 			{
 				if(task->sleep <= 0)
 				{
