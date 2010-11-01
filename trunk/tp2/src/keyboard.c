@@ -129,7 +129,6 @@ keyEntry scan2ascii(byte scan_code) {
 		}
 	}
 	return &ans;
-	//return ascii;
 }
 
 int isKeyNumPad(unsigned char ascii) {
@@ -199,8 +198,6 @@ void updateLeds() {
 						(ttys[System.atty].input.flags.num_status * 2) + 
 						(ttys[System.atty].input.flags.mayus_status * 4);
 
-	//while ((_inport(0x64) & 2) != 0);
-	//_outport(0x60, 0xED);
 	 char aux;
 	 do {
         __asm__ __volatile__("inb $0x64, %al");
@@ -217,8 +214,6 @@ void updateLeds() {
 
 	__asm__ __volatile__("movb %0, %%al" : : "g" (leds));
     __asm__ __volatile__("outb %al, $0x60");
-	//while ((_inport(0x64) & 2) != 0);
-	//_outport(0x60, leds);
 }
 
 escapedKey(unsigned int scan_code){

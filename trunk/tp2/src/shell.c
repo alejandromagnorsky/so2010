@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 13
+#define NUM_COMMANDS 14
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -21,7 +21,8 @@ static struct {
 				 {"demo_malloc", "demo malloc", demo_malloc},
 				 {"doNothing", "Runs a task that doesn't end 4 times as children", doNothing4Times},
 				 {"kill", "kills a task with the id you give", kill},
-                 {"echoserver", "A server that echoes messages sent to it", echoserver}
+                 {"echoserver", "A server that echoes messages sent to it", echoserver},
+				 {"doGetChar", "Makes a getchar to try running in background", do_getchar}
 };
 
 
@@ -75,16 +76,21 @@ void input_handler(){
 }
 
 int run_command(command_t* command){
-	int i, ret, bk = 0;
+	int i = 0, ret, bk = 0;
+	char * bkstring = "&";
 	if(streq(command->name, ""))
 		return 0;
-	if(streq(command->args, "&")){
+	
+	if(command->args[0] == '&'){
 		bk = 1;
 	}
+	
 	for (i = 0; i < NUM_COMMANDS; i++) {
 	    if(streq(command->name, commands[i].name)) {
-	        ret = System.exec(commands[i].function, command->args);
-			if(!bk){				
+			if(bk){
+				ret = System.execb(commands[i].function, command->args);			
+			}else{
+				ret = System.exec(commands[i].function, command->args);			
 				System.wait();
 			}
 			clearCommand(command);
@@ -214,4 +220,11 @@ int echoserver(char* line) {
         System.send(from, msg, len);
     }
 
+}
+
+int do_getchar(char* line){
+	System.name("doGetChar");
+	printf("Press a key to terminate the program.\n");
+	getchar();
+	printf("Thanks!!\n");
 }

@@ -103,6 +103,19 @@ int _sys_exec(int (*f) (char*), char* args) {
     return ret;
 }
 
+int _sys_exec_b(int (*f) (char*), char* args) {
+	int ret;
+
+	MOVTO_EAX(SYSTEM_CALL_EXEC_B);
+	MOVTO_EBX(f);
+	MOVTO_ECX(args);
+
+	THROW_INT80;
+
+	MOVFROM_EAX(ret);
+	return ret;
+}	
+
 int _sys_gettid(char* name) {
     int ret;
 

@@ -68,6 +68,7 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_malloc,
                                _sys_free,
                                _sys_exec,
+							   _sys_exec_b,
                                _sys_gettid,
                                _sys_nexttid,
                                _sys_getprio,
@@ -268,6 +269,14 @@ void int_80() {
             MOVTO_EAX(ret);
             
             break;
+
+		case SYSTEM_CALL_EXEC_B:
+			ret = Task.new(&(System.tasks[Task.findSlot()]), "Task_back", 
+            				(program_t) ebx, RANK_NORMAL, PRIORITY_MEDIUM, RUNNING_BACK, System.task->tty, (char*) ecx);
+
+			MOVTO_EAX(ret);
+			
+			break;
 
         case SYSTEM_CALL_GETTID:
 
