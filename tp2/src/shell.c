@@ -19,7 +19,7 @@ static struct {
 		         {"top", "Shows active processes and statistics", top},
 		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks},
 				 {"demo_malloc", "demo malloc", demo_malloc},
-				 {"infinite", "Runs a task that doesnt end, e", infinite},
+				 {"doNothing", "Runs a task that doesn't end", doNothing},
 				 {"kill", "kills a task with the id you give", kill}
 };
 
@@ -145,7 +145,7 @@ int top (char* line) {
     int i;
     task_t t;
 
-    //System.name("printTasks");
+    //System.name("top");
     
     for (i = 0; i < NUM_TASKS; i++)
         if (System.tasks[i].tid != 0) {
@@ -178,8 +178,8 @@ int kill(char* tid)
 	return 0;
 }
 
-int infinite(char* line) {
-	System.name("infinite");
+int doNothing(char* line) {
+	System.name("doNothing");
     for(;;);
     return 0;
 }
