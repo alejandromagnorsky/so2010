@@ -33,7 +33,10 @@ int demo_malloc(char * a);
 int kill(char* tid);
 int doNothing(char* line);
 int echoserver(char*);
+int ohceserver(char*);
 int do_getchar(char* line);
+
+int daemontest(char * line);
 
 extern struct system_t System;
 extern tty_t ttys[NTTYS];

@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 14
+#define NUM_COMMANDS 15
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -17,11 +17,12 @@ static struct {
 		         {"startx", "Start graphic OS", startx},
 		         {"clear", "Clear the screen", clear},
 		         {"top", "Shows active processes and statistics", top},
-		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks},
+		         {"daemontest", "Queries the echo and reverse echo system servers", daemontest},
 				 {"demo_malloc", "demo malloc", demo_malloc},
 				 {"doNothing", "Runs a task that doesn't end 4 times as children", doNothing4Times},
 				 {"kill", "kills a task with the id you give", kill},
                  {"echoserver", "A server that echoes messages sent to it", echoserver},
+                 {"ohceserver", "ti ot tnes segassem seohce taht revres A", ohceserver},
 				 {"doGetChar", "Makes a getchar to try running in background", do_getchar}
 };
 
@@ -78,6 +79,7 @@ void input_handler(){
 int run_command(command_t* command){
 	int i = 0, ret, bk = 0;
 	char * bkstring = "&";
+    
 	if(streq(command->name, ""))
 		return 0;
 	
@@ -223,9 +225,67 @@ int echoserver(char* line) {
 
 }
 
+int ohceserver(char* line) {
+    int len, from, i;
+    char msg[128], reverse[128];
+
+    System.name("ohceserver");
+    
+    while(1) {
+        len = System.recv();
+        from = System.getmsg(msg, len);
+
+        for(i = 0; i < len; i++)
+            reverse[i] = msg[len - i - 1];
+        
+        System.clsmsg();
+
+        System.send(from, reverse, len);
+    }    
+}
+
 int do_getchar(char* line){
 	System.name("doGetChar");
 	printf("Press a key to terminate the program.\n");
 	getchar();
 	printf("Thanks!!\n");
+}
+
+int daemontest(char * line) {
+
+    int len, to;
+    char msg[128];
+    System.name("daemontest");
+
+    /* System.exec(task3, "3");
+    System.sleep(100);
+    System.exec(task2, "2");
+  */
+    printf("Sending 'prueba' to echo server...\n");
+
+    if (to = System.gettid("echoserver"))
+        System.send(to, "prueba", 6);
+    else
+        printf("Echo server not running.\n");
+
+    len = System.recv();
+    System.getmsg(msg, len);
+
+    msg[len] = 0;
+
+    printf("Got: %s\n", msg);
+
+    printf("Sending 'prueba' to reverse echo server...\n");
+    
+    if (to = System.gettid("ohceserver")) {
+        System.send(to, "prueba", 6);
+    } else
+        printf("Reverse echo server not running.\n");
+    
+    len = System.recv();
+    System.getmsg(msg, len);
+
+    msg[len] = 0;
+
+    printf("Got: %s\n", msg);
 }
