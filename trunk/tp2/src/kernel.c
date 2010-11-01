@@ -360,7 +360,7 @@ void int_80() {
                 
             }
 
-            MOVTO_EAX(ret ? 0 : -1);
+            MOVTO_EAX(ret ? System.task->tsdata.recv.tid : -1);
             break;
 
         case SYSTEM_CALL_CLSMSG:
@@ -378,6 +378,8 @@ void int_80() {
         	break;
         
         case SYSTEM_CALL_WAIT:
+            System.task->tstatus = STATUS_WAITING_CHILD;
+            _scheduler();
         	break;
         	
      }

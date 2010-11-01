@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 12
+#define NUM_COMMANDS 13
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -20,7 +20,8 @@ static struct {
 		         {"testTasks", "Tests tasks by creating 3, killing one and ending the other 2", testTasks},
 				 {"demo_malloc", "demo malloc", demo_malloc},
 				 {"doNothing", "Runs a task that doesn't end 4 times as children", doNothing4Times},
-				 {"kill", "kills a task with the id you give", kill}
+				 {"kill", "kills a task with the id you give", kill},
+                 {"echoserver", "A server that echoes messages sent to it", echoserver}
 };
 
 
@@ -74,14 +75,16 @@ void input_handler(){
 }
 
 int run_command(command_t* command){
-	int i;
+	int i, ret;
 	if(streq(command->name, ""))
 		return 0;
 		
 	for (i = 0; i < NUM_COMMANDS; i++) {
 	    if (streq(command->name, commands[i].name)) {
 	        clearCommand(command);
-	        return System.exec(commands[i].function, command->args);
+	        ret = System.exec(commands[i].function, command->args);
+            System.wait();
+            return ret;
 	    }
 	}
 
@@ -173,7 +176,7 @@ int top (char* line) {
         printf("TaskID: %d\tPriority: %d\tRank: %d\tUsage: %d\tName: %s\n", other, rank, prio, usage, task->tname);
         other = System.nexttid(&iter);
     } while (first != other);
-}    
+}
 
 int kill(char* tid)
 {
@@ -197,4 +200,20 @@ int kill(char* tid)
 	return 0;
 }
 
+int echoserver(char* line) {
 
+    int len, from;
+    char msg[128];
+
+    System.name("echoserver");
+    
+    while(1) {
+        len = System.recv();
+        from = System.getmsg(msg, len);
+        
+        System.clsmsg();
+
+        System.send(from, msg, len);
+    }
+
+}

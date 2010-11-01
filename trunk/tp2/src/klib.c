@@ -269,7 +269,14 @@ int _sys_setRMode(int rm) {
 }
 
 int _sys_wait() {
+    int ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_WAIT);
 
+    THROW_INT80;
+    
+    MOVFROM_EAX(ret);
+    return ret;
 }
 
 struct TaskNamespace Task = {
@@ -502,12 +509,6 @@ int _task_new (task_t task, char* name, program_t program, int rank,
     /* Reserve memory for the stack (grows downwards in x86): */
     task->stack = System.malloc(DEFAULT_STACK_SIZE);
     task->stack_start = task->stack + DEFAULT_STACK_SIZE - 1;
-    
-    if(rank == RANK_SERVER){
-		Task.setStatus(task, STATUS_WAITING);
-    }else{
-	    Task.setStatus(task, STATUS_READY);
-    }
 	
 	_pageUp(task->stack);
 
@@ -522,8 +523,7 @@ int _task_new (task_t task, char* name, program_t program, int rank,
 		Task.runInBackground(task);
 	}
 
-	if(running_mode == RUNNING_FRONT && current->tid > 1 /*&& Task.checkTTY(current->tid) != -1*/){
-		Task.setStatus(current, STATUS_WAITING);
+	if(running_mode == RUNNING_FRONT && current->tid > 1 /*&& Task.checkTTY(current->tid) != -1*/) {
 		Task.setParentTID(task, current->tid);
 		sched = 1;
 	}else{
