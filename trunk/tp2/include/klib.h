@@ -151,7 +151,11 @@ enum {
     SYSTEM_CALL_GETMSG,
     SYSTEM_CALL_CLSMSG,
     SYSTEM_CALL_YIELD,
-    SYSTEM_CALL_KILL
+    SYSTEM_CALL_KILL,
+    SYSTEM_CALL_SETPRIO,
+    SYSTEM_CALL_SETRANK,
+    SYSTEM_CALL_SETRMODE,
+    SYSTEM_CALL_WAIT
 };
 
 struct driver_t {
@@ -222,6 +226,10 @@ struct system_t {
     int (*clsmsg) ();
     int (*yield) ();
     int (*kill) (int);
+    int (*setPrio)(int prio);
+	int (*setRank)(int rank);
+	int (*setRMode)(int rm);
+	int (*wait)();
 };
 
 typedef struct system_t* system_t;
@@ -308,6 +316,11 @@ int _sys_sleep(int);
 int _sys_yield();
 int _sys_kill(int tid);
 
+int _sys_setPrio(int prio);
+int _sys_setRank(int rank);
+int _sys_setRMode(int rm);
+int _sys_wait();
+
 struct TaskNamespace {    
     void (*setPriority) (task_t, int);
     void (*setRank)    (task_t, int);
@@ -337,7 +350,7 @@ struct TaskNamespace {
 	int (*getRunningMode)(task_t);
 	void (*setParentTID)(task_t, int);
 	int (*getParentTID)(task_t);
-	void (*yield)(int);
+	void (*yield)();
 	int (*checkTTY)(int taskTID);
 	void (*setSleep)(task_t task, int ticks);
 	int (*decSleep)(task_t);
@@ -393,7 +406,7 @@ static void _task_cleaner (void);
 void _task_setupScheduler ();
 int _task_scheduler(int esp);
 int Idle (void);
-void _task_yield(int tid);
+void _task_yield();
 int _task_checkTTY(int taskTID);
 
 void _task_maintenance();
