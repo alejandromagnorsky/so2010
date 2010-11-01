@@ -289,3 +289,11 @@ int daemontest(char * line) {
 
     printf("Got: %s\n", msg);
 }
+
+void init() {
+
+    System.exec(echoserver, "");
+    System.exec(ohceserver, "");
+
+    return;
+}
