@@ -74,6 +74,7 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_getrank,
                                _sys_getcpuc,
                                _sys_name,
+                               _sys_getName,
                                _sys_sleep,
                                _sys_send,
                                _sys_recv,
@@ -84,6 +85,8 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_setPrio,
 							   _sys_setRank,
 							   _sys_setRMode,
+							   _sys_getRMode,
+							   _sys_getStatus,
 							   _sys_wait
                            };
                                
@@ -204,6 +207,7 @@ void int_80() {
     int syscall;
     task_t task;
     char* name;
+    char nameg[MAX_TASK_NAME];
     int ebx, ecx, edx, ret, iter, len;
     
     /* The above instructions, as well as these macros, do not affect the
@@ -321,6 +325,13 @@ void int_80() {
             
             MOVTO_EAX(System.task->tname);
             break;
+        
+        case SYSTEM_CALL_GETNAME:
+        	if (ebx == 0)
+                ebx = System.task->tid;
+            strcpy((task = Task.getByTID(ebx)) ? task->tname : "", nameg);
+            MOVTO_EAX(nameg);
+            break;
 
         case SYSTEM_CALL_SLEEP:
             Task.setSleep(System.task, ebx);
@@ -330,7 +341,7 @@ void int_80() {
             break;
             
 		case SYSTEM_CALL_YIELD:
-			Task.yield(ebx);
+			Task.yield();
 			MOVTO_EAX(0);
 			break;
 		
@@ -369,13 +380,35 @@ void int_80() {
             break;
         
         case SYSTEM_CALL_SETPRIO:
+        	System.task->tpriority = ebx;
+        	MOVTO_EAX(0);
         	break;
         
         case SYSTEM_CALL_SETRANK:
+	        System.task->trank = ebx;
+	        MOVTO_EAX(0);
         	break;
         
         case SYSTEM_CALL_SETRMODE:
+        	System.task->running_mode = ebx;
+        	MOVTO_EAX(0);
         	break;
+        
+        case SYSTEM_CALL_GETRMODE:
+        	if (ebx == 0)
+                ebx = System.task->tid;
+            ret = (task = Task.getByTID(ebx)) ? task->running_mode : -1;
+            
+            MOVTO_EAX(ret);
+            break;
+        
+        case SYSTEM_CALL_GETSTATUS:
+        	if (ebx == 0)
+                ebx = System.task->tid;
+            ret = (task = Task.getByTID(ebx)) ? task->tstatus : -1;
+            
+            MOVTO_EAX(ret);
+            break;
         
         case SYSTEM_CALL_WAIT:
             System.task->tstatus = STATUS_WAITING_CHILD;

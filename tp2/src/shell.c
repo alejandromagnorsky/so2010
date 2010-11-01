@@ -144,23 +144,12 @@ int clear(char* line) {
 
 int top (char* line) {
     System.name("top");
-
-    /*int i;
-    task_t t;
-
-    //System.name("top");
     
-    for (i = 0; i < NUM_TASKS; i++)
-        if (System.tasks[i].tid != 0) {
-            t = &(System.tasks[i]);
-            printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
-        }
-        
-    return 0;*/
-    
+    printf("Processes and it's CPU percentage of use\n");
     task_t task;
     int iter = 0, self, first, other;
-    int rank, prio, usage;
+    int rank, prio, usage, status, rm;
+    char name[MAX_TASK_NAME];
     
     self = System.gettid();
 
@@ -170,10 +159,14 @@ int top (char* line) {
         rank = System.getrank(other);
         prio = System.getprio(other);
         usage = System.getcpuc(other);
+		strcpy(System.getName(other), name);
+        status = System.getStatus(other);
+        rm = System.getRMode(other);
 
         task = Task.getByTID(other);
-        
-        printf("TaskID: %d\tPriority: %d\tRank: %d\tUsage: %d\tName: %s\n", other, rank, prio, usage, task->tname);
+        // [TODO] change name for a sys call
+        printf("TaskID: %d\tPriority: %d\tRank: %d\tUsage: %d\t RunningMode: %d\tName: %s (%d)\n", 
+        		other, rank, prio, usage, rm, name, status);
         other = System.nexttid(&iter);
     } while (first != other);
 }
