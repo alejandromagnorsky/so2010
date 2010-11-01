@@ -135,6 +135,8 @@ int clear(char* line) {
     for (i = 0; i < VIDEO_SIZE; i++)
 		printf(" ");
         //System.device[DEVICE_SCREEN]->driver->write(DEVICE_SCREEN, " ", 1);
+        
+    return 0;
 }
 
 int top (char* line) {
@@ -150,15 +152,34 @@ int top (char* line) {
             t = &(System.tasks[i]);
             printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
         }
+        
+    return 0;
 }    
 
 int kill(char* tid)
 {
+	int tidi, status;
+	tidi = atoi(tid,10);
+	status = System.kill(tidi);
 	//System.name("kill");
-	System.kill(atoi(tid, 10));
+	
+	switch(status)
+	{
+		case KILL_INVALID_TASK:
+			printf("The given task doesnt exist, you should pass as an argument an existing task id\n");
+			break; 
+		case KILL_PERMISSION_DENIED:
+			printf("Permission denied\n");
+			break;
+		case KILL_SUCCEEDED:
+			printf("Task %d killed\n", tidi);
+			break;
+	}
+	return 0;
 }
 
 int infinite(char* line) {
 	System.name("infinite");
     for(;;);
+    return 0;
 }

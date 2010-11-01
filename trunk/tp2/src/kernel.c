@@ -78,7 +78,9 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_send,
                                _sys_recv,
                                _sys_yield,
-                               _sys_kill
+                               _sys_kill,
+                               _sys_getmsg,
+							   _sys_clsmsg
                            };
                                
 //system_t System = &_system_data;
@@ -252,7 +254,7 @@ void int_80() {
             break;
             
         case SYSTEM_CALL_EXEC:
-            printf("Exec with line: %s\n", (char*) ecx);
+           // printf("Exec with line: %s\n", (char*) ecx);
             ret = Task.new(&(System.tasks[Task.findSlot()]), "Task", 
             				(program_t) ebx, RANK_NORMAL, PRIORITY_MEDIUM, RUNNING_FRONT, System.task->tty, (char*) ecx);
 
@@ -330,8 +332,8 @@ void int_80() {
 			break;
 		
 		case SYSTEM_CALL_KILL:
-			Task.kill(ebx);
-			MOVTO_EAX(0);
+			ret = Task.kill(ebx);
+			MOVTO_EAX(ret);
 			break;
         case SYSTEM_CALL_SEND:
             Task.setSend(System.task, ebx, (void*) ecx, edx);

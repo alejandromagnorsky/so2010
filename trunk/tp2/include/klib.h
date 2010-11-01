@@ -70,6 +70,12 @@ enum {
 	RUNNING_BACK,
 };
 
+enum {
+	KILL_INVALID_TASK,
+	KILL_PERMISSION_DENIED,
+	KILL_SUCCEEDED
+};
+
 struct block_t {
 	struct block_t * next;
 	void * firstPage;
@@ -211,17 +217,17 @@ struct system_t {
     int    (*exec)  (int (*f) (char*), char* args);
     int (*gettid) ();
     int (*nexttid) (int*);
-    int (*getprio) (int);
     int (*getrank) (int);
+    int (*getprio) (int);
     int (*getcpuc) (int);
     char* (*name) (char*);
     int (*sleep) (int);
     int (*send) (int, void*, int);
     int (*recv) ();
-    int (*getmsg) (void*, int);
-    int (*clsmsg) ();
     int (*yield) ();
     int (*kill) (int);
+    int (*getmsg) (void*, int);
+    int (*clsmsg) ();
 };
 
 typedef struct system_t* system_t;
@@ -320,7 +326,7 @@ struct TaskNamespace {
     
     int (*findSlot) ();
     int (*new) (task_t, char*, program_t, int, int, int, int, char*);
-    void (*kill) (int);
+    int (*kill) (int);
 
     task_t (*getByTID) (int);
     task_t (*getCurrent) ();
@@ -382,7 +388,7 @@ int _task_getParentTID(task_t task);
 
 int _task_new (task_t task, char* name, program_t program, int rank, 
 			int priority, int isFront, int tty, char* line);
-void _task_kill(int tid);
+int _task_kill(int tid);
 
 task_t _task_getCurrent();
 task_t _task_getByTID (int tid);
