@@ -28,9 +28,8 @@ int task1(char* line) {
     System.kill(1);
     
     printf("Test Task1 is going to kill itself\n");
-    System.kill(7);
+    System.kill(6);
     
-	System.sleep(200);
     printf("This shouldnt be printed, i should be dead\n"); */
 }
 

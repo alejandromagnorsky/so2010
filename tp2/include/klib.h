@@ -16,7 +16,6 @@
 
 #define QUANTUM 2
 
-#define STACK_SIZE 1024
 #define	MAX_TASK_NAME	20
 
 #define PAGE_SIZE 0x1000
