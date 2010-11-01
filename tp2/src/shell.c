@@ -116,7 +116,7 @@ int help(char* line) {
     
 	for (i = 0; i < NUM_COMMANDS; i++)
 	    printf("%s\t\t%s\n", commands[i].name, commands[i].description);
-	
+	printf("\n");
 	return 0;
 }
 
