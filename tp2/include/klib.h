@@ -140,6 +140,7 @@ enum {
     SYSTEM_CALL_TELLR,
     SYSTEM_CALL_TELLW,
     SYSTEM_CALL_EXEC,
+	SYSTEM_CALL_EXEC_B,
     SYSTEM_CALL_GETTID,
     SYSTEM_CALL_NEXTTID,
     SYSTEM_CALL_GETRANK,
@@ -217,6 +218,7 @@ struct system_t {
     void* (*malloc) (size_t size);
     void (*free) ();
     int    (*exec)  (int (*f) (char*), char* args);
+	int	   (*execb) (int (*f) (char*), char* args);
     int (*gettid) ();
     int (*nexttid) (int*);
     int (*getrank) (int);
@@ -306,6 +308,8 @@ size_t _sys_seekw(int devcode, int offset, int from);
 size_t _sys_tellr(int devcode);
 size_t _sys_tellw(int devcode);
 int _sys_exec(int (*f) (char*), char* args);
+int _sys_exec_b(int (*f) (char*), char* args);
+
 
 int _sys_gettid(char* name);
 int _sys_nexttid(int* iter);
