@@ -112,10 +112,7 @@ int doNothing3(char * line)
 
 int doNothing4(char * line)
 {
-	//System.name(doNothingName4);
-	//System.setPrio(3);
-	//System.setRank(0);
-	System.setRMode(RUNNING_BACK);
+	System.name(doNothingName4);
 	for(;;);
 	return 0;
 }

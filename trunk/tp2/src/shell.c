@@ -165,7 +165,7 @@ int top (char* line) {
 
         task = Task.getByTID(other);
         // [TODO] change name for a sys call
-        printf("TaskID: %d\tPriority: %d\tRank: %d\tUsage: %d\t RunningMode: %d\tName: %s (%d)\n", 
+        printf("TID: %d\tPriority: %d\tRank: %d\tUsage: %d\t RunningMode: %d\tName: %s (%d)\n", 
         		other, rank, prio, usage, rm, name, status);
         other = System.nexttid(&iter);
     } while (first != other);
