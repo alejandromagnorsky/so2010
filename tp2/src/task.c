@@ -1,10 +1,5 @@
 #include "../include/task.h"
 
-static char* x = "Task 2 (Msg len:%d) \"%s\"\n";
-static char* y = "Task 3 (Msg len:%d) \"%s\"\n";
-
-static char* test_message = "prueba";
-
 static char* doNothingName1 = "doNothing1";
 static char* doNothingName2 = "doNothing2";
 static char* doNothingName3 = "doNothing3";
