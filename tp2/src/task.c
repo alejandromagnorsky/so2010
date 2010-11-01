@@ -10,12 +10,23 @@ static char* basta = "basta";
 
 int testTasks(char * a) {
 
+    int len;
+    char msg[128];
     System.name("testTasks");
 
-    System.exec(task3, "3");
+    /* System.exec(task3, "3");
     System.sleep(100);
     System.exec(task2, "2");
-    
+  */
+
+    System.send(System.gettid("echoserver"), test_message, 6);
+
+    len = System.recv();
+    System.getmsg(msg, len);
+
+    msg[len] = 0;
+
+    printf("%s", msg);
 }
 
 int task1(char* line) {
