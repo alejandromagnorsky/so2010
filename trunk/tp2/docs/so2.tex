@@ -157,9 +157,10 @@ Se decidió crear los siguientes estados:
  \item STATUS\_WAITING - La tarea está bloqueada esperando.
  \item STATUS\_DEAD - La tarea está marcada como muerta.
  \item STATUS\_RUNNING - La tarea está corriendo.
- \item STATUS\_WAITING\_RECV - La tarea está esperando recibir un mensaje.
+ \item STATUS\_WAITING\_RECV - La tarea está esperando a recibir un mensaje.
+ \item STATUS\_WAITING\_SEND - La tarea está esperando a enviar un mensaje.
+ \item STATUS\_WAITING\_SLEEP - La tarea está durmiendo.
 \end{itemize}
-
 
 En cuanto a las prioridades se tienen las siguientes:
 
@@ -178,7 +179,7 @@ En cuanto a las prioridades se tienen las siguientes:
 % y se deberá poder corroborar el estado del proceso y el
 % porcentaje de procesador que esté ocupando con la ayuda del comando ”top”.
 
-El comando kill termina la tarea indicada sacándola del vector de procesos y 
+El comando kill termina la tarea indicada por el id pasado como parámetro, sacándola del vector de procesos y 
 liberando su stack. Por otro lado marca con STATUS\_DEAD a todos sus procesos hijos 
 con el fin de que en la próxima ejecución cada hijo termine con sí mismo y sus
 respectivos hijos. \\
@@ -191,7 +192,6 @@ al scheduler para que una nueva tarea pueda ser elegida.
 % a ceder procesador.
 
 \subsection{Terminales}
-
 
 \subsection{Intérprete de comandos}
 

@@ -125,12 +125,6 @@ struct task_t {
 
 	block_t mem;
 
-	// [TODO] we are not using this:
-    struct {
-        int devcode;
-        int wpos;
-        int rpos;
-    } odevs[10];
 };
 
 typedef struct task_t* task_t;
