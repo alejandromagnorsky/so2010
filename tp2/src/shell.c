@@ -81,7 +81,8 @@ int run_command(command_t* command){
 	if(streq(command->name, ""))
 		return 0;
 	
-	if(command->args[0] == '&'){
+	while(command->args[i++] != 0);
+	if(command->args[i - 2] == '&'){
 		bk = 1;
 	}
 	
