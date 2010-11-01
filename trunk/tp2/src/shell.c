@@ -260,7 +260,7 @@ int daemontest(char * line) {
     System.sleep(100);
     System.exec(task2, "2");
   */
-    printf("Sending 'prueba' to echo server...\n");
+    printf("Sending '%s' to echo server...\n", line);
 
     if (to = System.gettid("echoserver"))
         System.send(to, line, strlen(line));
@@ -274,7 +274,7 @@ int daemontest(char * line) {
 
     printf("Got: %s\n", msg);
 
-    printf("Sending 'prueba' to reverse echo server...\n");
+    printf("Sending '%s' to reverse echo server...\n", line);
     
     if (to = System.gettid("ohceserver")) {
         System.send(to, line, strlen(line));
