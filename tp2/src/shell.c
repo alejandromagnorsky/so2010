@@ -264,7 +264,7 @@ int daemontest(char * line) {
     printf("Sending 'prueba' to echo server...\n");
 
     if (to = System.gettid("echoserver"))
-        System.send(to, "prueba", 6);
+        System.send(to, line, strlen(line));
     else
         printf("Echo server not running.\n");
 
@@ -278,7 +278,7 @@ int daemontest(char * line) {
     printf("Sending 'prueba' to reverse echo server...\n");
     
     if (to = System.gettid("ohceserver")) {
-        System.send(to, "prueba", 6);
+        System.send(to, line, strlen(line));
     } else
         printf("Reverse echo server not running.\n");
     
