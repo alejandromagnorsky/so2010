@@ -256,6 +256,22 @@ int _sys_kill(int tid) {
     return ret;
 }
 
+int _sys_setPrio(int prio) {
+	
+}
+
+int _sys_setRank(int rank) {
+	
+}
+
+int _sys_setRMode(int rm) {
+
+}
+
+int _sys_wait() {
+
+}
+
 struct TaskNamespace Task = {
     _task_setPriority,
     _task_setRank,
@@ -772,11 +788,11 @@ void _task_setupScheduler ()
 	return;
 }
 
-void _task_yield(int tid)
+void _task_yield()
 {
 	task_t task;
 	_Cli();
-	task = Task.getByTID(tid);
+	task = Task.getCurrent();
 	Task.setStatus(task, STATUS_READY);
 	_Sti();
 	_scheduler();

@@ -142,7 +142,7 @@ int clear(char* line) {
 int top (char* line) {
     System.name("top");
 
-    int i;
+    /*int i;
     task_t t;
 
     //System.name("top");
@@ -153,15 +153,34 @@ int top (char* line) {
             printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
         }
         
-    return 0;
+    return 0;*/
+    
+    task_t task;
+    int iter = 0, self, first, other;
+    int rank, prio, usage;
+    
+    self = System.gettid();
+
+    other = first = System.nexttid(&iter);
+    
+    do {
+        rank = System.getrank(other);
+        prio = System.getprio(other);
+        usage = System.getcpuc(other);
+
+        task = Task.getByTID(other);
+        
+        printf("TaskID: %d\tPriority: %d\tRank: %d\tUsage: %d\tName: %s\n", other, rank, prio, usage, task->tname);
+        other = System.nexttid(&iter);
+    } while (first != other);
 }    
 
 int kill(char* tid)
 {
+	System.name("kill");
 	int tidi, status;
 	tidi = atoi(tid,10);
 	status = System.kill(tidi);
-	//System.name("kill");
 	
 	switch(status)
 	{

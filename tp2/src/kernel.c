@@ -80,7 +80,11 @@ struct system_t System = {     0,					/* Tick count */
                                _sys_getmsg,
                                _sys_clsmsg,
                                _sys_yield,
-                               _sys_kill
+                               _sys_kill,
+                               _sys_setPrio,
+							   _sys_setRank,
+							   _sys_setRMode,
+							   _sys_wait
                            };
                                
 //system_t System = &_system_data;
@@ -363,43 +367,20 @@ void int_80() {
             System.task->tsdata.recv.tid = 0;
             MOVTO_EAX(0);
             break;
-     }
-
-}
-
-int printTasks(char* line) {
-    int i;
-    task_t t;
-
-    //System.name("printTasks");
-    
-    for (i = 0; i < NUM_TASKS; i++)
-        if (System.tasks[i].tid != 0) {
-            t = &(System.tasks[i]);
-            printf("Task %d\tPriority %d\tRank %d\tUsage %d\t%s (%d)\n", t->tid, t->tpriority, t->trank, 0, t->tname, t->tstatus);
-
-        }
-
-    for(;;);
-    /*task_t hola;
-    int iter = 30, self, first, other;
-    int rank, prio, usage;
-    
-    self = System.gettid();
-
-    iter = 0;
-    other = first = System.nexttid(&iter);
-    
-    do {
-        rank = System.getrank(other);
-        prio = System.getprio(other);
-        usage = System.getcpuc(other);
-
-        hola = Task.getByTID(other);
         
-        printf("Task %d\tPriority %d\tRank %d\tUsage %d\tName %s\n", other, rank, prio, usage, hola->tname);
-        other = System.nexttid(&iter);
-    } while (first != other);*/
+        case SYSTEM_CALL_SETPRIO:
+        	break;
+        
+        case SYSTEM_CALL_SETRANK:
+        	break;
+        
+        case SYSTEM_CALL_SETRMODE:
+        	break;
+        
+        case SYSTEM_CALL_WAIT:
+        	break;
+        	
+     }
 }
 
 /*************************************************
