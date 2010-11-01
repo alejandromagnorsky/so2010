@@ -31,7 +31,7 @@ int alloc(char*);
 int top(char*);
 int demo_malloc(char * a);
 int kill(char* tid);
-int infinite(char* line);
+int doNothing(char* line);
 
 extern struct system_t System;
 extern tty_t ttys[NTTYS];
