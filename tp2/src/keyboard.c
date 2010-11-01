@@ -195,15 +195,30 @@ void initializeKeyboard() {
 }
 
 void updateLeds() {
-	unsigned char leds = ttys[System.atty].input.flags.scroll_status | 
-						(ttys[System.atty].input.flags.num_status * 2) | 
+	unsigned char leds = ttys[System.atty].input.flags.scroll_status + 
+						(ttys[System.atty].input.flags.num_status * 2) + 
 						(ttys[System.atty].input.flags.mayus_status * 4);
 
-	while ((_inport(0x64) & 2) != 0);
-	_outport(0x60, 0xED);
+	//while ((_inport(0x64) & 2) != 0);
+	//_outport(0x60, 0xED);
+	 char aux;
+	 do {
+        __asm__ __volatile__("inb $0x64, %al");
+        __asm__ __volatile__("movb %%al, %0" : : "gr" (aux));
+    } while( (aux & 2) != 0);
 
-	while ((_inport(0x64) & 2) != 0);
-	_outport(0x60, leds);
+	__asm__ __volatile__("movb $0xed, %al");
+    __asm__ __volatile__("outb %al, $0x60 ");
+
+	do {
+        __asm__ __volatile__("inb $0x64, %al");
+        __asm__ __volatile__("movb %%al, %0" : : "gr" (aux));
+    } while( (aux & 2) != 0);
+
+	__asm__ __volatile__("movb %0, %%al" : : "g" (leds));
+    __asm__ __volatile__("outb %al, $0x60");
+	//while ((_inport(0x64) & 2) != 0);
+	//_outport(0x60, leds);
 }
 
 escapedKey(unsigned int scan_code){
