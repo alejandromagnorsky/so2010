@@ -149,11 +149,11 @@ void fault_handler(struct regs *r)
 {
     if (r->int_no < 32)
     {
+		printf("Aca\n");
         printf("%s", exception_messages[r->int_no]);
         printf(" Exception.\n");
     }
     _Sti();
-    //shellloop();
 	while(1);
 }
 
