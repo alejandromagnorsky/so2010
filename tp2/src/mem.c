@@ -108,6 +108,7 @@ int _pageUp(void * addr){
 	}
 }
 
+
 int _pageDown(void * addr){
 	address_t address = getPage(addr);
 	ptbl_t tbl = (ptbl_t) tablesArea + GETDIRENTRY(address) * PAGESIZE;

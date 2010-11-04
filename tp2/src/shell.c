@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 15
+#define NUM_COMMANDS 16
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -23,7 +23,8 @@ static struct {
 				 {"kill", "kills a task with the id you give and its children", kill},
                  {"echoserver", "A server that echoes messages sent to it", echoserver},
                  {"ohceserver", "ti ot tnes segassem seohce taht revres A", ohceserver},
-				 {"doGetChar", "Makes a getchar to try running in background", do_getchar}
+				 {"doGetChar", "Makes a getchar to try running in background", do_getchar},
+				 {"freeTest", "free test", freeTest}
 };
 
 
@@ -287,6 +288,12 @@ int daemontest(char * line) {
     msg[len] = 0;
 
     printf("Got: %s\n", msg);
+}
+
+
+int freeTest(char * line){
+	int * a = (int *) 34000000;
+	*a = 1;	
 }
 
 void init() {

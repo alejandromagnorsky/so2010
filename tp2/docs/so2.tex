@@ -110,6 +110,99 @@ y servirán para demostrar la implementación del TP.
 
 \section{Desarrollo}
 
+\subsection{Llamadas al Sistema}
+Todas las llamadas de sistema son accedidas a través del pseudo-objeto System. Por ejemplo:
+
+System.name("my new task name");
+
+A continuación sigue una guía detallada de todas las llamadas que ofrece SuciOS.
+
+\subsubsection{Control de Tareas}
+
+\begin{itemize}
+ \item \textbf{int exec(program\_t program, char* line)}\\
+    \noindent
+    Crea una nueva tarea desde la función program, cuyo prototipo debe retornar integer y recibir como parámetro un char*.
+    La línea line es pasada como parámetro a la tarea, que se coloca en la cola de tareas listas para ejecutarse.
+
+ \item \textbf{int execb(program\_t program, char* line)}\\
+    \noindent Como exec, pero ejecuta un proceso en background.
+
+ \item \textbf{int yield()}\\
+    \noindent Ofrece al sistema operativo la opción de desalojar inmediatamente a la tarea invocadora.
+
+ \item \textbf{int wait()}\\
+    \noindent Bloquea a la tarea invocadora hasta que uno de sus hijos finalice su ejecución.
+
+ \item \textbf{int name(char* name)}\\
+    \noindent Cambia el nombre de la tarea invocadora.
+
+ \item \textbf{int getName(void* buf, int tid)}\\
+    \noindent Recibe un task id, y escribe su nombre en el buffer buf. Cuídese que el buffer tenga MAX\_TASK\_NAME bytes. Retorna 0 si tiene éxito, -1 si ocurre un error.
+
+\item \textbf{int getRMode(int tid)}\\
+    \noindent Recibe un task id, y retorna su modo de ejecución FOREGROUND, o BACKGROUND.
+
+ \item \textbf{int getStatus(int tid)}\\
+    \noindent Recibe un task id, y retorna su estado de ejecución, o -1 en caso de error.
+
+ \item \textbf{int getcpuc(int tid)}\\
+    \noindent Recibe un task id, y retorna su porcentaje de consumo de cpu, o -1 en caso de error.
+
+ \item \textbf{int getprio(int tid)}\\
+    \noindent Recibe un task id, y retorna su prioridad, o -1 en caso de error.
+
+ \item \textbf{int setPrio(int prio)}\\
+    \noindent Cambia la prioridad del proceso invocador.
+
+ \item \textbf{int getrank(int tid)}\\
+    \noindent Recibe un task id, y retorna su rango (RANK\_NORMAL o RANK\_SERVER), o -1 en caso de error.
+
+ \item \textbf{int setRank(int rank)}\\
+    \noindent Cambia el rango del proceso invocador.
+
+ \item \textbf{int gettid(char* name)}\\
+    \noindent  Localiza una tarea llamada name, y retorna su tid, o -1 en caso de error. Si name es NULL, retorna el id de la tarea invocadora.
+
+ \item \textbf{int nexttid(int* iter)}\\
+    \noindent Recibe un puntero a entero en el espacio de programa, que se utilizará para controlar la iteración, y no necesita estar inicializado. Retorna el task id de alguna tarea en ejecución en su primera invocación, y uno diferente en cada invocación subsiguiente (siempre que se le pase como parámetro el mismo puntero a entero, y su contenido no se modifique por otra función). Es responsabilidad del llamador detener la iteración cuando le plazca: nexttid devolverá circularmente los ids de todas las tareas del sistema.
+
+ \item \textbf{int kill(int tid)}\\
+    \noindent Termina la tarea con el tid especificado.
+
+ \item \textbf{int sleep(int n)}\\
+    \noindent Duerme al proceso, evitando que el scheduler lo elija durante n pasadas.
+
+\end{itemize}
+ 
+\subsubsection{Conmutación entre Tareas}
+\begin{itemize}
+ \item \textbf{int send(int to, void* msg, int len)}\\
+  \noindent Envía el mensaje contenido en el buffer msg, hasta el largo len, a la tarea con ID 'to'. La tarea bloquea hasta que el mensaje pueda ser enviado (lo cual requiere que el receptor invoque a System.recv()).
+ \item \textbf{int recv()}\\
+  \noindent Bloquea a la tarea invocadora hasta que un mensaje sea recibido, y devuelve la longitud del mensaje. Es la primera llamada al intentar recibir un mensaje.
+ \item \textbf{int getmsg(void* buf, int len)}\\
+  \noindent Transfiere un mensaje previamente recibido con System.recv() al espacio de proceso, en el buffer buf. Len debe ser igual al largo del mensaje informado por System.recv(), como medida de control. Debe llamarse inmediatamente después de recv(), sin recurrir a otras llamadas de sistema.
+ \item \textbf{int clsmsg()}\\
+  \noindent Destruye el mensaje almacenado por el kernel para este proceso. No es necesario llamarla entre mensajes, pero la tarea tiene la opción de hacerlo si desea.
+\end{itemize}
+
+\subsubsection{Entrada y Salida}
+\begin{itemize}
+ \item \textbf{int read(int dev, void* buf, int n)}\\
+  \noindent Lee n bytes del dispositivo dev y los escribe en el buffer buf.
+ \item \textbf{int seekr(int dev, int offset, int from)}\\
+  \noindent Desplaza el puntero de lectura del dispositivo dev en offset bytes, desde una posición determinada por from (DEVICE\_START, DEVICE\_CURRENT o DEVICE\_END).
+ \item \textbf{int seekw(int dev, int offset, int from)}\\
+  \noindent Desplaza el puntero de escritura del dispositivo dev en offset bytes, desde una posición determinada por from (DEVICE\_START, DEVICE\_CURRENT o DEVICE\_END).
+ \item \textbf{int tellr(int dev)}\\
+  \noindent Retorna la posición del puntero de lectura del dispositivo dev.\\
+ \item \textbf{int tellw(int dev)}
+  \noindent Retorna la posición del puntero de escritura del dispositivo dev.
+ \item \textbf{int write(int dev, void* buf, int n)}\\
+  \noindent Escribe n bytes en el dispositivo dev, tomándolos de buf.
+\end{itemize}
+
 \subsection{Contexto de tareas}
 Para guardar el contexto de las tareas se decidió realizar una implementación propia, 
 la cual guarda en el stack de la tarea los valores necesarios. Al crear una tarea se crea
@@ -247,11 +340,14 @@ el proceso muere se eliminan todos los bloques generados por el mismo.
  \item \textbf{doNothing}\\
       \noindent Este comando ejecuta una función que crea una tarea que a su vez crea otra, para armar una rama de tareas y poder hacer un correcto testing del
 	kill.
- \item \textbf{echoserver}
+ \item \textbf{echoserver}\\
+      \noindent Este comando ejecuta una función para el testing del IPC.
  \item \textbf{doGetChar} \\
       \noindent Este comando ejecuta una función que realiza un getchar, y termina cuando el usuario presiona una tecla. Esto nos permite hacer un testing
 	  de tareas corriendo en background. Si ejecutamos este comando en background, el programa queda colgado en el getchar(), y deberemos matarlo con
 	  kill.
+ \item \textbf{testFree}\\
+      \noindent A último momento se agregó este comando para demostrar que salta el Page Fault, si queremos acceder a memoria no paginada.
 \end{itemize}
 
 
@@ -259,8 +355,7 @@ el proceso muere se eliminan todos los bloques generados por el mismo.
 \section{Conclusiones}
 Luego del desarrollo del trabajo práctico especial llegamos a las siguientes conclusiones:
 \begin{itemize}
- \item Entendimos qué era realmente un sistema operativo con multitasking, y que esto no es lo más complejo del 
-    desarrollo de un sistema operativo. Aunque es realmente importante.
+ \item Entendimos qué era realmente un sistema operativo con multitasking, y la complejidad que resulta desarrollarlo.
  \item Comprendimos las ventajas de un sistema con memoria paginada, y la seguridad que brinda esta característica. Aunque
     lograr un eficiente y seguro manejo de memoria es muy complejo.
  \item Haber logrado un acercamiento a un sistema operativo multitasking con manejo de tareas, terminales, procesos en background, fue un gran

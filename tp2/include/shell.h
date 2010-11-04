@@ -36,6 +36,7 @@ int doNothing(char* line);
 int echoserver(char*);
 int ohceserver(char*);
 int do_getchar(char* line);
+int freeTest(char * line);
 
 int daemontest(char * line);
 
