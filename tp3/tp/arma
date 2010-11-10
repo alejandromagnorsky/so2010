@@ -1,0 +1,4 @@
+./compila
+cd ./bin
+mcopy ../menu.lst b:boot/grub/ -o
+mcopy kernel.bin b:boot/ -o
