@@ -12,6 +12,7 @@
 #include "gralprotection.h"
 #include "task.h"
 #include "defs.h"
+#include "wini.h"
 
 void init();
 void shell(int tty, linebuffer_t linebuffer, command_t command);
@@ -37,6 +38,7 @@ int echoserver(char*);
 int ohceserver(char*);
 int do_getchar(char* line);
 int freeTest(char * line);
+int initDisk(char * a);
 
 int daemontest(char * line);
 
