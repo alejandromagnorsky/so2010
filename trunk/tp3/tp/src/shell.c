@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 16
+#define NUM_COMMANDS 17
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -24,7 +24,8 @@ static struct {
                  {"echoserver", "A server that echoes messages sent to it", echoserver},
                  {"ohceserver", "ti ot tnes segassem seohce taht revres A", ohceserver},
 				 {"doGetChar", "Makes a getchar to try running in background", do_getchar},
-				 {"freeTest", "free test", freeTest}
+				 {"freeTest", "free test", freeTest},
+				 {"initDisk", "initializes the disk", initDisk}
 };
 
 
@@ -302,4 +303,9 @@ void init() {
     System.exec(ohceserver, "");
 
     return;
+}
+
+int initDisk(char * a){
+	printf("Inicializador de Disco\n");
+	winchester_task();
 }
