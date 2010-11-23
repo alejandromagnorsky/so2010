@@ -14,7 +14,6 @@ typedef unsigned char   u8_t;	   /* 8 bit type */
 typedef unsigned short u16_t;	   /* 16 bit type */
 typedef unsigned long  u32_t;	   /* 32 bit type */
 
-
 typedef struct { u32_t _[2]; } u64_t;
 
 
