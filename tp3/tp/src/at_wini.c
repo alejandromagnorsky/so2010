@@ -20,6 +20,8 @@
 
 #include "../include/at_wini.h"
 
+#include "../include/defs.h"
+
 /* I/O Ports used by winchester disk controller. */
 
 #define WIN_REG1       0x1f0
@@ -108,7 +110,7 @@ PUBLIC winchester_task()
 
   while (TRUE) {
 	/* First wait for a request to read or write a disk block. */
-	receive(ANY, &w_mess);	/* get a request to do some work */
+	//receive(ANY, &w_mess);	/* get a request to do some work */
 	if (w_mess.m_source < 0) {
 		printf("winchester task got message from %d ", w_mess.m_source);
 		continue;
@@ -128,7 +130,7 @@ PUBLIC winchester_task()
 	w_mess.REP_PROC_NR = proc_nr;
 
 	w_mess.REP_STATUS = r;	/* # of bytes transferred or error code */
-	send(caller, &w_mess);	/* send reply to caller */
+	//send(caller, &w_mess);	/* send reply to caller */
   }
 }
 
@@ -192,8 +194,8 @@ PRIVATE int w_transfer(wn)
 register struct wini *wn;	/* pointer to the drive struct */
 {
   extern phys_bytes umap();
-  phys_bytes win_buf = umap(proc_addr(WINCHESTER), D, buf, BLOCK_SIZE);
-  phys_bytes usr_buf = umap(proc_addr(wn->wn_procnr), D, wn->wn_address, BLOCK_SIZE);
+  phys_bytes win_buf = (phys_bytes)buf;
+  phys_bytes usr_buf = (phys_bytes)buf;
   register int i,j;
   int r;
 
@@ -219,7 +221,7 @@ register struct wini *wn;	/* pointer to the drive struct */
   /* Block, waiting for disk interrupt. */
   if (wn->wn_opcode == DISK_READ) {
 	for (i=0; i<BLOCK_SIZE/SECTOR_SIZE; i++) {
-		receive(HARDWARE, &w_mess);
+		//receive(HARDWARE, &w_mess);
 		for (j=0; j<256; j++)
 			portw_in(WIN_REG1, &buf[i*512+j*2]);
 		if (win_results() != OK) {
@@ -239,7 +241,7 @@ register struct wini *wn;	/* pointer to the drive struct */
 	for (i=0; i<BLOCK_SIZE/SECTOR_SIZE; i++) {
 		for (j=0; j<256; j++)
 			portw_out(WIN_REG1, *(int *)&buf[i*512+j*2]);
-		receive(HARDWARE, &w_mess);
+	//	receive(HARDWARE, &w_mess);
 		if (win_results() != OK) {
 			w_need_reset = TRUE;
 			return(ERR);
@@ -304,7 +306,7 @@ PRIVATE win_init()
   if (com_out() != OK)	/* Output command block */
 	return(ERR);
 
-  receive(HARDWARE, &w_mess);
+ // receive(HARDWARE, &w_mess);
   if (win_results() != OK) {	/* See if controller accepted parameters */
 	w_need_reset = TRUE;
 	return(ERR);
@@ -319,7 +321,7 @@ PRIVATE win_init()
 
 	if (com_out() != OK)			/* Output command block */
 		return(ERR);
-	receive(HARDWARE, &w_mess);
+	//receive(HARDWARE, &w_mess);
 	if (win_results() != OK) {  /* See if controller accepted parameters */
 		w_need_reset = TRUE;
 		return(ERR);
@@ -331,7 +333,7 @@ PRIVATE win_init()
 	command[7] = WIN_RECALIBRATE | (wini[i*5].wn_ctlbyte & 0x0F);
 	if (com_out() != OK)
 		return(ERR);
-	receive(HARDWARE, &w_mess);
+	//receive(HARDWARE, &w_mess);
 	if (win_results() != OK) {
 		w_need_reset = TRUE;
 		return(ERR);
@@ -406,63 +408,63 @@ PRIVATE com_out()
  *============================================================================*/
 PRIVATE init_params()
 {
-/* This routine is called at startup to initialize the partition table,
- * the number of drives and the controller
-*/
-  unsigned int i, segment, offset;
-  phys_bytes address;
-  extern phys_bytes umap();
-  extern int vec_table[];
+	/* This routine is called at startup to initialize the partition table,
+	* the number of drives and the controller
+	*/
+	unsigned int i, segment, offset;
+	phys_bytes address;
+	extern phys_bytes umap();
+	extern DESCR_INT idt[];
 
-  /* Copy the parameter vector from the saved vector table */
-  offset = vec_table[2 * 0x41];
-  segment = vec_table[2 * 0x41 + 1];
+	/* Copy the parameter vector from the saved vector table */
+	offset = idt[0x61].offset_l | idt[0x61].offset_h;
+	segment = idt[0x61].selector;
 
-  /* Calculate the address off the parameters and copy them to buf */
-  address = ((long)segment << 4) + offset;
-  phys_copy(address, umap(proc_addr(WINCHESTER), D, buf, 16), 16L);
+	/* Calculate the address off the parameters and copy them to buf */
+	address = ((long)segment << 4) + offset;
+	phys_copy(address, (long)buf, 16L); 
 
-  /* Copy the parameters to the structures */
-  copy_param(buf, &wini[0]);
+	/* Copy the parameters to the structures */
+	copy_param(buf, &wini[0]);
 
-  /* Copy the parameter vector from the saved vector table */
-  offset = vec_table[2 * 0x46];
-  segment = vec_table[2 * 0x46 + 1];
+	/* Copy the parameter vector from the saved vector table */
+	offset = idt[0x66].offset_l | idt[0x66].offset_h;
+	segment = idt[0x66].selector;
 
-  /* Calculate the address off the parameters and copy them to buf */
-  address = ((long)segment << 4) + offset;
-  phys_copy(address, umap(proc_addr(WINCHESTER), D, buf, 16), 16L);
+	/* Calculate the address off the parameters and copy them to buf */
+	address = ((long)segment << 4) + offset;
+	phys_copy(address, (long)buf, 16L);
 
-  /* Copy the parameters to the structures */
-  copy_param(buf, &wini[5]);
+	/* Copy the parameters to the structures */
+	copy_param(buf, &wini[5]);
 
-  /* Get the nummer of drives from the bios */
-  phys_copy(0x475L, umap(proc_addr(WINCHESTER), D, buf, 1), 1L);
-  nr_drives = (int) *buf;
+	/* Get the nummer of drives from the bios */
+	phys_copy(0x475L, (long)buf, 1L);
+	nr_drives = (int) *buf;
 
-  /* Set the parameters in the drive structure */
-  wini[0].wn_low = wini[5].wn_low = 0L;
+	/* Set the parameters in the drive structure */
+	wini[0].wn_low = wini[5].wn_low = 0L;
 
-  /* Initialize the controller */
-  if ((nr_drives > 0) && (win_init() != OK))
+	/* Initialize the controller */
+	if ((nr_drives > 0) && (win_init() != OK))
 		nr_drives = 0;
 
-  /* Read the partition table for each drive and save them */
-  for (i = 0; i < nr_drives; i++) {
-	w_mess.DEVICE = i * 5;
-	w_mess.POSITION = 0L;
-	w_mess.COUNT = BLOCK_SIZE;
-	w_mess.ADDRESS = (char *) buf;
-	w_mess.PROC_NR = WINCHESTER;
-	w_mess.m_type = DISK_READ;
-	if (w_do_rdwt(&w_mess) != BLOCK_SIZE)
-		panic("Can't read partition table of winchester ", i);
-	if (buf[510] != 0x55 || buf[511] != 0xAA) {
-		printf("Invalid partition table\n");
-		continue;
+	/* Read the partition table for each drive and save them */
+	for (i = 0; i < nr_drives; i++) {
+		w_mess.DEVICE = i * 5;
+		w_mess.POSITION = 0L;
+		w_mess.COUNT = BLOCK_SIZE;
+		w_mess.ADDRESS = (char *) buf;
+		w_mess.PROC_NR = WINCHESTER;
+		w_mess.m_type = DISK_READ;
+		if (w_do_rdwt(&w_mess) != BLOCK_SIZE)
+			panic("Can't read partition table of winchester ", i);
+		if (buf[510] != 0x55 || buf[511] != 0xAA) {
+			printf("Invalid partition table\n");
+			continue;
+		}
+		copy_prt(i*5);
 	}
-	copy_prt(i*5);
-  }
 }
 
 /*============================================================================*

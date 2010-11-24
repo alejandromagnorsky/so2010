@@ -21,7 +21,6 @@ void 		_unlock();
 
 #define panic(S,N) printf(S);while(1)
 
-
 /* </include/const.h> */
 /* Copyright (C) 1987 by Prentice-Hall, Inc.  Permission is hereby granted to
  * private individuals and educational institutions to modify and
