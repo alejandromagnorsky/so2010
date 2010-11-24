@@ -1,5 +1,5 @@
 GLOBAL  _read_msw,_lidt
-GLOBAL  _int_20_hand, _int_21_hand, _int_80_hand,
+GLOBAL  _int_20_hand, _int_21_hand, _int_80_hand, _int_96_hand
 GLOBAL	_int_00_hand, _int_01_hand, _int_02_hand, _int_03_hand
 GLOBAL	_int_04_hand, _int_05_hand, _int_06_hand, _int_07_hand
 GLOBAL	_int_08_hand, _int_09_hand, _int_0A_hand, _int_0B_hand
@@ -14,7 +14,7 @@ GLOBAL	_task_load_state_, _task_save_state_
 GLOBAL	_newStack, _scheduler
 GLOBAL  _debug
 
-EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_scheduler
+EXTERN  int_20, int_21, int_80, int_00, int_96, fault_handler, _task_scheduler
 
 SECTION .text
 
@@ -322,6 +322,31 @@ _int_80_hand:
         sti
         iret
 	
+
+_int_96_hand:
+	cli
+	push	ds
+	push	es
+	pusha
+	
+	mov	ax, 10h
+	mov	ds, ax
+	mov	es, ax
+
+	call	int_96
+	
+	mov	al,20h
+	out	20h,al
+	
+	popa
+	pop	es
+	pop	ds
+	sti
+	iret
+
+
+
+
 isr_common_stub:
 	pusha
 	push ds

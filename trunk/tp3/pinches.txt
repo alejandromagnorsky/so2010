@@ -1,0 +1,2 @@
+(long)buf por el umap ese raro (de proc_addr)
+
