@@ -529,16 +529,16 @@ L7:	mov [bp + 32],dx		; store	decremented byte count back in mem
 ; port_out(port, value)	writes 'value' on the I/O port 'port'.
 
 port_out:
-	push bx			; save bx
-	mov bx,sp		; index	off bx
-	push ax			; save ax
-	push dx			; save dx
-	mov dx,[bx+4]	; dx = port
-	mov ax,[bx+6]	; ax = value
+	push ebx			; save bx
+	mov ebx,esp		; index	off bx
+	push eax			; save ax
+	push edx			; save dx
+	mov dx,[bx+8]	; dx = port
+	mov ax,[bx+10]	; ax = value
 	out dx,al		; output 1 byte
-	pop dx			; restore_lock dx
-	pop ax			; restore ax
-	pop bx			; restore bx
+	pop edx			; restore_lock dx
+	pop eax			; restore ax
+	pop ebx			; restore bx
 	ret				; return to caller
 
 ;===========================================================================
@@ -546,18 +546,18 @@ port_out:
 ;===========================================================================
 ; port_in(port,	&value)	reads from port	'port' and puts	the result in 'value'.
 port_in:
-	push bx			; save bx
-	mov bx,sp		; index	off bx
-	push ax			; save ax
-	push dx			; save dx
-	mov dx,[bx+4]		; dx = port
+	push ebx			; save bx
+	mov ebx,esp		; index	off bx
+	push eax			; save ax
+	push edx			; save dx
+	mov dx,[bx+8]		; dx = port
 	in  al,dx		; input	1 byte
 	xor ah,ah		; clear	ah
-	mov bx,[bx+6]	; fetch	address	where byte is to go
+	mov bx,[bx+10]	; fetch	address	where byte is to go
 	mov [bx],ax		; return byte to caller	in param
-	pop dx			; restore dx
-	pop ax			; restore ax
-	pop bx			; restore bx
+	pop edx			; restore dx
+	pop eax			; restore ax
+	pop ebx			; restore bx
 	ret				; return to caller
 
 
@@ -567,16 +567,16 @@ port_in:
 ; portw_out(port, value) writes 'value' on the I/O port 'port'.
 
 _portw_out:
-	push bx			; save bx
-	mov bx,sp		; index off bx
-	push ax			; save ax
-	push dx			; save dx
-	mov dx,[bx+4]	; dx = port
-	mov ax,[bx+6]	; ax = value
+	push ebx			; save bx
+	mov ebx,esp		; index off bx
+	push eax			; save ax
+	push edx			; save dx
+	mov edx,[bx+8]	; dx = port
+	mov eax,[bx+12]	; ax = value
 	out	dx,ax			; output 1 word
-	pop dx			; restore dx
-	pop ax			; restore ax
-	pop bx			; restore bx
+	pop edx			; restore dx
+	pop eax			; restore ax
+	pop ebx			; restore bx
 	ret			; return to caller
 
 
@@ -585,17 +585,17 @@ _portw_out:
 ;*===========================================================================*
 ; portw_in(port, &value) reads from port 'port' and puts the result in 'value'.
 _portw_in:
-	push bx			; save bx
-	mov bx,sp		; index off bx
-	push ax			; save ax
-	push dx			; save dx
-	mov dx,[bx+4]	; dx = port
+	push ebx			; save bx
+	mov ebx,esp		; index off bx
+	push eax			; save ax
+	push edx			; save dx
+	mov edx,[ebx+8]	; dx = port
 	in ax,dx		; input 1 word
-	mov bx,[bx+6]	; fetch address where byte is to go
-	mov [bx],ax		; return byte to caller in param
-	pop dx			; restore dx
-	pop ax			; restore ax
-	pop bx			; restore bx
+	mov ebx,[ebx+12]	; fetch address where byte is to go
+	mov [ebx],eax		; return byte to caller in param
+	pop edx			; restore dx
+	pop eax			; restore ax
+	pop ebx			; restore bx
 	ret			; return to caller
 
 

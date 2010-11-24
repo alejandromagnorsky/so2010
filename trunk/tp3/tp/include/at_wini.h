@@ -16,6 +16,7 @@ void 		_unlock();
 
 #define portw_in 	_portw_in
 #define portw_out 	_portw_out
+
 #define copy_param 	copy_params
 #define init_param	init_params
 
