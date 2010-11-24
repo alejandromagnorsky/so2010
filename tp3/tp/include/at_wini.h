@@ -1,6 +1,26 @@
 #ifndef _AT_WINI_H_
 #define _AT_WINI_H
 
+/* ASSEMBLER */
+
+
+void		phys_copy(	long source, long destination, long bytecount);
+void		port_out(unsigned short port, unsigned int value);
+void		port_in(unsigned short port, unsigned int * value);
+void		_lock();
+void 		_unlock();
+
+/* PARCHES */
+#define lock		_lock
+#define	unlock		_unlock
+
+#define portw_in 	_portw_in
+#define portw_out 	_portw_out
+#define copy_param 	copy_params
+#define init_param	init_params
+
+#define panic(S,N) printf(S);while(1)
+
 
 /* </include/const.h> */
 /* Copyright (C) 1987 by Prentice-Hall, Inc.  Permission is hereby granted to
