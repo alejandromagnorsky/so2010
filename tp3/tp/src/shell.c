@@ -306,6 +306,7 @@ void init() {
 }
 
 int initDisk(char * a){
+	printf("Hola\n");
 	printf("Inicializador de Disco\n");
 	winchester_task();
 }

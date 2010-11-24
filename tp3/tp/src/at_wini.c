@@ -99,39 +99,41 @@ PUBLIC winchester_task()
 {
 /* Main program of the winchester disk driver task. */
 
-  int r, caller, proc_nr;
+	int r, caller, proc_nr;
 
-  /* First initialize the controller */
-  init_param();
+	/* First initialize the controller */
+	init_param();
 
-  /* Here is the main loop of the disk task.  It waits for a message, carries
-   * it out, and sends a reply.
-   */
+	printf("asd\n");
 
-  while (TRUE) {
-	/* First wait for a request to read or write a disk block. */
-	//receive(ANY, &w_mess);	/* get a request to do some work */
-	if (w_mess.m_source < 0) {
-		printf("winchester task got message from %d ", w_mess.m_source);
-		continue;
+	/* Here is the main loop of the disk task.  It waits for a message, carries
+	* it out, and sends a reply.
+	*/
+
+	while (TRUE) {
+		/* First wait for a request to read or write a disk block. */
+		//receive(ANY, &w_mess);	/* get a request to do some work */
+		if (w_mess.m_source < 0) {
+			printf("winchester task got message from %d ", w_mess.m_source);
+			continue;
+		}
+		caller = w_mess.m_source;
+		proc_nr = w_mess.PROC_NR;
+
+		/* Now carry out the work. */
+		switch(w_mess.m_type) {
+			case DISK_READ:
+			case DISK_WRITE:	r = w_do_rdwt(&w_mess);	break;
+			default:		r = EINVAL;		break;
+		}
+
+		/* Finally, prepare and send the reply message. */
+		w_mess.m_type = TASK_REPLY;	
+		w_mess.REP_PROC_NR = proc_nr;
+
+		w_mess.REP_STATUS = r;	/* # of bytes transferred or error code */
+		//send(caller, &w_mess);	/* send reply to caller */
 	}
-	caller = w_mess.m_source;
-	proc_nr = w_mess.PROC_NR;
-
-	/* Now carry out the work. */
-	switch(w_mess.m_type) {
-	    case DISK_READ:
-	    case DISK_WRITE:	r = w_do_rdwt(&w_mess);	break;
-	    default:		r = EINVAL;		break;
-	}
-
-	/* Finally, prepare and send the reply message. */
-	w_mess.m_type = TASK_REPLY;	
-	w_mess.REP_PROC_NR = proc_nr;
-
-	w_mess.REP_STATUS = r;	/* # of bytes transferred or error code */
-	//send(caller, &w_mess);	/* send reply to caller */
-  }
 }
 
 /*===========================================================================*
@@ -415,7 +417,7 @@ PRIVATE init_params()
 	phys_bytes address;
 	extern phys_bytes umap();
 	extern DESCR_INT idt[];
-
+	__asm__("int $0x96");
 	/* Copy the parameter vector from the saved vector table */
 	offset = idt[0x61].offset_l | idt[0x61].offset_h;
 	segment = idt[0x61].selector;
