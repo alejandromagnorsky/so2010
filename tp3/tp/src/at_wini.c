@@ -92,6 +92,60 @@ PRIVATE init_params();
 PRIVATE copy_params(register unsigned char *src, register struct wini *dest);
 PRIVATE copy_prt(int drive);
 
+
+
+unsigned short _inportw(unsigned short port) {
+/* Reads a byte from an I/O port */
+	short c;
+
+    __asm__("in %%dx, %%ax;"            /* Assembler instructions */
+            :"=a" (c)                   /* Output variables */
+            :"d" (port)                 /* Input variabless */
+           );
+    
+    return c;
+}
+
+void _outportw(unsigned short port, unsigned short c) {
+/* Writes a byte to an I/O port */
+
+    __asm__("out %%ax, %%dx;"           /* Assembler instructions */
+            :                           /* Output variables */
+            :"d" (port), "a" (c)        /* Input variabless */
+           );
+}
+
+
+
+unsigned char _inport(unsigned char port);
+
+void _outport(unsigned char port, unsigned char c);
+
+/*===========================================================================*
+ *				winchester_task				     * 
+ *===========================================================================*/
+PUBLIC winchester_taskTEST()
+{
+/* Main program of the winchester disk driver task. */
+
+	int r, caller, proc_nr;
+
+	/* First initialize the controller */
+	init_param();
+
+
+	int lala = 17;
+	int comm = WIN_READ;
+
+	_outportw(0x70, 0);
+
+	lala = _inport(0x71);
+
+	printf("%d\n",lala);
+
+}
+
+
 /*===========================================================================*
  *				winchester_task				     * 
  *===========================================================================*/
@@ -417,7 +471,7 @@ PRIVATE init_params()
 	phys_bytes address;
 	extern phys_bytes umap();
 	extern DESCR_INT idt[];
-	__asm__("int $0x96");
+	//__asm__("int $0x96");
 	/* Copy the parameter vector from the saved vector table */
 	offset = idt[0x61].offset_l | idt[0x61].offset_h;
 	segment = idt[0x61].selector;
