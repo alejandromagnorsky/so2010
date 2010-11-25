@@ -1,0 +1,6 @@
+hiddenmenu
+timeout 0
+default 0
+
+title SuciOS 0.01 Superstable Beta
+kernel /boot/kernel.bin
