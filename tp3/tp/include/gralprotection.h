@@ -1,1 +1,0 @@
-int gralprotection(char * input);
