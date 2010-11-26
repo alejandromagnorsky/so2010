@@ -520,6 +520,12 @@ int shell(){
     *b = 'x';
 }
 
+int_2E(){
+	printf("Driver AT int\n");
+	int data = getDataRegister();
+    printf("Data: %d\n", data);  
+}
+
 
 void initializeIDT(){
 	/* set IRQ routines  */
@@ -557,6 +563,9 @@ void initializeIDT(){
 	setup_IDT_entry (&idt[0x1F], 0x08, (dword)&_int_1F_hand, ACS_INT, 0);
 	setup_IDT_entry (&idt[0x20], 0x08, (dword)&_int_20_hand, ACS_INT, 0);
 	setup_IDT_entry (&idt[0x21], 0x08, (dword)&_int_21_hand, ACS_INT, 0);
+
+	setup_IDT_entry (&idt[0x2E], 0x08, (dword)&_int_2E_hand, ACS_INT, 0);
+
 	setup_IDT_entry (&idt[0x80], 0x08, (dword)&_int_80_hand, ACS_INT, 0);	
 }
 

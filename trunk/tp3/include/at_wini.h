@@ -2,19 +2,27 @@
 #define _AT_WINI_H_
 
 /* I/O Ports used by winchester disk controller. */
-#define WIN_REG0       0x1f0
-#define WIN_REG1       0x1f1 // Error
-#define WIN_REG2       0x1f2
-#define WIN_REG3       0x1f3
-#define WIN_REG4       0x1f4
-#define WIN_REG5       0x1f5
-#define WIN_REG6       0x1f6
-#define WIN_REG7       0x1f7 // Command|Status
+
+#define ATA0 0x1f0
+#define ATA1 0x170
+
+#define WIN_REG0       0x0
+#define WIN_REG1       0x1 // Error
+#define WIN_REG2       0x2
+#define WIN_REG3       0x3
+#define WIN_REG4       0x4
+#define WIN_REG5       0x5
+#define WIN_REG6       0x6
+#define WIN_REG7       0x7 // Command|Status
 #define WIN_REG8       0x3f6
+
+
+
 
 /* Winchester disk controller command bytes. */
 #define WIN_IDENTIFY	0xEC
-#define USE_DMA			0xC8
+#define MEDIA_STATUS	0xDA
+#define READ_DMA		0xC8
 #define WIN_RECALIBRATE	0x10	/* command for the drive to recalibrate */
 #define WIN_READ        0x20	/* command for the drive to read */
 #define WIN_WRITE       0x30	/* command for the drive to write */
@@ -34,12 +42,14 @@
 #define DEV_PER_DRIVE      5	/* hd0 + hd1 + hd2 + hd3 + hd4 = 5 */
 
 
-void init_driver();
+void init_driver(int ata);
 
-unsigned short getStatusRegister();
-void    identifyDevice();
-unsigned short getDataRegister();
-void sendDMAcomm();
-unsigned short getErrorRegister();
+unsigned short getStatusRegister(int ata);
+void identifyDevice(int ata);
+unsigned short getDataRegister(int ata);
+void sendDMAcomm(int ata);
+void check_drive(int ata);
+void mediaStatus(int ata);
+unsigned short getErrorRegister(int ata);
 
 #endif

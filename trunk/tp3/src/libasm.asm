@@ -1,5 +1,5 @@
 GLOBAL  _read_msw,_lidt
-GLOBAL  _int_20_hand, _int_21_hand, _int_80_hand,
+GLOBAL  _int_20_hand, _int_21_hand, _int_2E_hand, _int_80_hand,
 GLOBAL	_int_00_hand, _int_01_hand, _int_02_hand, _int_03_hand
 GLOBAL	_int_04_hand, _int_05_hand, _int_06_hand, _int_07_hand
 GLOBAL	_int_08_hand, _int_09_hand, _int_0A_hand, _int_0B_hand
@@ -14,7 +14,7 @@ GLOBAL	_newStack, _scheduler
 GLOBAL  port_in, port_out, portw_in, portw_out
 GLOBAL  _debug
 
-EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_scheduler
+EXTERN  int_20, int_21, int_2E, int_80, int_00, fault_handler, _task_scheduler
 
 SECTION .text
 
@@ -367,6 +367,28 @@ _int_21_hand:
 	pop	ds
 	sti
 	iret
+
+_int_2E_hand:
+	cli
+	push	ds
+	push	es
+	pusha
+	
+	mov	ax, 10h
+	mov	ds, ax
+	mov	es, ax
+
+	call	int_2E
+	
+	mov	al,20h
+	out	20h,al
+	
+	popa
+	pop	es
+	pop	ds
+	sti
+	iret
+	
 	
 _int_80_hand:
         cli
