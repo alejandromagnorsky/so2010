@@ -99,11 +99,11 @@ void sendDMAcomm(){
 	port_out(WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
 	port_out(WIN_REG7, USE_DMA); // Set command
 	
-	int i = 0;
-	for(i = 0; i < 100000; i++)
-		__asm__("nop");
 
 	_Sti();
+	int i = 0;
+	for(i = 0; i < 10000; i++)
+		__asm__("nop");
 }
 
 

@@ -30,53 +30,53 @@
 00000000000i[     ]   SB16 support: yes
 00000000000i[     ]   USB support: yes
 00000000000i[     ]   VGA extension support: vbe 
-00000000000i[MEM0 ] allocated memory at 0xb5155008. after alignment, vector=0xb5156000
+00000000000i[MEM0 ] allocated memory at 0xb51a6008. after alignment, vector=0xb51a7000
 00000000000i[MEM0 ] 32.00MB
 00000000000i[MEM0 ] mem block size = 0x00100000, blocks=32
 00000000000i[MEM0 ] rom at 0xfffe0000/131072 ('/usr/share/bochs/BIOS-bochs-latest')
 00000000000i[MEM0 ] rom at 0xc0000/38400 ('/usr/share/bochs/VGABIOS-lgpl-latest')
-00000000000i[     ] lt_dlhandle is 0xae83870
+00000000000i[     ] lt_dlhandle is 0xa668870
 00000000000i[PLGIN] loaded plugin libbx_cmos.so
-00000000000i[     ] lt_dlhandle is 0xae83da0
+00000000000i[     ] lt_dlhandle is 0xa668da0
 00000000000i[PLGIN] loaded plugin libbx_dma.so
-00000000000i[     ] lt_dlhandle is 0xae84308
+00000000000i[     ] lt_dlhandle is 0xa669308
 00000000000i[PLGIN] loaded plugin libbx_pic.so
-00000000000i[     ] lt_dlhandle is 0xae848b8
+00000000000i[     ] lt_dlhandle is 0xa6698b8
 00000000000i[PLGIN] loaded plugin libbx_pit.so
-00000000000i[     ] lt_dlhandle is 0xae84dc8
+00000000000i[     ] lt_dlhandle is 0xa669dc8
 00000000000i[PLGIN] loaded plugin libbx_vga.so
-00000000000i[     ] lt_dlhandle is 0xae853b0
+00000000000i[     ] lt_dlhandle is 0xa66a3b0
 00000000000i[PLGIN] loaded plugin libbx_floppy.so
-00000000000i[     ] lt_dlhandle is 0xae85bb8
+00000000000i[     ] lt_dlhandle is 0xa66abb8
 00000000000i[PLGIN] loaded plugin libbx_pci.so
-00000000000i[     ] lt_dlhandle is 0xae862e8
+00000000000i[     ] lt_dlhandle is 0xa66b2e8
 00000000000i[PLGIN] loaded plugin libbx_pci2isa.so
-00000000000i[     ] lt_dlhandle is 0xae867f0
+00000000000i[     ] lt_dlhandle is 0xa66b7f0
 00000000000i[PLGIN] loaded plugin libbx_unmapped.so
-00000000000i[     ] lt_dlhandle is 0xae86e08
+00000000000i[     ] lt_dlhandle is 0xa66be08
 00000000000i[PLGIN] loaded plugin libbx_biosdev.so
-00000000000i[     ] lt_dlhandle is 0xae872d8
+00000000000i[     ] lt_dlhandle is 0xa66c2d8
 00000000000i[PLGIN] loaded plugin libbx_speaker.so
-00000000000i[     ] lt_dlhandle is 0xae878e8
+00000000000i[     ] lt_dlhandle is 0xa66c8e8
 00000000000i[PLGIN] loaded plugin libbx_extfpuirq.so
-00000000000i[     ] lt_dlhandle is 0xae87dc0
+00000000000i[     ] lt_dlhandle is 0xa66cdc0
 00000000000i[PLGIN] loaded plugin libbx_gameport.so
-00000000000i[     ] lt_dlhandle is 0xae882a0
+00000000000i[     ] lt_dlhandle is 0xa66d2a0
 00000000000i[PLGIN] loaded plugin libbx_pci_ide.so
-00000000000i[     ] lt_dlhandle is 0xae887b0
+00000000000i[     ] lt_dlhandle is 0xa66d7b0
 00000000000i[PLGIN] loaded plugin libbx_acpi.so
-00000000000i[     ] lt_dlhandle is 0xae88dd8
+00000000000i[     ] lt_dlhandle is 0xa66ddd8
 00000000000i[PLGIN] loaded plugin libbx_ioapic.so
-00000000000i[     ] lt_dlhandle is 0xae893f0
+00000000000i[     ] lt_dlhandle is 0xa66e3f0
 00000000000i[PLGIN] loaded plugin libbx_keyboard.so
-00000000000i[     ] lt_dlhandle is 0xae899e8
+00000000000i[     ] lt_dlhandle is 0xa66e9e8
 00000000000i[PLGIN] loaded plugin libbx_harddrv.so
-00000000000i[     ] lt_dlhandle is 0xae9b7a8
+00000000000i[     ] lt_dlhandle is 0xa6807a8
 00000000000i[PLGIN] loaded plugin libbx_serial.so
-00000000000i[     ] lt_dlhandle is 0xae9c2d8
+00000000000i[     ] lt_dlhandle is 0xa6812d8
 00000000000i[PLGIN] loaded plugin libbx_parallel.so
 00000000000i[CMOS ] Using local time for initial clock
-00000000000i[CMOS ] Setting initial clock to: Thu Nov 25 21:24:20 2010 (time0=1290731060)
+00000000000i[CMOS ] Setting initial clock to: Thu Nov 25 21:50:18 2010 (time0=1290732618)
 00000000000i[DMA  ] channel 4 used by cascade
 00000000000i[DMA  ] channel 2 used by Floppy Drive
 00000000000i[FDD  ] fd0: './img/tpe.img' ro=0, h=2,t=80,spt=18
@@ -203,37 +203,37 @@
 00027101814i[BIOS ] int13_harddisk: function 41, unmapped device for ELDL=81
 00027106595i[BIOS ] int13_harddisk: function 08, unmapped device for ELDL=81
 00027111246i[BIOS ] *** int 15h function AX=00c0, BX=0000 not yet supported!
-00141021964e[HD   ] read cmd 0xC8 (READ DMA) not supported
-00141021964p[HD   ] >>PANIC<< hard drive: shouldnt get here!
-00746512000p[XGUI ] >>PANIC<< POWER button turned off.
-00746512000i[CPU0 ] CPU is in protected mode (active)
-00746512000i[CPU0 ] CS.d_b = 32 bit
-00746512000i[CPU0 ] SS.d_b = 32 bit
-00746512000i[CPU0 ] EFER   = 0x00000000
-00746512000i[CPU0 ] | RAX=0000000000000000  RBX=0000000000105c72
-00746512000i[CPU0 ] | RCX=0000000000000009  RDX=000000000010232c
-00746512000i[CPU0 ] | RSP=0000000000801d23  RBP=0000000000801d3b
-00746512000i[CPU0 ] | RSI=000000000002be9c  RDI=0000000000801edb
-00746512000i[CPU0 ] |  R8=0000000000000000   R9=0000000000000000
-00746512000i[CPU0 ] | R10=0000000000000000  R11=0000000000000000
-00746512000i[CPU0 ] | R12=0000000000000000  R13=0000000000000000
-00746512000i[CPU0 ] | R14=0000000000000000  R15=0000000000000000
-00746512000i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf AF PF cf
-00746512000i[CPU0 ] | SEG selector     base    limit G D
-00746512000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
-00746512000i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
-00746512000i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00746512000i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00746512000i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00746512000i[CPU0 ] |  FS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00746512000i[CPU0 ] |  GS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
-00746512000i[CPU0 ] |  MSR_FS_BASE:0000000000000000
-00746512000i[CPU0 ] |  MSR_GS_BASE:0000000000000000
-00746512000i[CPU0 ] | RIP=0000000000101399 (0000000000101399)
-00746512000i[CPU0 ] | CR0=0xe0000011 CR2=0x0000000000000000
-00746512000i[CPU0 ] | CR3=0x003fc000 CR4=0x00000000
-00746512000i[CPU0 ] 0x0000000000101399>> call ebx : FFD3
-00746512000i[CMOS ] Last time is 1290731246 (Thu Nov 25 21:27:26 2010)
-00746512000i[XGUI ] Exit
-00746512000i[     ] restoring default signal behavior
-00746512000i[CTRL ] quit_sim called with exit code 1
+00228493934e[HD   ] read cmd 0xC8 (READ DMA) not supported
+00228493934p[HD   ] >>PANIC<< hard drive: shouldnt get here!
+00289996000p[XGUI ] >>PANIC<< POWER button turned off.
+00289996000i[CPU0 ] CPU is in protected mode (active)
+00289996000i[CPU0 ] CS.d_b = 32 bit
+00289996000i[CPU0 ] SS.d_b = 32 bit
+00289996000i[CPU0 ] EFER   = 0x00000000
+00289996000i[CPU0 ] | RAX=0000000000000000  RBX=00000000001012de
+00289996000i[CPU0 ] | RCX=0000000000000016  RDX=0000000000000000
+00289996000i[CPU0 ] | RSP=0000000000804d1b  RBP=0000000000804d1b
+00289996000i[CPU0 ] | RSI=000000000002be9c  RDI=0000000000804edb
+00289996000i[CPU0 ] |  R8=0000000000000000   R9=0000000000000000
+00289996000i[CPU0 ] | R10=0000000000000000  R11=0000000000000000
+00289996000i[CPU0 ] | R12=0000000000000000  R13=0000000000000000
+00289996000i[CPU0 ] | R14=0000000000000000  R15=0000000000000000
+00289996000i[CPU0 ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf ZF af PF cf
+00289996000i[CPU0 ] | SEG selector     base    limit G D
+00289996000i[CPU0 ] | SEG sltr(index|ti|rpl)     base    limit G D
+00289996000i[CPU0 ] |  CS:0008( 0001| 0|  0) 00000000 ffffffff 1 1
+00289996000i[CPU0 ] |  DS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00289996000i[CPU0 ] |  SS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00289996000i[CPU0 ] |  ES:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00289996000i[CPU0 ] |  FS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00289996000i[CPU0 ] |  GS:0010( 0002| 0|  0) 00000000 ffffffff 1 1
+00289996000i[CPU0 ] |  MSR_FS_BASE:0000000000000000
+00289996000i[CPU0 ] |  MSR_GS_BASE:0000000000000000
+00289996000i[CPU0 ] | RIP=0000000000105da5 (0000000000105da5)
+00289996000i[CPU0 ] | CR0=0xe0000011 CR2=0x0000000000000000
+00289996000i[CPU0 ] | CR3=0x003fc000 CR4=0x00000000
+00289996000i[CPU0 ] 0x0000000000105da5>> lea edx, dword ptr ds:[eax*8] : 8D14C500000000
+00289996000i[CMOS ] Last time is 1290732690 (Thu Nov 25 21:51:30 2010)
+00289996000i[XGUI ] Exit
+00289996000i[     ] restoring default signal behavior
+00289996000i[CTRL ] quit_sim called with exit code 1
