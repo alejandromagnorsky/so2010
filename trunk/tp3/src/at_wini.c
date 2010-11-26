@@ -46,7 +46,7 @@ void init_driver(int ata){
 
     printf("Ahora voy a intentar leer. Mando un comando primero\n");
 
-    sendDMAcomm(ata);
+    sendComm(ata, READ, 1);
 
     printf("Ahora tengo que leer el mensaje de respuesta. Esta en el status register\n");
     status = getStatusRegister(ata);
@@ -72,6 +72,12 @@ void init_driver(int ata){
     printf("Status %d\n", getStatusRegister(ata));
     printf("Error %d\n", getErrorRegister(ata));
     printf("\n\n");	
+}
+
+char * read(char * ans, int bytes){	
+	ans[0] = bytes & 0xFF;
+	ans[1] = ( bytes & 0xFF00 ) >> 8;
+	ans[2] = 0;
 }
 
 void translateBytes(char ans[], unsigned short bytes){	
@@ -149,19 +155,37 @@ void check_drive(int ata){
 
 }
 
-
-void sendDMAcomm(int ata){
+void sendComm(int ata, int rdWr, unsigned long addr){
 	_Cli();
-	port_out(ata + WIN_REG1, 0);
-	port_out(ata + WIN_REG2, 1); // Setea el sector count register en 1
+
+	if(rdWr == READ){
 	
-	// Setea LBA en 0
-	port_out(ata + WIN_REG3, 0); // LBA low
-	port_out(ata + WIN_REG4, 0); // LBA mid
-	port_out(ata + WIN_REG5, 0); // LBA high
-	port_out(ata + WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
-	port_out(ata + WIN_REG7, WIN_READ); // Set command
+		port_out(ata + WIN_REG1, 0);
+		port_out(ata + WIN_REG2, 1); // Setea el sector count register en 1
 	
+		// Setea LBA en 0
+		port_out(ata + WIN_REG3, 0); // LBA low
+		port_out(ata + WIN_REG4, 0); // LBA mid
+		port_out(ata + WIN_REG5, 0); // LBA high
+		port_out(ata + WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
+		port_out(ata + WIN_REG7, WIN_READ); // Set command
+		
+	} else if(rdWr == WRITE) {
+	// WRITE : CAMBIAR!!
+		port_out(ata + WIN_REG1, 0);
+		port_out(ata + WIN_REG2, 1); // Setea el sector count register en 1
+	
+		// Setea LBA en 0
+		port_out(ata + WIN_REG3, 0); // LBA low
+		port_out(ata + WIN_REG4, 0); // LBA mid
+		port_out(ata + WIN_REG5, 0); // LBA high
+		port_out(ata + WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
+		port_out(ata + WIN_REG7, WIN_WRITE); // Set command
+		
+	} else {
+	
+		return;
+	}
 
 	_Sti();
 }

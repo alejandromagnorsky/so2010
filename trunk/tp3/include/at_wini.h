@@ -1,6 +1,9 @@
 #ifndef _AT_WINI_H_
 #define _AT_WINI_H_
 
+#define READ 0
+#define WRITE 1
+
 /* I/O Ports used by winchester disk controller. */
 
 #define ATA0 0x1f0
@@ -47,9 +50,8 @@ void init_driver(int ata);
 unsigned short getStatusRegister(int ata);
 void identifyDevice(int ata);
 unsigned short getDataRegister(int ata);
-void sendDMAcomm(int ata);
+void sendComm(int ata, int rdWr, unsigned long addr);
 void check_drive(int ata);
-void mediaStatus(int ata);
 unsigned short getErrorRegister(int ata);
 
 #endif
