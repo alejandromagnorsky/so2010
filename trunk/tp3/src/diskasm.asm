@@ -1,5 +1,3 @@
-GLOBAL getStatusRegister, getDataRegister, identifyDevice, getErrorRegister, sendDMAcomm
-
 getStatusRegister:
     mov dx, 1F7h
     in al, dx
@@ -43,8 +41,8 @@ sendDMAcomm:
     xor ah,ah
 
     mov dx, 1f2h    ; sector count register
-    mov al, 1        ; QUEREMOS LEER 1 SECTOR
-    out dx, al    ; setear el sector count register en 1
+    mov al, 1       ; QUEREMOS LEER 1 SECTOR
+    out dx, al    	; setea el sector count register en 1
 
     ; SETEO LBA EN MADAFAKING 0, 
     ; ESTO ES LO MISMO QUE DECIR DISCO[0]
