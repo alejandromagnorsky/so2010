@@ -50,6 +50,7 @@ void 		_int_1F_hand();
 
 void		_int_20_hand();      		/* Timer tick */
 void		_int_21_hand();			/* Teclado */
+void 		_int_2E_hand();
 void        	_int_80_hand();
 void		_debug (void);
 
