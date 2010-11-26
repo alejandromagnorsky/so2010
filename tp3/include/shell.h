@@ -12,8 +12,7 @@
 #include "gralprotection.h"
 #include "task.h"
 #include "defs.h"
-#include "diskasm.h"
-
+#include "at_wini.h"
 void init();
 void shell(int tty, linebuffer_t linebuffer, command_t command);
 

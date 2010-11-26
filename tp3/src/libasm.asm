@@ -11,6 +11,7 @@ GLOBAL	_int_1C_hand, _int_1D_hand, _int_1E_hand, _int_1F_hand
 GLOBAL  _mascaraPIC1,_mascaraPIC2,_Cli,_Sti
 GLOBAL	_task_load_state_, _task_save_state_
 GLOBAL	_newStack, _scheduler
+GLOBAL  port_in, port_out, portw_in, portw_out
 GLOBAL  _debug
 
 EXTERN  int_20, int_21, int_80, int_00, fault_handler, _task_scheduler
@@ -25,6 +26,77 @@ _Cli:
 _Sti:
 	sti			; habilita interrupciones por flag
 	ret
+
+;=================================================================
+;					PORT_IN
+;=================================================================
+port_in:
+	push ebp
+	mov ebp, esp
+	push dx	
+
+	mov eax, 0
+	mov dx, [ebp+8]
+	in al, dx
+	
+	pop dx
+	leave
+	ret
+
+
+;=================================================================
+;					PORT_OUT
+;=================================================================
+
+port_out:
+	push ebp
+	mov ebp, esp
+	pusha
+
+	mov dx, [ebp+8]
+	mov ax, [ebp+12]
+	out dx, al
+	
+	popa
+	leave
+	ret
+
+
+
+;=================================================================
+;					PORTW_IN
+;=================================================================
+portw_in:
+	push ebp
+	mov ebp, esp
+	push dx	
+
+	mov eax, 0
+	mov dx, [ebp+8]
+	in ax, dx
+	
+	pop dx
+	leave
+	ret
+
+
+;=================================================================
+;					PORTW_OUT
+;=================================================================
+
+portw_out:
+	push ebp
+	mov ebp, esp
+	pusha
+
+	mov dx, [ebp+8]
+	mov ax, [ebp+12]
+	out dx, ax
+	
+	popa
+	leave
+	ret
+
 
 _mascaraPIC1:			; Escribe mascara del PIC 1
 	push    ebp
