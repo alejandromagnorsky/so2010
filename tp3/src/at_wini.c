@@ -25,11 +25,12 @@
 #define LBA_SUP(D) (D & BIT9) ? printf("LBA is supported\n") : printf("LBA is not supported\n")
 #define DMA_QUEUED_SUP(D) (D & BIT1) ? printf("DMA QUEUED supported\n") : printf("DMA QUEUED is not supported\n")
 
+void translateBytes(char ans[], unsigned short bytes);
 
 void init_driver(int ata){
 
     printf("\n\n========================= \nInicializador de Disco\n========================= \n");
-
+	int data;
     int status = 0;     // Just to make sure it changes
     status = getStatusRegister(ata);
     if( status & 0x80 )
@@ -42,14 +43,6 @@ void init_driver(int ata){
 
     if(!(status & BIT3))
         printf("Termine de leer\n");
-
-	printf("MEDIA STATUS\n");
-	mediaStatus(ata);
-	printf("Status %d\n", getStatusRegister(ata));
-    printf("Error %d\n", getErrorRegister(ata));
-	
-
-
 
     printf("Ahora voy a intentar leer. Mando un comando primero\n");
 
@@ -67,18 +60,32 @@ void init_driver(int ata){
         return;
     }
 
-    printf("Voy a leer\n");
-
-    //data = getDataRegister(ata);
-    //printf("Data: %d\n", data);    
-
+	char ans[3];
+   	printf("Voy a leer\n");
+   	int i;
+   	for(i=0;i<55;i++){
+    	data = getDataRegister(ata);
+    	translateBytes(ans, data);
+    	printf("%s", ans);
+    }
+    printf("\n\n");	
     printf("Status %d\n", getStatusRegister(ata));
     printf("Error %d\n", getErrorRegister(ata));
     printf("\n\n");	
 }
 
+void translateBytes(char ans[], unsigned short bytes){	
+	ans[0] = bytes & 0xFF;
+	ans[1] = ( bytes & 0xFF00 ) >> 8;
+	ans[2] = 0;
+}
+
 unsigned short getStatusRegister(int ata){
-	return port_in(ata + WIN_REG7) & 0x00000FFFF;	
+	unsigned short rta;
+	_Cli();
+	rta = port_in(ata + WIN_REG7) & 0x00000FFFF;
+	_Sti();
+	return rta;
 }
 
 void identifyDevice(int ata){
@@ -90,19 +97,19 @@ void identifyDevice(int ata){
 
 
 unsigned short getDataRegister(int ata){
-	return portw_in(ata + WIN_REG0) & 0x00000FFFF;
-}
-
-void mediaStatus(int ata){
+	unsigned short rta;
 	_Cli();
-	port_out(ata + WIN_REG6, 0);
-	port_out(ata + WIN_REG7, MEDIA_STATUS);
+	while (!(portw_in(ata+WIN_REG7) & BIT3));
+	rta = portw_in(ata + WIN_REG0) & 0x00000FFFF;
 	_Sti();
+	return rta;
 }
-
 
 unsigned short getErrorRegister(int ata){
-	return port_in(ata + WIN_REG1) & 0x00000FFFF;
+	_Cli();
+	unsigned short rta = port_in(ata + WIN_REG1) & 0x00000FFFF;
+	_Sti();
+	return rta;
 }
 
 
@@ -120,7 +127,7 @@ void check_drive(int ata){
     unsigned short data = 0;
 
     int i;
-    for(i=0;i<255;i++)    {
+    for(i=0;i<255;i++){
         data = getDataRegister(ata);
 		switch(i){
 			case 0:
@@ -145,20 +152,18 @@ void check_drive(int ata){
 
 void sendDMAcomm(int ata){
 	_Cli();
+	port_out(ata + WIN_REG1, 0);
 	port_out(ata + WIN_REG2, 1); // Setea el sector count register en 1
 	
 	// Setea LBA en 0
-	port_out(ata + WIN_REG3, 0);
-	port_out(ata + WIN_REG4, 0);
-	port_out(ata + WIN_REG5, 0);
+	port_out(ata + WIN_REG3, 0); // LBA low
+	port_out(ata + WIN_REG4, 0); // LBA mid
+	port_out(ata + WIN_REG5, 0); // LBA high
 	port_out(ata + WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
-	port_out(ata + WIN_REG7, READ_DMA); // Set command
+	port_out(ata + WIN_REG7, WIN_READ); // Set command
 	
 
 	_Sti();
-	int i = 0;
-	for(i = 0; i < 10000; i++)
-		__asm__("nop");
 }
 
 
