@@ -307,6 +307,6 @@ void init() {
 
 int initDisk(char * a){
 	init_driver(ATA0);
-	getchar();
-	init_driver(ATA1);
+//	getchar();
+	//init_driver(ATA1);
 }
