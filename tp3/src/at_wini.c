@@ -89,7 +89,7 @@ void init_driver(int ata){
 	printf("\n------------------\nTEST WRITE\n------------------\n");
 
 
-	int sec = 10;
+	int sec = 0;
 
 	read(ata, r, sec,0 , 512);
 	printf("El sector %d esta asi antes de leer:\n%s\n\n", sec, r);
@@ -101,7 +101,7 @@ void init_driver(int ata){
 
 	write(ata, msg, 50, sec, 37);	// Por ahora con write no andan offset ni sector
 
-	read(ata, r, sec, 0, 50);
+	read(ata, r, sec, 0, 512);
 
 	printf("%s\n", r);    
 /*
