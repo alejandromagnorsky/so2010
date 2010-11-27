@@ -25,13 +25,20 @@
 #define LBA_SUP(D) (D & BIT9) ? printf("LBA is supported\n") : printf("LBA is not supported\n")
 #define DMA_QUEUED_SUP(D) (D & BIT1) ? printf("DMA QUEUED supported\n") : printf("DMA QUEUED is not supported\n")
 
-void translateBytes(char ans[], unsigned short bytes);
+void sendComm(int ata, int rdwr, unsigned short sector);
+void read(int ata, char * ans, unsigned short sector, int offset, int count);
+unsigned short getDataRegister(int ata);
+void write(int ata, char * msg, int bytes, unsigned short sector, int offset);
+void writeDataToRegister(int ata, char upper, char lower);
+void translateBytes(char ans[], unsigned short sector);
 
 void init_driver(int ata){
 
     printf("\n\n========================= \nInicializador de Disco\n========================= \n");
-	int data;
-    int status = 0;     // Just to make sure it changes
+    
+    int status = 0;     // Just to make sure it changes;
+    
+    /* // Prints no los borro por las dudas
     status = getStatusRegister(ata);
     if( status & 0x80 )
         printf("Disco ocupado\n");
@@ -39,14 +46,8 @@ void init_driver(int ata){
         printf("Disco listo, startup (RDY 0)\n");
     printf("Status Register: %d\n", status);
 
-    check_drive(ata);
-
-    if(!(status & BIT3))
-        printf("Termine de leer\n");
-
     printf("Ahora voy a intentar leer. Mando un comando primero\n");
 
-    sendComm(ata, READ, 1);
 
     printf("Ahora tengo que leer el mensaje de respuesta. Esta en el status register\n");
     status = getStatusRegister(ata);
@@ -58,32 +59,135 @@ void init_driver(int ata){
     if( status & 0x80 ){
         printf("OCUPADO\n");
         return;
-    }
+    }*/
+    
+    check_drive(ata);
 
-	char ans[3];
-   	printf("Voy a leer\n");
-   	int i;
-   	for(i=0;i<55;i++){
-    	data = getDataRegister(ata);
-    	translateBytes(ans, data);
-    	printf("%s", ans);
-    }
+    if(!(status & BIT3))
+        printf("Termine de leer\n");
+    
+    /* TEST READ */
+   	printf("\n------------------\nTEST READ\n------------------\n");
+	char * r = (char *)malloc(255);
+	
+	read(ata, r, 0, 0, 18);
+	printf("Primera parte usando offset 0 cantidad 18:\n%s\n", r);
+	
+	read(ata, r, 0, 18, 20);
+	printf("Segunda parte usando offset 18 cantidad 20:\n%s\n", r);
+	
+	/* ACLARACION POR SI LES SURGIO LA DUDA:
+	 	+ En la salida en el bochs de los 2 printf de arriba se come la letra 'a' de 'apartments'
+	 	+ Eso pasa porque como siempre levanto de a 2 bytes, es "o levanto los 2 bytes" o "no levanto ninguno".
+	 	+ La letra 'a' debe caer en el medio de eso y por eso redondea para abajo el algoritmo y no la toma.
+	 	+ Si el primer read lo cambian por:
+	 				+ read(ata, ans, 0, 0, 19);
+	 		les va a leer los 2 pedazos bien divididos (donde termina uno empieza el otro). 
+	 	
+	 	+ TIENE SOLUCION, NO ES DIFICIL, EN VEZ DE REDONDEAR PARA ABAJO (PEDIR DE MENOS) HAY QUE REDONDEAR PARA ARRIBA
+	 		(PEDIR DE MÁS) PERO ME DA PAJA HACERLA AHORA.
+	*/
+   	
+   	/* TEST WRITE */
+    printf("\n------------------\nTEST WRITE\n------------------\n");
+    char * w = "<-| LOS ROLLING STONES SON LO MEJOR QUE ME PASO EN LA VIDA |->";
+	printf("Voy a escribir esto:\n%s\n", w);
+    write(ata, w, 61, 0, 0);	// Por ahora con write no andan offset ni sector
+    read(ata, r, 0, 0, 61);
+	printf("Acabo de escribir esto:\n%s\n", r);
+    
+    
     printf("\n\n");	
     printf("Status %d\n", getStatusRegister(ata));
     printf("Error %d\n", getErrorRegister(ata));
     printf("\n\n");	
 }
 
-char * read(char * ans, int bytes){	
-	ans[0] = bytes & 0xFF;
-	ans[1] = ( bytes & 0xFF00 ) >> 8;
-	ans[2] = 0;
+// To read N bytes from hard disk, must alloc N+1 bytes for ans, as N+1 byte is used to null-character
+void read(int ata, char * ans, unsigned short sector, int offset, int count){
+	int i, b;
+	unsigned short data;
+	int size = sizeof(unsigned short);
+	sendComm(ata, READ, sector);
+	
+	// Discards useless data until offset byte is reached
+	for (b=0; b < offset/2; b++)
+		getDataRegister(ata);
+	
+	i = 0; b = 0;
+   	while( b++ < count-1 ){
+    	data = getDataRegister(ata);
+    	translateBytes(ans + (i++ * size), data);
+    }
+    
+    ans[count-1] = 0;
 }
 
-void translateBytes(char ans[], unsigned short bytes){	
-	ans[0] = bytes & 0xFF;
-	ans[1] = ( bytes & 0xFF00 ) >> 8;
-	ans[2] = 0;
+void translateBytes(char * ans, unsigned short databyte){	
+	ans[0] = databyte & 0xFF;
+	ans[1] = databyte >> 8;
+}
+
+void write(int ata, char * msg, int bytes, unsigned short sector, int offset){
+	int b;
+	sendComm(ata, WRITE, 0);
+	
+   	for( b=0; b+1 < bytes; b++ )
+    	writeDataToRegister(ata, msg[b++], msg[b]);
+}
+
+void writeDataToRegister(int ata, char upper, char lower){
+	_Cli();
+	unsigned short out;
+	
+	// Wait for driver's ready signal.
+	while (!(portw_in(ata + WIN_REG7) & BIT3));
+	
+	out = (upper << 8) | lower;
+	portw_out(ata + WIN_REG0, out);
+	
+	_Sti();
+}
+
+unsigned short getDataRegister(int ata){
+	_Cli();
+	unsigned short ans;
+	
+	// Wait for driver's ready signal.
+	while (!(portw_in(ata + WIN_REG7) & BIT3));
+
+	ans = portw_in(ata + WIN_REG0);
+	
+	_Sti();
+	return ans;
+}
+
+unsigned short getErrorRegister(int ata){
+	_Cli();
+	unsigned short rta = port_in(ata + WIN_REG1) & 0x00000FFFF;
+	_Sti();
+	return rta;
+}
+
+void sendComm(int ata, int rdwr, unsigned short sector){
+	_Cli();
+	
+	port_out(ata + WIN_REG1, 0);
+	port_out(ata + WIN_REG2, 0);	// Set count register sector in 1
+	
+	// Setea LBA in 0
+	port_out(ata + WIN_REG3, (unsigned char)sector);			// LBA low
+	port_out(ata + WIN_REG4, (unsigned char)(sector >> 8));		// LBA mid
+	port_out(ata + WIN_REG5, (unsigned char)(sector >> 16));	// LBA high
+	port_out(ata + WIN_REG6, 0x40);								// Set LBA bit in 1 and the rest in 0
+	
+	// Set command
+	if(rdwr == READ)
+		port_out(ata + WIN_REG7, LBA_READ);
+	else
+		port_out(ata + WIN_REG7, LBA_WRITE);
+
+	_Sti();
 }
 
 unsigned short getStatusRegister(int ata){
@@ -100,24 +204,6 @@ void identifyDevice(int ata){
 	port_out(ata + WIN_REG7, WIN_IDENTIFY);
 	_Sti();
 }
-
-
-unsigned short getDataRegister(int ata){
-	unsigned short rta;
-	_Cli();
-	while (!(portw_in(ata+WIN_REG7) & BIT3));
-	rta = portw_in(ata + WIN_REG0) & 0x00000FFFF;
-	_Sti();
-	return rta;
-}
-
-unsigned short getErrorRegister(int ata){
-	_Cli();
-	unsigned short rta = port_in(ata + WIN_REG1) & 0x00000FFFF;
-	_Sti();
-	return rta;
-}
-
 
 void check_drive(int ata){
 	printf("-----------------------\n");
@@ -154,40 +240,4 @@ void check_drive(int ata){
 	printf("-----------------------\n");
 
 }
-
-void sendComm(int ata, int rdWr, unsigned long addr){
-	_Cli();
-
-	if(rdWr == READ){
-	
-		port_out(ata + WIN_REG1, 0);
-		port_out(ata + WIN_REG2, 1); // Setea el sector count register en 1
-	
-		// Setea LBA en 0
-		port_out(ata + WIN_REG3, 0); // LBA low
-		port_out(ata + WIN_REG4, 0); // LBA mid
-		port_out(ata + WIN_REG5, 0); // LBA high
-		port_out(ata + WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
-		port_out(ata + WIN_REG7, WIN_READ); // Set command
-		
-	} else if(rdWr == WRITE) {
-	// WRITE : CAMBIAR!!
-		port_out(ata + WIN_REG1, 0);
-		port_out(ata + WIN_REG2, 1); // Setea el sector count register en 1
-	
-		// Setea LBA en 0
-		port_out(ata + WIN_REG3, 0); // LBA low
-		port_out(ata + WIN_REG4, 0); // LBA mid
-		port_out(ata + WIN_REG5, 0); // LBA high
-		port_out(ata + WIN_REG6, 0x40); // Set LBA bit in 1 and the rest in 0
-		port_out(ata + WIN_REG7, WIN_WRITE); // Set command
-		
-	} else {
-	
-		return;
-	}
-
-	_Sti();
-}
-
 
