@@ -62,9 +62,6 @@ void init_driver(int ata){
     }*/
     
     check_drive(ata);
-
-    if(!(status & BIT3))
-        printf("Termine de leer\n");
     
     /* TEST READ */
    	printf("\n------------------\nTEST READ\n------------------\n");
@@ -94,18 +91,15 @@ void init_driver(int ata){
 	printf("Voy a escribir esto:\n%s\n", w);
     write(ata, w, 61, 0, 0);	// Por ahora con write no andan offset ni sector
     read(ata, r, 0, 0, 61);
-	printf("Acabo de escribir esto:\n%s\n", r);
+	printf("Acabo de escribir esto:\n%s\n", r);    
     
-    
-    printf("\n\n");	
-    printf("Status %d\n", getStatusRegister(ata));
-    printf("Error %d\n", getErrorRegister(ata));
-    printf("\n\n");	
+    printf("Status: %d\n", getStatusRegister(ata));
+    printf("Error: %d\n", getErrorRegister(ata));
 }
 
 // To read N bytes from hard disk, must alloc N+1 bytes for ans, as N+1 byte is used to null-character
 void read(int ata, char * ans, unsigned short sector, int offset, int count){
-	int i, b;
+	int b;
 	unsigned short data;
 	int size = sizeof(unsigned short);
 	sendComm(ata, READ, sector);
@@ -114,10 +108,10 @@ void read(int ata, char * ans, unsigned short sector, int offset, int count){
 	for (b=0; b < offset/2; b++)
 		getDataRegister(ata);
 	
-	i = 0; b = 0;
-   	while( b++ < count-1 ){
+	b = 0;
+   	while( b < count-1 ){
     	data = getDataRegister(ata);
-    	translateBytes(ans + (i++ * size), data);
+    	translateBytes(ans + (b++ * size), data);
     }
     
     ans[count-1] = 0;
@@ -132,8 +126,8 @@ void write(int ata, char * msg, int bytes, unsigned short sector, int offset){
 	int b;
 	sendComm(ata, WRITE, 0);
 	
-   	for( b=0; b+1 < bytes; b++ )
-    	writeDataToRegister(ata, msg[b++], msg[b]);
+   	for(b=0; b+1 < bytes; b++)
+    	writeDataToRegister(ata, msg[b+1], msg[b++]);
 }
 
 void writeDataToRegister(int ata, char upper, char lower){
@@ -175,11 +169,10 @@ void sendComm(int ata, int rdwr, unsigned short sector){
 	port_out(ata + WIN_REG1, 0);
 	port_out(ata + WIN_REG2, 0);	// Set count register sector in 1
 	
-	// Setea LBA in 0
 	port_out(ata + WIN_REG3, (unsigned char)sector);			// LBA low
 	port_out(ata + WIN_REG4, (unsigned char)(sector >> 8));		// LBA mid
 	port_out(ata + WIN_REG5, (unsigned char)(sector >> 16));	// LBA high
-	port_out(ata + WIN_REG6, 0x40);								// Set LBA bit in 1 and the rest in 0
+	port_out(ata + WIN_REG6, 0xE0 | (ata << 4) | ((sector >> 24) & 0x0F));	// Set LBA bit in 1 and the rest in 0
 	
 	// Set command
 	if(rdwr == READ)
@@ -211,10 +204,7 @@ void check_drive(int ata){
     identifyDevice(ata);
 
     int status = getStatusRegister(ata);
-    printf("Result: %d\n", status);
-
-    if( status & 8 )
-        printf("Data request set. \n");
+    printf("Status: %d\n", status);
 
     unsigned short data = 0;
 
