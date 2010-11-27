@@ -31,6 +31,9 @@
 #define WIN_WRITE       0x30	/* command for the drive to write */
 #define WIN_SPECIFY     0x91	/* command for the controller to accept params */
 
+#define LBA_READ        WIN_READ
+#define LBA_WRITE       WIN_WRITE
+
 /* Parameters for the disk drive. */
 #define SECTOR_SIZE      512	/* physical sector size in bytes */
 
@@ -49,8 +52,6 @@ void init_driver(int ata);
 
 unsigned short getStatusRegister(int ata);
 void identifyDevice(int ata);
-unsigned short getDataRegister(int ata);
-void sendComm(int ata, int rdWr, unsigned long addr);
 void check_drive(int ata);
 unsigned short getErrorRegister(int ata);
 
