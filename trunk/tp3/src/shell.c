@@ -26,7 +26,7 @@ static struct {
 				 {"doGetChar", "Makes a getchar to try running in background", do_getchar},
 				 {"freeTest", "free test", freeTest},
 				 {"checkDrives", "display information about the drives", check_drives},
-				 {"programita", "execute the programita that resides in the disk", programita},
+				 {"programDisk", "execute the program that resides in the sector 0 of the disk", programDisk},
 				 {"readDisk", "read a string from the disk", read_disk},
 				 {"writeDisk", "write a string into the disk", write_disk}
 };
@@ -315,16 +315,11 @@ int check_drives(char * a){
 
 
 
-int programita(char * a){
-	_programita();
-	unsigned char * r = (unsigned char *)malloc(0x8F);
-	read(ATA0, r, 0, 0, 0x8F);
-	//int i = 0;
-	//while(i != 0x120)
-	//	printf("%d ", r[i++]);
-	_memcpy(r, _programita + 1, 0x8D);
-	//_caller((int)r);	
-	System.exec((program_t) r, "");
+int programDisk(char * a){
+	unsigned char * buffer = (unsigned char *)malloc(4096);
+	disk_cmd cmd = {ATA0, 0, 0, 0x30, buffer};
+	_sys_read_disk(&cmd);
+	_caller((int)buffer);	
 }
 
 int read_disk(char * a){

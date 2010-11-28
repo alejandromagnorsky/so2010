@@ -41,7 +41,8 @@ int do_getchar(char* line);
 int freeTest(char * line);
 int check_drives(char * a);
 int read_disk(char * a);
-int programita();
+int write_disk(char * a);
+int programDisk();
 
 int daemontest(char * line);
 
