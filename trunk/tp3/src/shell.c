@@ -311,6 +311,29 @@ void init() {
 int check_drives(char * a){
 	check_drive(ATA0);
 	check_drive(ATA1);
+
+
+	// ESTO ES PARA TESTEAR READ SECTORS
+/*
+	char * tmp = (char *) malloc(4096);
+	int i;
+	for(i=0;i<4096;i++) tmp[i] = i>2048 ? 'A' : 'B';
+
+	
+	disk_cmd writeCMD = { ATA0, 0,0,4096, tmp};
+	_sys_write_disk(&writeCMD);
+
+
+	char * r = (char*) malloc(1024);
+	disk_cmd readCMD = { ATA0, 0,0,1024, r};
+	_sys_read_disk(&readCMD);
+
+	r[1023] = '\0';
+
+	printf("%s\n", readCMD.buffer);
+
+	putchar(readCMD.buffer[200]);*/
+	
 }
 
 
@@ -324,8 +347,12 @@ int programDisk(char * a){
 
 int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
+
 	disk_cmd cmd = {ATA0, 0, 0, 512, buffer};
 	_sys_read_disk(&cmd);
+
+	cmd.buffer[511] = '\0';
+
 	printf("%s\n", cmd.buffer);
 }
 
