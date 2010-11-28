@@ -1907,10 +1907,10 @@ idle:
 _task_getNewTID:
 	pushl	%ebp
 	movl	%esp, %ebp
-	movl	tid.1965, %eax
+	movl	tid.1969, %eax
 	incl	%eax
-	movl	%eax, tid.1965
-	movl	tid.1965, %eax
+	movl	%eax, tid.1969
+	movl	tid.1969, %eax
 	leave
 	ret
 	.size	_task_getNewTID, .-_task_getNewTID
@@ -2523,7 +2523,7 @@ _top_run:
 	leave
 	ret
 	.size	_top_run, .-_top_run
-	.local	tid.1965
-	.comm	tid.1965,4,4
-	.ident	"GCC: (Ubuntu 4.4.3-4ubuntu5) 4.4.3"
+	.local	tid.1969
+	.comm	tid.1969,4,4
+	.ident	"GCC: (Ubuntu 4.4.1-4ubuntu9) 4.4.1"
 	.section	.note.GNU-stack,"",@progbits

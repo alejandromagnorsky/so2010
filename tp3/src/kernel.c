@@ -87,7 +87,9 @@ struct system_t System = {     0,					/* Tick count */
 							   _sys_setRank,
 							   _sys_getRMode,
 							   _sys_getStatus,
-							   _sys_wait
+							   _sys_wait,
+							   _sys_read_disk,
+							   _sys_write_disk
                            };
                                
 //system_t System = &_system_data;
