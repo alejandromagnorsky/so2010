@@ -85,9 +85,8 @@ void read(int ata, char * ans, unsigned short sector, int offset, int count){
 		int size =  (i == sectors-1) ? count%513 : 512;
 		if(!i)	
 			_read(ata, ans, sector, offset, size-offset);
-		else {
+		else 
 			_read(ata, ans+(i*512)-offset, sector+i,0,size);
-		}
 	}
 }
 
@@ -135,12 +134,9 @@ void write(int ata, char * msg, int bytes, unsigned short sector, int offset){
 		// First sector, check offset
 		if(!i)
 			_write(ata, msg, size-offset, sector,offset);
-		else {
-			// Set size
-
-
+		else 
 			_write(ata, msg+(i*512)-offset, size, sector+i, 0);
-		}
+		
 	}
 }
 
