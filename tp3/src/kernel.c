@@ -424,15 +424,15 @@ void int_80() {
             _scheduler();
         	break;
 
-		case SYSTEM_CALL_WRITE_DISK:
-			cmd = (disk_cmd_t) ebx;
-			Disk.write(cmd->ata, cmd->buffer, cmd->count, cmd->sector, cmd->offset);
-        	break;
+	case SYSTEM_CALL_WRITE_DISK:
+		cmd = (disk_cmd_t) ebx;
+		Disk.write(cmd->ata, cmd->buffer, cmd->count, cmd->sector, cmd->offset);
+	break;
 
-		case SYSTEM_CALL_READ_DISK:
-			cmd = (disk_cmd_t) ebx;
-			Disk.read(cmd->ata, cmd->buffer, cmd->sector, cmd->offset, cmd->count);
-        	break;
+	case SYSTEM_CALL_READ_DISK:
+		cmd = (disk_cmd_t) ebx;
+		Disk.read(cmd->ata, cmd->buffer, cmd->sector, cmd->offset, cmd->count);
+	break;
         	
      }
 }
