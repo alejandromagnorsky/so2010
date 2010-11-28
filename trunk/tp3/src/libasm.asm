@@ -10,7 +10,7 @@ GLOBAL	_int_18_hand, _int_19_hand, _int_1A_hand, _int_1B_hand
 GLOBAL	_int_1C_hand, _int_1D_hand, _int_1E_hand, _int_1F_hand
 GLOBAL  _mascaraPIC1,_mascaraPIC2,_Cli,_Sti
 GLOBAL	_task_load_state_, _task_save_state_
-GLOBAL	_newStack, _scheduler
+GLOBAL	_newStack, _scheduler, _caller, _programita
 GLOBAL  port_in, port_out, portw_in, portw_out
 GLOBAL  _debug
 
@@ -98,6 +98,44 @@ portw_out:
 	ret
 
 
+_caller:
+	push ebp
+	mov ebp, esp
+	pusha
+
+	mov eax, [ebp+8]
+	call eax
+	
+	popa
+	leave
+	ret
+
+
+_programita:
+	cli
+	mov ecx, 0
+	mov	eax, 0xB8000
+	mov	ebx, 0x62
+LOOP:
+	inc ecx
+	mov	[eax], ebx
+	inc	eax
+	mov	[eax], dword 0x6
+	inc eax
+	cmp ecx, 2000
+	jne LOOP
+	
+LOOP2:
+	inc ecx
+	cmp ecx, 0xFFFFFF
+	jne LOOP2
+	sti
+	ret
+
+
+
+
+
 _mascaraPIC1:			; Escribe mascara del PIC 1
 	push    ebp
         mov     ebp, esp
@@ -145,7 +183,6 @@ _lidt:
     pop        EBP
 
     retn
-
 
 _int_00_hand:
     mov [0xB8000], dword 65

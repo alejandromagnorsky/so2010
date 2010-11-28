@@ -747,6 +747,52 @@ _sys_wait:
 	leave
 	ret
 	.size	_sys_wait, .-_sys_wait
+.globl _sys_read_disk
+	.type	_sys_read_disk, @function
+_sys_read_disk:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%ebx
+	subl	$16, %esp
+#APP
+# 342 "../src/klib.c" 1
+	movl $28, %eax;
+# 0 "" 2
+# 343 "../src/klib.c" 1
+	movl 8(%ebp), %ebx;
+# 0 "" 2
+# 345 "../src/klib.c" 1
+	int $0x80;
+# 0 "" 2
+#NO_APP
+	addl	$16, %esp
+	popl	%ebx
+	leave
+	ret
+	.size	_sys_read_disk, .-_sys_read_disk
+.globl _sys_write_disk
+	.type	_sys_write_disk, @function
+_sys_write_disk:
+	pushl	%ebp
+	movl	%esp, %ebp
+	pushl	%ebx
+	subl	$16, %esp
+#APP
+# 352 "../src/klib.c" 1
+	movl $27, %eax;
+# 0 "" 2
+# 353 "../src/klib.c" 1
+	movl 8(%ebp), %ebx;
+# 0 "" 2
+# 355 "../src/klib.c" 1
+	int $0x80;
+# 0 "" 2
+#NO_APP
+	addl	$16, %esp
+	popl	%ebx
+	leave
+	ret
+	.size	_sys_write_disk, .-_sys_write_disk
 .globl Task
 	.data
 	.align 32
@@ -804,15 +850,15 @@ _task_setPriority:
 	pushl	%ebp
 	movl	%esp, %ebp
 	cmpl	$0, 8(%ebp)
-	je	.L57
+	je	.L61
 	cmpl	$4, 12(%ebp)
-	jg	.L57
+	jg	.L61
 	cmpl	$0, 12(%ebp)
-	js	.L57
+	js	.L61
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 	movl	%edx, 29(%eax)
-.L57:
+.L61:
 	leave
 	ret
 	.size	_task_setPriority, .-_task_setPriority
@@ -822,15 +868,15 @@ _task_setRank:
 	pushl	%ebp
 	movl	%esp, %ebp
 	cmpl	$0, 8(%ebp)
-	je	.L60
+	je	.L64
 	cmpl	$0, 12(%ebp)
-	js	.L60
+	js	.L64
 	cmpl	$1, 12(%ebp)
-	jg	.L60
+	jg	.L64
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 	movl	%edx, 25(%eax)
-.L60:
+.L64:
 	leave
 	ret
 	.size	_task_setRank, .-_task_setRank
@@ -840,15 +886,15 @@ _task_setStatus:
 	pushl	%ebp
 	movl	%esp, %ebp
 	cmpl	$0, 8(%ebp)
-	je	.L63
+	je	.L67
 	cmpl	$0, 12(%ebp)
-	js	.L63
+	js	.L67
 	cmpl	$7, 12(%ebp)
-	jg	.L63
+	jg	.L67
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
 	movl	%edx, 33(%eax)
-.L63:
+.L67:
 	leave
 	ret
 	.size	_task_setStatus, .-_task_setStatus
@@ -859,7 +905,7 @@ _task_setESP:
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
-	movl	%edx, 189(%eax)
+	movl	%edx, 1085(%eax)
 	leave
 	ret
 	.size	_task_setESP, .-_task_setESP
@@ -909,7 +955,7 @@ _task_getESP:
 	pushl	%ebp
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
-	movl	189(%eax), %eax
+	movl	1085(%eax), %eax
 	leave
 	ret
 	.size	_task_getESP, .-_task_getESP
@@ -920,7 +966,7 @@ _task_setTty:
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
-	movl	%edx, 197(%eax)
+	movl	%edx, 1093(%eax)
 	leave
 	ret
 	.size	_task_setTty, .-_task_setTty
@@ -930,7 +976,7 @@ _task_getTty:
 	pushl	%ebp
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
-	movl	197(%eax), %eax
+	movl	1093(%eax), %eax
 	leave
 	ret
 	.size	_task_getTty, .-_task_getTty
@@ -940,7 +986,7 @@ _task_runInBackground:
 	pushl	%ebp
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
-	movb	$1, 201(%eax)
+	movb	$1, 1097(%eax)
 	leave
 	ret
 	.size	_task_runInBackground, .-_task_runInBackground
@@ -950,7 +996,7 @@ _task_getRunningMode:
 	pushl	%ebp
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
-	movb	201(%eax), %al
+	movb	1097(%eax), %al
 	movsbl	%al,%eax
 	leave
 	ret
@@ -962,7 +1008,7 @@ _task_setParentTID:
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
 	movl	12(%ebp), %edx
-	movl	%edx, 193(%eax)
+	movl	%edx, 1089(%eax)
 	leave
 	ret
 	.size	_task_setParentTID, .-_task_setParentTID
@@ -972,7 +1018,7 @@ _task_getParentTID:
 	pushl	%ebp
 	movl	%esp, %ebp
 	movl	8(%ebp), %eax
-	movl	193(%eax), %eax
+	movl	1089(%eax), %eax
 	leave
 	ret
 	.size	_task_getParentTID, .-_task_getParentTID
@@ -1026,10 +1072,10 @@ _task_setSend:
 	movl	%esp, %ebp
 	subl	$8, %esp
 	cmpl	$128, 20(%ebp)
-	jle	.L95
+	jle	.L99
 	movl	$-1, %eax
-	jmp	.L96
-.L95:
+	jmp	.L100
+.L99:
 	movl	8(%ebp), %eax
 	leal	45(%eax), %edx
 	movl	16(%ebp), %eax
@@ -1048,7 +1094,7 @@ _task_setSend:
 	movl	8(%ebp), %eax
 	movl	$4, 33(%eax)
 	movl	$0, %eax
-.L96:
+.L100:
 	leave
 	ret
 	.size	_task_setSend, .-_task_setSend
@@ -1072,23 +1118,27 @@ _task_getByName:
 	movl	%esp, %ebp
 	subl	$24, %esp
 	movl	$0, -16(%ebp)
-	jmp	.L101
-.L104:
+	jmp	.L105
+.L108:
 	movl	-16(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	movl	%eax, -12(%ebp)
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
 	testl	%eax, %eax
-	je	.L102
+	je	.L106
 	movl	-12(%ebp), %eax
 	addl	$4, %eax
 	subl	$8, %esp
@@ -1097,16 +1147,16 @@ _task_getByName:
 	call	streq
 	addl	$16, %esp
 	testl	%eax, %eax
-	je	.L102
+	je	.L106
 	movl	-12(%ebp), %eax
-	jmp	.L103
-.L102:
+	jmp	.L107
+.L106:
 	incl	-16(%ebp)
-.L101:
+.L105:
 	cmpl	$19, -16(%ebp)
-	jle	.L104
+	jle	.L108
 	movl	$0, %eax
-.L103:
+.L107:
 	leave
 	ret
 	.size	_task_getByName, .-_task_getByName
@@ -1122,43 +1172,47 @@ _task_findSlot:
 	movl	%esp, %ebp
 	subl	$24, %esp
 	movl	$0, -16(%ebp)
-	jmp	.L107
-.L110:
+	jmp	.L111
+.L114:
 	movl	-16(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	movl	System+84(%eax), %eax
 	testl	%eax, %eax
 	sete	%al
 	movb	%al, -9(%ebp)
 	cmpb	$0, -9(%ebp)
-	jne	.L114
-.L108:
+	jne	.L118
+.L112:
 	incl	-16(%ebp)
-.L107:
-	cmpl	$19, -16(%ebp)
-	jle	.L110
-	jmp	.L109
-.L114:
-	nop
-.L109:
-	cmpb	$0, -9(%ebp)
-	je	.L111
-	movl	-16(%ebp), %eax
-	jmp	.L112
 .L111:
+	cmpl	$19, -16(%ebp)
+	jle	.L114
+	jmp	.L113
+.L118:
+	nop
+.L113:
+	cmpb	$0, -9(%ebp)
+	je	.L115
+	movl	-16(%ebp), %eax
+	jmp	.L116
+.L115:
 	subl	$12, %esp
 	pushl	$.LC0
 	call	printf
 	addl	$16, %esp
 	movl	$-1, %eax
-.L112:
+.L116:
 	leave
 	ret
 	.size	_task_findSlot, .-_task_findSlot
@@ -1169,22 +1223,22 @@ _task_checkTTY:
 	movl	%esp, %ebp
 	subl	$16, %esp
 	movl	$0, -4(%ebp)
-	jmp	.L116
-.L119:
+	jmp	.L120
+.L123:
 	movl	-4(%ebp), %eax
-	addl	$1048, %eax
+	addl	$5528, %eax
 	movl	System+12(,%eax,4), %eax
 	cmpl	8(%ebp), %eax
-	jne	.L117
+	jne	.L121
 	movl	-4(%ebp), %eax
-	jmp	.L118
-.L117:
+	jmp	.L122
+.L121:
 	incl	-4(%ebp)
-.L116:
+.L120:
 	cmpl	$3, -4(%ebp)
-	jle	.L119
+	jle	.L123
 	movl	$-1, %eax
-.L118:
+.L122:
 	leave
 	ret
 	.size	_task_checkTTY, .-_task_checkTTY
@@ -1229,36 +1283,36 @@ _task_new:
 	call	*%eax
 	addl	$16, %esp
 	movl	8(%ebp), %eax
-	movl	$4096, 185(%eax)
+	movl	$4096, 1081(%eax)
 	movl	8(%ebp), %eax
-	movl	$0, 202(%eax)
+	movl	$0, 1098(%eax)
 	movl	Task+100, %eax
 	subl	$8, %esp
 	pushl	$0
 	pushl	8(%ebp)
 	call	*%eax
 	addl	$16, %esp
-	movl	System+4656, %eax
+	movl	System+22576, %eax
 	subl	$12, %esp
 	pushl	$4096
 	call	*%eax
 	addl	$16, %esp
 	movl	8(%ebp), %edx
-	movl	%eax, 177(%edx)
+	movl	%eax, 1073(%edx)
 	movl	8(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	leal	4095(%eax), %edx
 	movl	8(%ebp), %eax
-	movl	%edx, 181(%eax)
+	movl	%edx, 1077(%eax)
 	movl	8(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	subl	$12, %esp
 	pushl	%eax
 	call	_pageUp
 	addl	$16, %esp
 	movl	Task+64, %edx
 	movl	8(%ebp), %eax
-	movl	181(%eax), %eax
+	movl	1077(%eax), %eax
 	pushl	%edx
 	pushl	36(%ebp)
 	pushl	%eax
@@ -1266,37 +1320,37 @@ _task_new:
 	call	_newStack
 	addl	$16, %esp
 	movl	8(%ebp), %edx
-	movl	%eax, 189(%edx)
+	movl	%eax, 1085(%edx)
 	movl	8(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	subl	$12, %esp
 	pushl	%eax
 	call	_pageDown
 	addl	$16, %esp
 	cmpl	$0, 28(%ebp)
-	jne	.L122
+	jne	.L126
 	movl	8(%ebp), %eax
-	movb	$0, 201(%eax)
+	movb	$0, 1097(%eax)
 	movl	Task+68, %eax
 	subl	$8, %esp
 	pushl	32(%ebp)
 	pushl	8(%ebp)
 	call	*%eax
 	addl	$16, %esp
-	jmp	.L123
-.L122:
+	jmp	.L127
+.L126:
 	movl	Task+76, %eax
 	subl	$12, %esp
 	pushl	8(%ebp)
 	call	*%eax
 	addl	$16, %esp
-.L123:
+.L127:
 	cmpl	$0, 28(%ebp)
-	jne	.L124
+	jne	.L128
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
 	cmpl	$1, %eax
-	jle	.L124
+	jle	.L128
 	movl	Task+84, %edx
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
@@ -1306,8 +1360,8 @@ _task_new:
 	call	*%edx
 	addl	$16, %esp
 	movl	$1, -20(%ebp)
-	jmp	.L125
-.L124:
+	jmp	.L129
+.L128:
 	movl	Task+84, %edx
 	movl	System+76, %eax
 	movl	(%eax), %eax
@@ -1316,7 +1370,7 @@ _task_new:
 	pushl	8(%ebp)
 	call	*%edx
 	addl	$16, %esp
-.L125:
+.L129:
 	call	_Sti
 	movl	8(%ebp), %eax
 	movl	(%eax), %eax
@@ -1352,10 +1406,10 @@ _task_kill:
 	movl	-16(%ebp), %eax
 	movl	(%eax), %eax
 	testl	%eax, %eax
-	jg	.L130
+	jg	.L134
 	movl	$0, %eax
-	jmp	.L131
-.L130:
+	jmp	.L135
+.L134:
 	movl	Task+96, %edx
 	movl	-16(%ebp), %eax
 	movl	(%eax), %eax
@@ -1366,26 +1420,30 @@ _task_kill:
 	movl	%eax, -40(%ebp)
 	movl	System+76, %eax
 	cmpl	-16(%ebp), %eax
-	je	.L132
+	je	.L136
 	cmpl	$-1, -40(%ebp)
-	je	.L133
-.L132:
-	movl	$1, %eax
-	jmp	.L131
-.L133:
-	movl	$0, -44(%ebp)
-	jmp	.L134
+	je	.L137
 .L136:
+	movl	$1, %eax
+	jmp	.L135
+.L137:
+	movl	$0, -44(%ebp)
+	jmp	.L138
+.L140:
 	movl	Task+88, %ecx
 	movl	-44(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	subl	$12, %esp
 	pushl	%eax
@@ -1396,46 +1454,54 @@ _task_kill:
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	movl	System+84(%eax), %eax
 	cmpl	$1, %eax
-	jle	.L135
+	jle	.L139
 	movl	-16(%ebp), %eax
 	movl	(%eax), %eax
 	cmpl	-28(%ebp), %eax
-	jne	.L135
+	jne	.L139
 	movl	Task+8, %ecx
 	movl	-44(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	subl	$8, %esp
 	pushl	$6
 	pushl	%eax
 	call	*%ecx
 	addl	$16, %esp
-.L135:
+.L139:
 	incl	-44(%ebp)
-.L134:
+.L138:
 	cmpl	$19, -44(%ebp)
-	jle	.L136
+	jle	.L140
 	movl	Task+88, %eax
 	subl	$12, %esp
 	pushl	-16(%ebp)
 	call	*%eax
 	addl	$16, %esp
 	cmpl	$1, %eax
-	jle	.L137
+	jle	.L141
 	movl	Task+40, %ebx
 	movl	Task+88, %eax
 	subl	$12, %esp
@@ -1453,7 +1519,7 @@ _task_kill:
 	pushl	-24(%ebp)
 	call	*%eax
 	addl	$16, %esp
-.L137:
+.L141:
 	movl	Task+8, %eax
 	subl	$8, %esp
 	pushl	$6
@@ -1463,7 +1529,7 @@ _task_kill:
 	movl	-16(%ebp), %eax
 	movb	$0, 4(%eax)
 	movl	-16(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	subl	$8, %esp
 	pushl	$1
 	pushl	%eax
@@ -1474,7 +1540,7 @@ _task_kill:
 	call	_Sti
 	call	_scheduler
 	movl	$2, %eax
-.L131:
+.L135:
 	movl	-4(%ebp), %ebx
 	leave
 	ret
@@ -1495,7 +1561,7 @@ _task_scheduler:
 	movl	%eax, -12(%ebp)
 	movl	-16(%ebp), %eax
 	movl	8(%ebp), %edx
-	movl	%edx, 189(%eax)
+	movl	%edx, 1085(%eax)
 	movl	Task+24, %eax
 	subl	$12, %esp
 	pushl	-12(%ebp)
@@ -1508,7 +1574,7 @@ _task_scheduler:
 	call	*%eax
 	addl	$16, %esp
 	cmpl	%eax, %ebx
-	je	.L140
+	je	.L144
 	movl	-12(%ebp), %eax
 	movl	%eax, System+80
 	subl	$8, %esp
@@ -1517,13 +1583,13 @@ _task_scheduler:
 	call	switchTTY
 	addl	$16, %esp
 	movl	-16(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	subl	$12, %esp
 	pushl	%eax
 	call	_pageDown
 	addl	$16, %esp
 	movl	-12(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	subl	$12, %esp
 	pushl	%eax
 	call	_pageUp
@@ -1531,33 +1597,33 @@ _task_scheduler:
 	movl	-16(%ebp), %eax
 	movl	33(%eax), %eax
 	cmpl	$7, %eax
-	jne	.L141
+	jne	.L145
 	movl	Task+8, %eax
 	subl	$8, %esp
 	pushl	$0
 	pushl	-16(%ebp)
 	call	*%eax
 	addl	$16, %esp
-.L141:
+.L145:
 	movl	System+76, %eax
 	cmpl	-12(%ebp), %eax
-	je	.L140
+	je	.L144
 	movl	Task+8, %eax
 	subl	$8, %esp
 	pushl	$7
 	pushl	-12(%ebp)
 	call	*%eax
 	addl	$16, %esp
-.L140:
-	movl	System+4620, %edx
+.L144:
+	movl	System+22540, %edx
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
-	addl	$1052, %edx
+	addl	$5532, %edx
 	movl	%eax, System+12(,%edx,4)
 	movl	Top, %eax
 	call	*%eax
 	movl	-12(%ebp), %eax
-	movl	189(%eax), %eax
+	movl	1085(%eax), %eax
 	movl	-4(%ebp), %ebx
 	leave
 	ret
@@ -1569,17 +1635,21 @@ _task_maintenance:
 	movl	%esp, %ebp
 	subl	$24, %esp
 	movl	$0, -20(%ebp)
-	jmp	.L144
-.L151:
+	jmp	.L148
+.L155:
 	movl	-20(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	movl	%eax, -16(%ebp)
 	movl	Task+20, %eax
@@ -1588,27 +1658,27 @@ _task_maintenance:
 	call	*%eax
 	addl	$16, %esp
 	cmpl	$4, %eax
-	je	.L147
+	je	.L151
 	cmpl	$6, %eax
-	je	.L148
+	je	.L152
 	cmpl	$2, %eax
-	jne	.L145
-.L146:
+	jne	.L149
+.L150:
 	movl	Task+104, %eax
 	subl	$12, %esp
 	pushl	-16(%ebp)
 	call	*%eax
 	addl	$16, %esp
 	testl	%eax, %eax
-	jne	.L153
+	jne	.L157
 	movl	Task+8, %eax
 	subl	$8, %esp
 	pushl	$0
 	pushl	-16(%ebp)
 	call	*%eax
 	addl	$16, %esp
-	jmp	.L145
-.L147:
+	jmp	.L149
+.L151:
 	movl	Task+40, %edx
 	movl	-16(%ebp), %eax
 	movl	37(%eax), %eax
@@ -1618,11 +1688,11 @@ _task_maintenance:
 	addl	$16, %esp
 	movl	%eax, -12(%ebp)
 	cmpl	$0, -12(%ebp)
-	je	.L154
+	je	.L158
 	movl	-12(%ebp), %eax
 	movl	33(%eax), %eax
 	cmpl	$3, %eax
-	jne	.L155
+	jne	.L159
 	movl	-16(%ebp), %eax
 	movl	(%eax), %edx
 	movl	-12(%ebp), %eax
@@ -1649,8 +1719,8 @@ _task_maintenance:
 	movl	33(%eax), %edx
 	movl	-16(%ebp), %eax
 	movl	%edx, 33(%eax)
-	jmp	.L145
-.L148:
+	jmp	.L149
+.L152:
 	movl	Task+36, %edx
 	movl	-16(%ebp), %eax
 	movl	(%eax), %eax
@@ -1658,20 +1728,20 @@ _task_maintenance:
 	pushl	%eax
 	call	*%edx
 	addl	$16, %esp
-	jmp	.L145
-.L153:
+	jmp	.L149
+.L157:
 	nop
-	jmp	.L145
-.L154:
+	jmp	.L149
+.L158:
 	nop
-	jmp	.L145
-.L155:
+	jmp	.L149
+.L159:
 	nop
-.L145:
+.L149:
 	incl	-20(%ebp)
-.L144:
+.L148:
 	cmpl	$19, -20(%ebp)
-	jle	.L151
+	jle	.L155
 	leave
 	ret
 	.size	_task_maintenance, .-_task_maintenance
@@ -1681,7 +1751,7 @@ switchTTY:
 	pushl	%ebp
 	movl	%esp, %ebp
 	movl	12(%ebp), %eax
-	movl	197(%eax), %edx
+	movl	1093(%eax), %edx
 	movl	System+16, %eax
 	movl	27(%eax), %ecx
 	movl	%edx, %eax
@@ -1693,9 +1763,10 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%ecx, ttys+5014(%eax)
+	movl	%eax, %edx
+	movl	%ecx, ttys+5014(%edx)
 	movl	12(%ebp), %eax
-	movl	197(%eax), %edx
+	movl	1093(%eax), %edx
 	movl	System+16, %eax
 	movl	31(%eax), %ecx
 	movl	%edx, %eax
@@ -1707,10 +1778,11 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%ecx, ttys+5018(%eax)
+	movl	%eax, %edx
+	movl	%ecx, ttys+5018(%edx)
 	movl	System+16, %ecx
 	movl	8(%ebp), %eax
-	movl	197(%eax), %edx
+	movl	1093(%eax), %edx
 	movl	%edx, %eax
 	sall	$3, %eax
 	addl	%edx, %eax
@@ -1720,11 +1792,12 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	ttys+5014(%eax), %eax
+	movl	%eax, %edx
+	movl	ttys+5014(%edx), %eax
 	movl	%eax, 27(%ecx)
 	movl	System+16, %ecx
 	movl	8(%ebp), %eax
-	movl	197(%eax), %edx
+	movl	1093(%eax), %edx
 	movl	%edx, %eax
 	sall	$3, %eax
 	addl	%edx, %eax
@@ -1734,11 +1807,12 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	ttys+5018(%eax), %eax
+	movl	%eax, %edx
+	movl	ttys+5018(%edx), %eax
 	movl	%eax, 31(%ecx)
 	movl	System+16, %ecx
 	movl	8(%ebp), %eax
-	movl	197(%eax), %edx
+	movl	1093(%eax), %edx
 	movl	%edx, %eax
 	sall	$3, %eax
 	addl	%edx, %eax
@@ -1748,7 +1822,8 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	addl	$1008, %eax
+	movl	%eax, %edx
+	leal	1008(%edx), %eax
 	addl	$ttys, %eax
 	addl	$6, %eax
 	movl	%eax, 19(%ecx)
@@ -1762,48 +1837,56 @@ _task_getByTID:
 	movl	%esp, %ebp
 	subl	$16, %esp
 	movl	$0, -8(%ebp)
-	jmp	.L159
-.L162:
+	jmp	.L163
+.L166:
 	movl	-8(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	movl	System+84(%eax), %eax
 	cmpl	8(%ebp), %eax
 	sete	%al
 	movb	%al, -1(%ebp)
 	cmpb	$0, -1(%ebp)
-	jne	.L166
-.L160:
+	jne	.L170
+.L164:
 	incl	-8(%ebp)
-.L159:
+.L163:
 	cmpl	$19, -8(%ebp)
-	jle	.L162
-	jmp	.L161
-.L166:
+	jle	.L166
+	jmp	.L165
+.L170:
 	nop
-.L161:
+.L165:
 	cmpb	$0, -1(%ebp)
-	je	.L163
+	je	.L167
 	movl	-8(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
-	jmp	.L164
-.L163:
+	jmp	.L168
+.L167:
 	movl	$0, %eax
-.L164:
+.L168:
 	leave
 	ret
 	.size	_task_getByTID, .-_task_getByTID
@@ -1821,18 +1904,18 @@ _task_getCurrent:
 idle:
 	pushl	%ebp
 	movl	%esp, %ebp
-.L170:
-	jmp	.L170
+.L174:
+	jmp	.L174
 	.size	idle, .-idle
 .globl _task_getNewTID
 	.type	_task_getNewTID, @function
 _task_getNewTID:
 	pushl	%ebp
 	movl	%esp, %ebp
-	movl	tid.1914, %eax
+	movl	tid.1965, %eax
 	incl	%eax
-	movl	%eax, tid.1914
-	movl	tid.1914, %eax
+	movl	%eax, tid.1965
+	movl	tid.1965, %eax
 	leave
 	ret
 	.size	_task_getNewTID, .-_task_getNewTID
@@ -1852,7 +1935,7 @@ _task_cleaner:
 	call	*%eax
 	addl	$16, %esp
 	cmpl	$1, %eax
-	jle	.L175
+	jle	.L179
 	movl	Task+40, %ebx
 	movl	Task+88, %eax
 	subl	$12, %esp
@@ -1867,14 +1950,14 @@ _task_cleaner:
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
 	cmpl	$1, %eax
-	jle	.L175
+	jle	.L179
 	movl	Task+8, %eax
 	subl	$8, %esp
 	pushl	$0
 	pushl	-12(%ebp)
 	call	*%eax
 	addl	$16, %esp
-.L175:
+.L179:
 	movl	-16(%ebp), %eax
 	movb	$0, 4(%eax)
 	movl	Task+8, %eax
@@ -1886,14 +1969,14 @@ _task_cleaner:
 	movl	-16(%ebp), %eax
 	movl	$0, (%eax)
 	movl	-16(%ebp), %eax
-	movl	177(%eax), %eax
+	movl	1073(%eax), %eax
 	subl	$8, %esp
 	pushl	$1
 	pushl	%eax
 	call	_sys_free
 	addl	$16, %esp
 	movl	-16(%ebp), %eax
-	movl	202(%eax), %eax
+	movl	1098(%eax), %eax
 	subl	$12, %esp
 	pushl	%eax
 	call	_sys_free_mem
@@ -1927,17 +2010,21 @@ _task_setupScheduler:
 	call	*%eax
 	movl	%eax, -12(%ebp)
 	cmpl	$-1, -12(%ebp)
-	je	.L181
-.L178:
+	je	.L185
+.L182:
 	movl	-12(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	movl	%eax, -16(%ebp)
 	movl	Task+32, %eax
@@ -1970,10 +2057,10 @@ _task_setupScheduler:
 	addl	$16, %esp
 	movb	$1, scheduling
 	nop
-	jmp	.L180
-.L181:
+	jmp	.L184
+.L185:
 	nop
-.L180:
+.L184:
 	leave
 	ret
 	.size	_task_setupScheduler, .-_task_setupScheduler
@@ -2003,14 +2090,14 @@ _task_yield:
 _top_increment100Counter:
 	pushl	%ebp
 	movl	%esp, %ebp
-	movl	System+4620, %eax
+	movl	System+22540, %eax
 	incl	%eax
-	movl	%eax, System+4620
-	movl	System+4620, %eax
+	movl	%eax, System+22540
+	movl	System+22540, %eax
 	cmpl	$99, %eax
-	jle	.L187
-	movl	$0, System+4620
-.L187:
+	jle	.L191
+	movl	$0, System+22540
+.L191:
 	leave
 	ret
 	.size	_top_increment100Counter, .-_top_increment100Counter
@@ -2022,19 +2109,19 @@ _top_processCpuUsage:
 	subl	$16, %esp
 	movl	$0, -4(%ebp)
 	movl	$0, -8(%ebp)
-	jmp	.L189
-.L191:
+	jmp	.L193
+.L195:
 	movl	-8(%ebp), %eax
-	addl	$1052, %eax
+	addl	$5532, %eax
 	movl	System+12(,%eax,4), %eax
 	cmpl	8(%ebp), %eax
-	jne	.L190
+	jne	.L194
 	incl	-4(%ebp)
-.L190:
+.L194:
 	incl	-8(%ebp)
-.L189:
+.L193:
 	cmpl	$99, -8(%ebp)
-	jle	.L191
+	jle	.L195
 	movl	-4(%ebp), %eax
 	leave
 	ret
@@ -2062,40 +2149,40 @@ _top_getStatusName:
 	addl	$16, %esp
 	movl	%eax, -12(%ebp)
 	cmpl	$7, -12(%ebp)
-	jne	.L194
+	jne	.L198
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC3
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L198
-.L194:
+	jmp	.L202
+.L198:
 	cmpl	$0, -12(%ebp)
-	jne	.L196
+	jne	.L200
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC4
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L198
-.L196:
+	jmp	.L202
+.L200:
 	cmpl	$1, -12(%ebp)
-	jne	.L197
+	jne	.L201
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC5
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L198
-.L197:
+	jmp	.L202
+.L201:
 	cmpl	$6, -12(%ebp)
-	jne	.L198
+	jne	.L202
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC6
 	call	strcpy
 	addl	$16, %esp
-.L198:
+.L202:
 	leave
 	ret
 	.size	_top_getStatusName, .-_top_getStatusName
@@ -2118,22 +2205,22 @@ _top_getRankName:
 	addl	$16, %esp
 	movl	%eax, -12(%ebp)
 	cmpl	$0, -12(%ebp)
-	jne	.L200
+	jne	.L204
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC7
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L202
-.L200:
+	jmp	.L206
+.L204:
 	cmpl	$1, -12(%ebp)
-	jne	.L202
+	jne	.L206
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC8
 	call	strcpy
 	addl	$16, %esp
-.L202:
+.L206:
 	leave
 	ret
 	.size	_top_getRankName, .-_top_getRankName
@@ -2162,49 +2249,49 @@ _top_getPriority:
 	addl	$16, %esp
 	movl	%eax, -12(%ebp)
 	cmpl	$3, -12(%ebp)
-	jne	.L204
+	jne	.L208
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC9
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L209
-.L204:
+	jmp	.L213
+.L208:
 	cmpl	$1, -12(%ebp)
-	jne	.L206
+	jne	.L210
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC10
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L209
-.L206:
+	jmp	.L213
+.L210:
 	cmpl	$4, -12(%ebp)
-	jne	.L207
+	jne	.L211
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC11
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L209
-.L207:
+	jmp	.L213
+.L211:
 	cmpl	$2, -12(%ebp)
-	jne	.L208
+	jne	.L212
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC12
 	call	strcpy
 	addl	$16, %esp
-	jmp	.L209
-.L208:
+	jmp	.L213
+.L212:
 	cmpl	$0, -12(%ebp)
-	jne	.L209
+	jne	.L213
 	subl	$8, %esp
 	pushl	8(%ebp)
 	pushl	$.LC13
 	call	strcpy
 	addl	$16, %esp
-.L209:
+.L213:
 	leave
 	ret
 	.size	_top_getPriority, .-_top_getPriority
@@ -2215,16 +2302,16 @@ _top_initialize:
 	movl	%esp, %ebp
 	subl	$16, %esp
 	movl	$0, -4(%ebp)
-	jmp	.L211
-.L212:
+	jmp	.L215
+.L216:
 	movl	-4(%ebp), %eax
-	leal	1052(%eax), %edx
+	leal	5532(%eax), %edx
 	movl	8(%ebp), %eax
 	movl	%eax, System+12(,%edx,4)
 	incl	-4(%ebp)
-.L211:
+.L215:
 	cmpl	$99, -4(%ebp)
-	jle	.L212
+	jle	.L216
 	leave
 	ret
 	.size	_top_initialize, .-_top_initialize
@@ -2235,23 +2322,23 @@ _top_clearTask:
 	movl	%esp, %ebp
 	subl	$16, %esp
 	movl	$0, -4(%ebp)
-	jmp	.L215
-.L217:
+	jmp	.L219
+.L221:
 	movl	-4(%ebp), %eax
-	addl	$1052, %eax
+	addl	$5532, %eax
 	movl	System+12(,%eax,4), %eax
 	cmpl	8(%ebp), %eax
-	jne	.L216
+	jne	.L220
 	movl	-4(%ebp), %edx
 	movl	System+76, %eax
 	movl	(%eax), %eax
-	addl	$1052, %edx
+	addl	$5532, %edx
 	movl	%eax, System+12(,%edx,4)
-.L216:
+.L220:
 	incl	-4(%ebp)
-.L215:
+.L219:
 	cmpl	$99, -4(%ebp)
-	jle	.L217
+	jle	.L221
 	leave
 	ret
 	.size	_top_clearTask, .-_top_clearTask
@@ -2279,30 +2366,38 @@ _top_run:
 	addl	$16, %esp
 	call	_Cli
 	movl	$0, -12(%ebp)
-	jmp	.L220
-.L222:
+	jmp	.L224
+.L226:
 	movl	-12(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ecx
 	addl	%ecx, %eax
+	leal	0(,%eax,4), %ecx
+	addl	%ecx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	movl	System+84(%eax), %eax
 	testl	%eax, %eax
-	je	.L221
+	je	.L225
 	movl	Top+8, %ecx
 	movl	-12(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	subl	$8, %esp
 	pushl	%eax
@@ -2315,11 +2410,15 @@ _top_run:
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	subl	$8, %esp
 	pushl	%eax
@@ -2332,11 +2431,15 @@ _top_run:
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$System+84, %eax
 	subl	$8, %esp
 	pushl	%eax
@@ -2349,11 +2452,15 @@ _top_run:
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	movl	System+84(%eax), %eax
 	subl	$12, %esp
 	pushl	%eax
@@ -2364,21 +2471,29 @@ _top_run:
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %ebx
 	addl	%ebx, %eax
+	leal	0(,%eax,4), %ebx
+	addl	%ebx, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	movl	System+84(%eax), %ebx
 	movl	-12(%ebp), %edx
 	movl	%edx, %eax
 	sall	$2, %eax
 	addl	%edx, %eax
-	sall	$3, %eax
+	sall	%eax
 	addl	%edx, %eax
 	leal	0(,%eax,4), %esi
 	addl	%esi, %eax
+	leal	0(,%eax,4), %esi
+	addl	%esi, %eax
+	sall	%eax
 	addl	%edx, %eax
+	sall	%eax
 	addl	$80, %eax
 	addl	$System, %eax
 	leal	8(%eax), %edx
@@ -2395,11 +2510,11 @@ _top_run:
 	pushl	$.LC15
 	call	printf
 	addl	$32, %esp
-.L221:
+.L225:
 	incl	-12(%ebp)
-.L220:
+.L224:
 	cmpl	$19, -12(%ebp)
-	jle	.L222
+	jle	.L226
 	subl	$12, %esp
 	pushl	$.LC16
 	call	printf
@@ -2413,7 +2528,7 @@ _top_run:
 	leave
 	ret
 	.size	_top_run, .-_top_run
-	.local	tid.1914
-	.comm	tid.1914,4,4
-	.ident	"GCC: (Ubuntu 4.4.3-4ubuntu5) 4.4.3"
+	.local	tid.1965
+	.comm	tid.1965,4,4
+	.ident	"GCC: (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5"
 	.section	.note.GNU-stack,"",@progbits

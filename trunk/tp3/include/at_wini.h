@@ -1,8 +1,19 @@
 #ifndef _AT_WINI_H_
 #define _AT_WINI_H_
 
-#define READ 0
-#define WRITE 1
+extern struct system_t System;
+
+
+
+typedef struct disk_cmd{
+	int ata;
+	int sector;
+	int offset;
+	int count; // Bytes count
+	char * buffer;
+}disk_cmd;
+
+typedef struct disk_cmd * disk_cmd_t; 
 
 /* I/O Ports used by winchester disk controller. */
 
@@ -48,11 +59,23 @@
 #define DEV_PER_DRIVE      5	/* hd0 + hd1 + hd2 + hd3 + hd4 = 5 */
 
 
-void init_driver(int ata);
+enum{
+	READ_DISK = 0,
+	WRITE_DISK,
+	OK,
+	ERROR
+};
+
+int driver(char * ata);
 
 unsigned short getStatusRegister(int ata);
 void identifyDevice(int ata);
 void check_drive(int ata);
 unsigned short getErrorRegister(int ata);
+
+struct disk_t {
+	void (*read)(int, char *, unsigned short, int, int);
+	void (*write)(int, char *, int, unsigned short, int);
+};
 
 #endif

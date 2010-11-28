@@ -149,7 +149,6 @@ void fault_handler(struct regs *r)
 {
     if (r->int_no < 32)
     {
-		printf("Aca\n");
         printf("%s", exception_messages[r->int_no]);
         printf(" Exception.\n");
     }
@@ -208,7 +207,7 @@ void int_80() {
     task_t task;
     char* name;
     int ebx, ecx, edx, ret, iter, len;
-    
+    disk_cmd_t cmd;
     /* The above instructions, as well as these macros, do not affect the
        general purpose registers, so we can read their values just fine. */
     MOVFROM_EAX(syscall);
@@ -424,6 +423,16 @@ void int_80() {
             System.task->tstatus = STATUS_WAITING_CHILD;
             _scheduler();
         	break;
+
+		case SYSTEM_CALL_WRITE_DISK:
+			cmd = (disk_cmd_t) ebx;
+			Disk.write(cmd->ata, cmd->buffer, cmd->count, cmd->sector, cmd->offset);
+        	break;
+
+		case SYSTEM_CALL_READ_DISK:
+			cmd = (disk_cmd_t) ebx;
+			Disk.read(cmd->ata, cmd->buffer, cmd->sector, cmd->offset, cmd->count);
+        	break;
         	
      }
 }
@@ -483,13 +492,13 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	TTYS.runShells();
     
     
-    init();
+ 
+	init();
     /* Gracias */
     _mascaraPIC1(0xFC);
     _mascaraPIC2(0xFF);
 
 	_Sti();
-
 
 }
 
@@ -521,9 +530,9 @@ int shell(){
 }
 
 int_2E(){
+	printf("______________________\n");
 	printf("Driver AT int\n");
-	int data = getDataRegister();
-    printf("Data: %d\n", data);  
+	
 }
 
 

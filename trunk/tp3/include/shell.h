@@ -13,6 +13,7 @@
 #include "task.h"
 #include "defs.h"
 #include "at_wini.h"
+
 void init();
 void shell(int tty, linebuffer_t linebuffer, command_t command);
 
@@ -22,6 +23,7 @@ int run_command(command_t* command);
 void clearCommand(command_t* command);
 int get_command(command_t* command);
 void getting_command(linebuffer_t* bufferinput);
+int write_disk(char * a);
 
 int divideByZero(char*);
 int help(char*);
@@ -37,11 +39,14 @@ int echoserver(char*);
 int ohceserver(char*);
 int do_getchar(char* line);
 int freeTest(char * line);
-int initDisk();
+int check_drives(char * a);
+int read_disk(char * a);
+int programita();
 
 int daemontest(char * line);
 
 extern struct system_t System;
 extern tty_t ttys[NTTYS];
+extern struct disk_t Disk; 
 
 #endif

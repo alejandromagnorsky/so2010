@@ -1,6 +1,6 @@
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 17
+#define NUM_COMMANDS 20
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -25,7 +25,10 @@ static struct {
                  {"ohceserver", "ti ot tnes segassem seohce taht revres A", ohceserver},
 				 {"doGetChar", "Makes a getchar to try running in background", do_getchar},
 				 {"freeTest", "free test", freeTest},
-				 {"initDisk", "initialize the driver disk", initDisk}
+				 {"checkDrives", "display information about the drives", check_drives},
+				 {"programita", "execute the programita that resides in the disk", programita},
+				 {"readDisk", "read a string from the disk", read_disk},
+				 {"writeDisk", "write a string into the disk", write_disk}
 };
 
 
@@ -298,15 +301,41 @@ int freeTest(char * line){
 }
 
 void init() {
-
-    System.exec(echoserver, "");
-    System.exec(ohceserver, "");
+	//System.exec(driver, "");
 
     return;
 }
 
-int initDisk(char * a){
-	init_driver(ATA0);
-//	getchar();
-	//init_driver(ATA1);
+
+
+int check_drives(char * a){
+	check_drive(ATA0);
+	check_drive(ATA1);
+}
+
+
+
+int programita(char * a){
+	_programita();
+	unsigned char * r = (unsigned char *)malloc(0x8F);
+	read(ATA0, r, 0, 0, 0x8F);
+	//int i = 0;
+	//while(i != 0x120)
+	//	printf("%d ", r[i++]);
+	_memcpy(r, _programita + 1, 0x8D);
+	//_caller((int)r);	
+	System.exec((program_t) r, "");
+}
+
+int read_disk(char * a){
+	char * buffer = (char *) malloc(512);
+	disk_cmd cmd = {ATA0, 0, 0, 512, buffer};
+	_sys_read_disk(&cmd);
+	printf("%s\n", cmd.buffer);
+}
+
+int write_disk(char * a){
+	disk_cmd cmd = {ATA0, 0, 0, strlen(a)};
+	cmd.buffer = a;
+	_sys_write_disk(&cmd);
 }

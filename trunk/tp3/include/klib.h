@@ -3,6 +3,12 @@
 
 #include "defs.h"
 #include "string.h"
+#include "at_wini.h"
+
+
+
+
+
 
 /************************************************
 ** Constants and definitions:
@@ -88,6 +94,8 @@ struct block_t {
 
 typedef struct block_t * block_t;
 
+#define MAX_LENGTH_MSG 1024
+
 struct task_t {
     int tid;
     char tname[MAX_TASK_NAME + 1];
@@ -98,12 +106,12 @@ struct task_t {
         
         struct {
             int tid, len;
-            char msg[128];
+            char msg[MAX_LENGTH_MSG];
         } send;
 
         struct {
             int tid, len;
-            char msg[128];
+            char msg[MAX_LENGTH_MSG];
         } recv;
 
         struct {
@@ -159,7 +167,9 @@ enum {
     SYSTEM_CALL_SETRANK,
     SYSTEM_CALL_WAIT,
     SYSTEM_CALL_GETRMODE,
-    SYSTEM_CALL_GETSTATUS
+    SYSTEM_CALL_GETSTATUS,
+	SYSTEM_CALL_WRITE_DISK,
+	SYSTEM_CALL_READ_DISK
 };
 
 struct driver_t {
@@ -301,6 +311,8 @@ typedef struct system_t* system_t;
 
 size_t _sys_write(int devcode, void* from, size_t nbytes);
 size_t _sys_read(int devcode, void* to, size_t nbytes);
+void _sys_read_disk(disk_cmd_t cmd);
+void _sys_write_disk(disk_cmd_t cmd);
 size_t _sys_seekr(int devcode, int offset, int from);
 size_t _sys_seekw(int devcode, int offset, int from);
 size_t _sys_tellr(int devcode);
