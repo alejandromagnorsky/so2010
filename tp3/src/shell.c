@@ -317,23 +317,24 @@ int check_drives(char * a){
 /*
 	char * tmp = (char *) malloc(4096);
 	int i;
-	for(i=0;i<4096;i++) tmp[i] = i>2048 ? 'A' : 'B';
+	for(i=0;i<4096;i++) tmp[i] = i>2048 ? 'F' : 'G';
 
 	
-	disk_cmd writeCMD = { ATA0, 0,0,4096, tmp};
+	disk_cmd writeCMD = { ATA0, 40,128,4096, tmp};
 	_sys_write_disk(&writeCMD);
 
 
 	char * r = (char*) malloc(1024);
-	disk_cmd readCMD = { ATA0, 0,0,1024, r};
+	disk_cmd readCMD = { ATA0, 40,50,1024, r};
 	_sys_read_disk(&readCMD);
 
 	r[1023] = '\0';
 
 	printf("%s\n", readCMD.buffer);
 
-	putchar(readCMD.buffer[200]);*/
+	putchar(readCMD.buffer[200]);
 	
+*/
 }
 
 
@@ -348,7 +349,7 @@ int programDisk(char * a){
 int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
 
-	disk_cmd cmd = {ATA0, 0, 0, 512, buffer};
+	disk_cmd cmd = {ATA0, 40, 0, 512, buffer};
 	_sys_read_disk(&cmd);
 
 	cmd.buffer[511] = '\0';
@@ -357,7 +358,7 @@ int read_disk(char * a){
 }
 
 int write_disk(char * a){
-	disk_cmd cmd = {ATA0, 0, 0, strlen(a)};
+	disk_cmd cmd = {ATA0, 40, 0, strlen(a)};
 	cmd.buffer = a;
 	_sys_write_disk(&cmd);
 }
