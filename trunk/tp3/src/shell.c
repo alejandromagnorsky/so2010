@@ -342,7 +342,7 @@ int check_drives(char * a){
 int programDisk(char * a){
 	unsigned char * buffer = (unsigned char *)malloc(4096);
 	disk_cmd cmd = {ATA0, 0, 0, 0x30, buffer};
-	_sys_read_disk(&cmd);
+	System.readDisk(&cmd);
 	_caller((int)buffer);	
 }
 
@@ -350,7 +350,7 @@ int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
 
 	disk_cmd cmd = {ATA0, 40, 0, 512, buffer};
-	_sys_read_disk(&cmd);
+	System.readDisk(&cmd);
 
 	cmd.buffer[511] = '\0';
 
@@ -360,5 +360,5 @@ int read_disk(char * a){
 int write_disk(char * a){
 	disk_cmd cmd = {ATA0, 40, 0, strlen(a)};
 	cmd.buffer = a;
-	_sys_write_disk(&cmd);
+	System.writeDisk(&cmd);
 }

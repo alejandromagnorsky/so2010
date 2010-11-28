@@ -247,6 +247,8 @@ struct system_t {
 	int (*getRMode)(int);
 	int (*getStatus)(int);
 	int (*wait)();
+	void (*readDisk)(disk_cmd_t cmd);
+	void (*writeDisk)(disk_cmd_t cmd);
 };
 
 typedef struct system_t* system_t;
