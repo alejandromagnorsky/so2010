@@ -14,6 +14,7 @@
 #include "multiboot.h"
 
 
+
 /********************************** 
 **
 ** Kernel header file
@@ -56,6 +57,6 @@ extern struct TaskNamespace Task;
 extern struct TTYSNamespace TTYS;
 extern struct KBNamespace Keyboard;
 extern struct TopNamespace Top;
-
+extern struct disk_t Disk;
 
 #endif

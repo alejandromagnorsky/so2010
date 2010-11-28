@@ -336,6 +336,25 @@ int _sys_wait() {
     return ret;
 }
 
+void _sys_read_disk(disk_cmd_t cmd) {
+    int ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_READ_DISK);
+    MOVTO_EBX(cmd);
+
+    THROW_INT80;
+    
+}
+
+void _sys_write_disk(disk_cmd_t cmd) {
+    int ret;
+    
+    MOVTO_EAX(SYSTEM_CALL_WRITE_DISK);
+    MOVTO_EBX(cmd);
+
+    THROW_INT80;
+}
+
 struct TaskNamespace Task = {
     _task_setPriority,
     _task_setRank,
