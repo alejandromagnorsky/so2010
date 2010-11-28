@@ -1763,8 +1763,7 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%eax, %edx
-	movl	%ecx, ttys+5014(%edx)
+	movl	%ecx, ttys+5014(%eax)
 	movl	12(%ebp), %eax
 	movl	1093(%eax), %edx
 	movl	System+16, %eax
@@ -1778,8 +1777,7 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%eax, %edx
-	movl	%ecx, ttys+5018(%edx)
+	movl	%ecx, ttys+5018(%eax)
 	movl	System+16, %ecx
 	movl	8(%ebp), %eax
 	movl	1093(%eax), %edx
@@ -1792,8 +1790,7 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%eax, %edx
-	movl	ttys+5014(%edx), %eax
+	movl	ttys+5014(%eax), %eax
 	movl	%eax, 27(%ecx)
 	movl	System+16, %ecx
 	movl	8(%ebp), %eax
@@ -1807,8 +1804,7 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%eax, %edx
-	movl	ttys+5018(%edx), %eax
+	movl	ttys+5018(%eax), %eax
 	movl	%eax, 31(%ecx)
 	movl	System+16, %ecx
 	movl	8(%ebp), %eax
@@ -1822,8 +1818,7 @@ switchTTY:
 	sall	$5, %edx
 	subl	%eax, %edx
 	leal	(%edx,%edx), %eax
-	movl	%eax, %edx
-	leal	1008(%edx), %eax
+	addl	$1008, %eax
 	addl	$ttys, %eax
 	addl	$6, %eax
 	movl	%eax, 19(%ecx)
@@ -2530,5 +2525,5 @@ _top_run:
 	.size	_top_run, .-_top_run
 	.local	tid.1965
 	.comm	tid.1965,4,4
-	.ident	"GCC: (Ubuntu/Linaro 4.4.4-14ubuntu5) 4.4.5"
+	.ident	"GCC: (Ubuntu 4.4.3-4ubuntu5) 4.4.3"
 	.section	.note.GNU-stack,"",@progbits
