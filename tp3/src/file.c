@@ -46,8 +46,6 @@ void exportTable(){
 	System.writeDisk(&cmd);
 }
 
-
-
 void printTable(int from, int to){
 	int i;
 	for(i=from;i<to;i++){
@@ -63,8 +61,6 @@ void __initSectorTable(){
 	for(i=0;i<_MAX_SECTORS;i++)
 		clearSector(i);
 }
-
-
 
 void createFilesystem(){
 	int i;
@@ -85,7 +81,6 @@ void createFilesystem(){
 	__initFileTable();
 }
 
-
 int loadFileSystem(){
 
 	__initSectorTable();
@@ -105,7 +100,6 @@ int loadFileSystem(){
 
 	return -1;
 }
-
 
 int __getFileFreeSector(){
 	int i;
@@ -144,11 +138,9 @@ File * getFreeFile(){
 	return NULL;
 }
 
-
 File * __getCurrentDir(){
 	return current_dir;
 }
-
 
 void __setCurrentDir( File * f){
 	current_dir = f;
@@ -219,7 +211,6 @@ File * __loadFile(int sector){
 	return NULL;
 }
 
-
 // Allocate a file on disk!
 void __allocateFile(File * file){
 	// Set sector on sectorTable
@@ -265,7 +256,6 @@ void __allocateFile(File * file){
 	System.writeDisk(&fileParent);
 	System.writeDisk(&fileFooter);
 }
-
 
 void __printFile(File * f){
 	printf("Filename: %s\n", f->name);
@@ -436,13 +426,10 @@ void __initFileTable(){
 	File * home = __createFile("home", __getFileFreeSector(), _DEFAULT_FILESIZE,base);
 	__allocateFile(home);
 
-
 	File * readme = __createFile("readme.txt", __getFileFreeSector(), _DEFAULT_FILESIZE,base);
 	__allocateFile(readme);
-
 	
 	writeFile(readme,_README, strlen(_README));
-
 
 	__setCurrentDir(base);
 }
@@ -529,7 +516,6 @@ int writeFile(File * file, char * buff, int count){
 	if( count > file->size -1) // EOF place
 		return -2;
 
-
 	int sector = file->sector+1;
 	int base = 0;
 
@@ -549,10 +535,30 @@ int writeFile(File * file, char * buff, int count){
 
 int vim(char * arg){
 
+}
+
+void printFilePosition(File * file){
+	if(file==NULL)
+		return;
+
+	if(file->parent == NULL){
+		printf("%s",file->name);
+		return;
+	} else {
+		printFilePosition(file->parent);
+		printf("/%s", file->name);
+	}
+}
 
 
-
-
+int mkdir(char * arg){
+	if(strlen(arg) == 0 )
+		printf("mkdir: invalid argument\n");
+	else {
+		if(openFile(arg, 0) == -1)
+			printf("mkdir: file already exists\n");		
+	}
+	return 0;
 }
 
 int cat(char * arg){
@@ -566,12 +572,8 @@ int cat(char * arg){
 
 	printf("File %s:\n", file->name);
 
-	int i;
-	for(i=0;i<file->size;i++)
-		putchar(tmp[i]);
+	printf("%s\nEOF\n", tmp);
 
-
-	printf("\nEnd of file \n");
 	return 0;
 }
 
@@ -583,8 +585,15 @@ int touch( char * arg ){
 }
 
 int tree(char *a){
-	File * file = getFileByName(a);
-	__printFileTree(file);
+
+	File * file;
+
+	if( strlen(a) == 0)
+		file = __getCurrentDir();
+	else file = getFileByName(a);
+
+	if(file != NULL)
+		__printFileTree(file);
 	return 0;
 }
 
@@ -595,7 +604,9 @@ int pwd(char * arg){
 
 	if(!strcmp(arg,"-a"))
 		__printFile(file);	
-	else printf("%s\n", file->name);
+	else printFilePosition(file);
+
+	printf("\n");
 }
 
 int cd(char * arg){
@@ -603,7 +614,9 @@ int cd(char * arg){
 	File * child = __getChildByFileName(arg,curr);
 
 	if(child != NULL ){
-		__setCurrentDir(child);
+		if(__fileHasChildren(child))
+			__setCurrentDir(child);
+		else printf("cd: %s is not a directory\n");
 		return 0;
 	} else if( !strcmp(arg,".")){
 		// Do nothing

@@ -3,7 +3,7 @@
 #include "../include/shell.h"
 
 
-#define NUM_COMMANDS 27
+#define NUM_COMMANDS 28
 
 static struct {
     char* name;
@@ -36,7 +36,8 @@ static struct {
 				 {"tree", "Show the contents of dir recursively", tree},
 				 {"pwd", "Show current directory. -a for full details", pwd},
 				 {"cd", "Change directory", cd},
-				 {"cat", "Show file contents", cat}
+				 {"cat", "Show file contents", cat},
+				 {"mkdir", "Make directory", mkdir}
 				
 };
 
