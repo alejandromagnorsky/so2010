@@ -58,12 +58,12 @@ extern char sectorTable[_MAX_SECTOR_BYTES];
 extern File fileTable[_MAX_FILES];
 
 
+
 void createFilesystem();
 
 int loadFileSystem();
 
 int fileIO(char * a);
-
 
 int pwd(char * arg);
 
@@ -72,6 +72,8 @@ int cat(char * arg);
 int cd(char * arg);
 
 int touch( char * arg );
+
+int mkdir(char * arg);
 
 int ls(char * a);
 
