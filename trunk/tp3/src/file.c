@@ -7,6 +7,9 @@ File fileTable[_MAX_FILES];
 char sectorTable[_MAX_SECTOR_BYTES] = {0};
 
 
+File * current_dir = NULL;
+
+
 void __initFileTable();
 
 void __printFile(File * f);
@@ -36,15 +39,15 @@ int getSector(int sector){
 	return sectorTable[sector/8] & (1<<bit);
 }
 
-
 void exportTable(){
-	disk_cmd cmd = {ATA0, _TABLE_STARTUP_SECTOR, 0, _MAX_SECTOR_BYTES };
-	cmd.buffer = sectorTable;
+	disk_cmd headerCMD = {ATA0, _TABLE_STARTUP_SECTOR, 0, strlen(_TABLE_HEADER), _TABLE_HEADER };
+	disk_cmd cmd = {ATA0, _TABLE_STARTUP_SECTOR, strlen(_TABLE_HEADER), _MAX_SECTOR_BYTES, sectorTable };
+	System.writeDisk(&headerCMD);
 	System.writeDisk(&cmd);
 }
 
 
-void createTable(){
+void createFilesystem(){
 	int i;
 
 	// First chunk is protected
@@ -54,18 +57,12 @@ void createTable(){
 	// Sector table is protected
 	for(i=0;i<_TABLE_SECTOR_SIZE;i++)
 		setSector(_TABLE_STARTUP_SECTOR+i);
+
 	exportTable();
 
 	__initFileTable();
 }
 
-void loadTable(){
-	disk_cmd cmd = {ATA0, _TABLE_STARTUP_SECTOR, 0, _MAX_SECTOR_BYTES };
-	cmd.buffer = sectorTable;
-	System.readDisk(&cmd);
-
-	__loadFileTable();
-}
 
 void printTable(int from, int to){
 	int i;
@@ -74,6 +71,25 @@ void printTable(int from, int to){
 		printf("Sector %d: %s\n", i, exists ? "exists" : "does not exist");
 	}
 }	
+
+int loadFileSystem(){
+
+	char header[100];
+	disk_cmd headerCMD = {ATA0, _TABLE_STARTUP_SECTOR, 0, strlen(_TABLE_HEADER), header };
+	disk_cmd cmd = {ATA0, _TABLE_STARTUP_SECTOR, strlen(_TABLE_HEADER), _MAX_SECTOR_BYTES, sectorTable };
+
+	System.readDisk(&headerCMD);
+	System.readDisk(&cmd);
+
+
+	if(!strcmp(header,_TABLE_HEADER)){
+	//	__loadFileTable();
+		return 0;
+	}
+
+	return -1;
+}
+
 
 int __getFileFreeSector(){
 	int i;
@@ -91,6 +107,15 @@ int getFreeSector(){
 	return -1;
 }
 
+
+int __getFileIndexBySector(int sector){
+	int i;
+	for(i=0;i<_MAX_FILES;i++)
+		if(fileTable[i].sector == sector)
+			return i;
+	return -1;
+}
+
 void __freeFile(int index){
 	fileTable[index].sector = -1;
 }
@@ -101,6 +126,16 @@ File * getFreeFile(){
 		if(fileTable[i].sector == -1)
 			return fileTable+i;
 	return NULL;
+}
+
+
+File * __getCurrentDir(){
+	return current_dir;
+}
+
+
+void __setCurrentDir( File * f){
+	current_dir = f;
 }
 
 File * __loadFile(int sector){
@@ -154,11 +189,17 @@ File * __loadFile(int sector){
 	System.readDisk(&fileFooter);
 
 	// Its a file
-	if(!strcmp(header,_FILE_HEADER) && !strcmp(footer,_FILE_FOOTER))
+	if(!strcmp(header,_FILE_HEADER) && !strcmp(footer,_FILE_FOOTER)){
+
+		// Blabla, things to do
+
+
 		return file;
+	}
+
 
 	// File not recognized
-	__freeFile(sector);
+	__freeFile(__getFileIndexBySector(file->sector));
 	return NULL;
 }
 
@@ -299,12 +340,17 @@ void __loadFileTable(){
 	
 	for(i=_FILETABLE_SECTOR_START;i<_MAX_SECTORS;i++)
 		if(getSector(i)){
+
+			printf("Loading file from sector %d\n", i);
 			// Try to load file
 			File * file = __loadFile(i);
 		}
 
 	// Now process and construct tree
 	__constructFileTree();
+
+
+	__setCurrentDir(fileTable);
 }
 
 void __printFileTree(File * f){
@@ -358,7 +404,7 @@ void __initFileTable(){
 	for(i=0;i<_MAX_FILES;i++)
 		fileTable[i].sector = -1;
 
-	File * base = __createFile("/",__getFileFreeSector(),_DEFAULT_FILESIZE, NULL);
+	File * base = __createFile(_FILE_ROOT,__getFileFreeSector(),_DEFAULT_FILESIZE, NULL);
 	__allocateFile(base);
 
 
@@ -373,43 +419,210 @@ void __initFileTable(){
 
 	File * home = __createFile("home", __getFileFreeSector(), _DEFAULT_FILESIZE,base);
 	__allocateFile(home);
+
+
+	__setCurrentDir(base);
+}
+
+int __fileHasChildren(File * file){
+	int i;
+	for(i=0;i<_FILE_CHILDREN;i++)
+		if(file->children[i] != NULL)
+			return 0;
+
+	return 1;
 }
 
 
-/*
-
-	char * buffer = (char *) malloc(512);
-
-	disk_cmd cmd = {ATA0, 40, 0, 512, buffer};
-	System.readDisk(&cmd);
-
-	cmd.buffer[511] = '\0';
-
-	printf("%s\n", cmd.buffer);
+int fileIsDir(File * file){
+	return __fileHasChildren(file);
 }
 
-int write_disk(char * a){
-	disk_cmd cmd = {ATA0, 40, 0, strlen(a)};
-	cmd.buffer = a;
-	System.writeDisk(&cmd);
+File * __getFileByName(char * name, File * parent){
+	if(parent == NULL)
+		return NULL;
 
-*/
+	if(!strcmp(parent->name,name))
+		return parent;
+	else {
+		int i;
+		for(i=0;i<_FILE_CHILDREN;i++)
+			if(__getFileByName(name,parent->children[i]) != NULL)
+				return parent->children[i];
+	}
+	return NULL;
+}
+
+File * getFileByName(char * name){
+	File * root = fileTable;
+	return __getFileByName(name,root);
+}
+
+
+File * __getChildByFileName( char * name, File * parent){
+	int i;
+	for(i=0;i<_FILE_CHILDREN;i++)
+		if(parent->children[i] != NULL)
+			if(!strcmp(parent->children[i]->name, name))
+				return parent->children[i];
+	return NULL;
+}
+
+
+int openFile( char * name, int flags){
+	File * curr = __getCurrentDir();
+	File * file = __getChildByFileName(name,curr);
+
+	if(file == NULL){
+		file = __createFile(name, __getFileFreeSector(), _DEFAULT_FILESIZE, __getCurrentDir());
+		__allocateFile(file);
+	} else return -1;
+
+	// There is no file descriptor :P
+	return 0;
+}
+
+
+int readFile(File * file, char * buff, int count){
+	if(file == NULL)
+		return -1;
+
+	if( count > file->size )
+		return -2;
+
+	int sector = file->sector+1;
+	disk_cmd fileData = {ATA0, sector, 0, count, buff};
+
+	// And allocate it
+	System.readDisk(&fileData);
+
+
+	return 0;
+}
+
+int writeFile(File * file, char * buff, int count){
+
+	if(file == NULL)
+		return -1;
+
+	if( count > file->size -1) // EOF place
+		return -2;
+
+
+	int sector = file->sector+1;
+	int base = 0;
+
+	disk_cmd fileData = {ATA0, sector, base, count, buff};
+	base += count;
+
+	char eof = EOF;
+
+	disk_cmd fileEnd = {ATA0, sector, base, 1, &eof };
+
+	// And allocate it
+	System.writeDisk(&fileData);
+	System.writeDisk(&fileEnd);
+	
+	return 0;
+}
+
+int vim(char * arg){
+
+
+
+
+
+}
+
+
+int cat(char * arg){
+	File * file = getFileByName(arg);
+
+	if(file == NULL) return -1;
+
+	char * tmp = (char*) malloc(file->size);
+
+	readFile(file, tmp, file->size);
+
+	printf("File %s:\n", file->name);
+
+	int i;
+	for(i=0;i<file->size;i++)
+		putchar(tmp[i]);
+
+
+	printf("\nEnd of file \n");
+	return 0;
+}
+
+
+int touch( char * arg ){
+	openFile(arg, 0);
+
+	return 0;
+}
+
+int tree(char *a){
+	File * file = getFileByName(a);
+	__printFileTree(file);
+	return 0;
+}
+
+int ls(char * arg){
+
+
+	printf("ls %s\n", arg);
+
+
+	File * file = getFileByName(arg);
+
+	if(file!=NULL){
+
+		int i;
+		for(i=0;i<_FILE_CHILDREN;i++)
+			if(file->children[i] != NULL){
+				printf("/%s\t", file->children[i]->name);
+			}
+
+		printf("\n");
+		return 0;
+	}
+
+	return -1;
+}
 
 int fileIO(char * a){
+
 	printf("Vamos a crear la tabla\n");
-	printf("Que hago?\n1) crear tabla\n2) cargar tabla\n");
+	printf("Que hago?\n1) crear tabla\n2) cargar tabla\n3)pasar\n");
 	int opt = 0;
 	scanf("%d",&opt);
 	printf("\n");
 
 	if(opt == 1)
-		createTable();
+		createFilesystem();
 	else if(opt== 2)
-		loadTable();
+		loadFileSystem();
+	else if(opt == 3);
 
 	File * f = fileTable;
 
 	printf("\nFile tree: \n");
-	__printFileTree(f);
+	ls("%");
 
+//	if( openFile("hola", 0) == -1 )
+//		printf("File already exists.\n");
+
+	File * hola = getFileByName("hola");
+
+	char * buf = "Hola como estas";
+
+//	writeFile(hola, buf, strlen(buf));
+
+//	printf("Sector de hola: %d\n", hola->sector);
+
+
+	//cat("hola");
+
+	tree("%");
 }

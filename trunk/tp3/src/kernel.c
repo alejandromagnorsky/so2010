@@ -1,4 +1,5 @@
 #include "../include/kernel.h"
+#include "../include/file.h"
 
 DESCR_INT idt[0xFF];			/* IDT de 10 entradas*/
 IDTR idtr;				/* IDTR */
@@ -487,6 +488,15 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
 	//Paging.start(mbd->mem_upper - mbd->mem_lower);
 	Paging.start(mbd->mem_lower + mbd->mem_upper);
     printf("OK\n\n");
+
+	printf("Initializing filesystem ............. ");
+	if(loadFileSystem() == -1){
+		printf("Error loading filesystem.\n");
+		printf("Creating new filesystem  ............. ");
+		createFilesystem();
+	}
+	printf("OK\n\n");
+
 
 	Task.setupScheduler();
 
