@@ -44,6 +44,7 @@ int read_disk(char * a);
 int write_disk(char * a);
 int programDisk();
 
+
 int daemontest(char * line);
 
 extern struct system_t System;

@@ -83,8 +83,9 @@ void read(int ata, char * ans, unsigned short sector, int offset, int count){
 
 	for(i=0;i<sectors;i++){
 		int size =  (i == sectors-1) ? count%513 : 512;
+
 		if(!i)	
-			_read(ata, ans, sector, offset, size-offset);
+			_read(ata, ans, sector, offset, (offset+count>512)? size-offset : size);
 		else 
 			_read(ata, ans+(i*512)-offset, sector+i,0,size);
 	}
@@ -103,11 +104,11 @@ void _read(int ata, char * ans, unsigned short sector, int offset, int count){
 	// Now read sector
 	int b;
 	unsigned short data;
-	for(b=0;b<=512;b+=2){
+	for(b=0;b<512;b+=2){
 		data = getDataRegister(ata);
 		translateBytes(tmp+b, data);
 	}
-	
+
 	int i;
 	for(i=0;i<count;i++)
 		ans[i] = tmp[offset+i];
@@ -127,13 +128,12 @@ void write(int ata, char * msg, int bytes, unsigned short sector, int offset){
 
 	// Quantity of necessary sectors
 	int sectors = (bytes / 512) + 1;
-	int base,top;
 	for(i=0;i<sectors;i++){
 
 		int size =  (i == sectors-1) ? bytes%513 : 512;
 		// First sector, check offset
 		if(!i)
-			_write(ata, msg, size-offset, sector,offset);
+			_write(ata, msg, (offset+bytes > 512 )? size-offset :size, sector,offset);
 		else 
 			_write(ata, msg+(i*512)-offset, size, sector+i, 0);
 		
