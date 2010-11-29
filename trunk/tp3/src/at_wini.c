@@ -249,6 +249,7 @@ void identifyDevice(int ata){
 	_Sti();
 }
 
+// Check disk features
 void check_drive(int ata){
 	printf("-----------------------\n");
 	printf("Identifying device ");
