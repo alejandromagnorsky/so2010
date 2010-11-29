@@ -2525,5 +2525,5 @@ _top_run:
 	.size	_top_run, .-_top_run
 	.local	tid.1969
 	.comm	tid.1969,4,4
-	.ident	"GCC: (Ubuntu 4.4.1-4ubuntu9) 4.4.1"
+	.ident	"GCC: (Ubuntu 4.4.3-4ubuntu5) 4.4.3"
 	.section	.note.GNU-stack,"",@progbits

@@ -1,6 +1,9 @@
+#include "../include/file.h"
+
 #include "../include/shell.h"
 
-#define NUM_COMMANDS 20
+
+#define NUM_COMMANDS 21
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -28,7 +31,8 @@ static struct {
 				 {"checkDrives", "display information about the drives", check_drives},
 				 {"programDisk", "execute the program that resides in the sector 0 of the disk", programDisk},
 				 {"readDisk", "read a string from the disk", read_disk},
-				 {"writeDisk", "write a string into the disk", write_disk}
+				 {"writeDisk", "write a string into the disk", write_disk},
+				 {"fileIO", "Test", fileIO}
 };
 
 
@@ -303,6 +307,7 @@ int freeTest(char * line){
 void init() {
 	//System.exec(driver, "");
 
+
     return;
 }
 
@@ -349,16 +354,20 @@ int programDisk(char * a){
 int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
 
-	disk_cmd cmd = {ATA0, 40, 0, 512, buffer};
+	disk_cmd cmd = {ATA0, 22, 0, 512, buffer};
 	System.readDisk(&cmd);
 
 	cmd.buffer[511] = '\0';
 
-	printf("%s\n", cmd.buffer);
+	int i;
+	for(i=0;i<512;i++)
+		putchar(cmd.buffer[i]);
+	printf("\n");
 }
 
 int write_disk(char * a){
-	disk_cmd cmd = {ATA0, 40, 0, strlen(a)};
+	disk_cmd cmd = {ATA0, 50, 0, strlen(a)};
 	cmd.buffer = a;
 	System.writeDisk(&cmd);
 }
+
