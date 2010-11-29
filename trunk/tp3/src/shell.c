@@ -3,7 +3,7 @@
 #include "../include/shell.h"
 
 
-#define NUM_COMMANDS 28
+#define NUM_COMMANDS 30
 
 static struct {
     char* name;
@@ -37,6 +37,8 @@ static struct {
 				 {"pwd", "Show current directory. -a for full details", pwd},
 				 {"cd", "Change directory", cd},
 				 {"cat", "Show file contents", cat},
+				 {"edit", "Edit or create file", edit},
+				 {"rm", "Delete file or directory", rm},
 				 {"mkdir", "Make directory", mkdir}
 				
 };
@@ -358,7 +360,7 @@ int programDisk(char * a){
 int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
 
-	disk_cmd cmd = {ATA0, 20, 0, 512, buffer};
+	disk_cmd cmd = {ATA0, 2, 0, 512, buffer};
 	System.readDisk(&cmd);
 
 	cmd.buffer[511] = '\0';
@@ -370,7 +372,7 @@ int read_disk(char * a){
 }
 
 int write_disk(char * a){
-	disk_cmd cmd = {ATA0, 50, 0, strlen(a)};
+	disk_cmd cmd = {ATA0, 2, 0, strlen(a)};
 	cmd.buffer = a;
 	System.writeDisk(&cmd);
 }

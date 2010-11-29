@@ -42,39 +42,6 @@ struct disk_t Disk = {
 	write
 };
 
-
-/*
-int driver(char * arg){
-
-	System.name("Disk driver");
-	//System.setPrio(PRIORITY_MAX);
-	//System.setRank(RANK_SERVER);
-
-	int length, from;
-	driver_req * req;
-    char * msg;
-	req = (driver_req *)malloc(MAX_LENGTH_MSG);
-
-	printf("hola");
-
-	while(TRUE){
-	    length = System.recv();
-		from = System.getmsg((void *)req, length);
-
-		if(req->command == READ_DISK)
-			read(req->ata, req->buffer, req->sector, req->offset, req->count);
-		else
-			write(req->ata, req->buffer, req->count, req->sector, req->offset);
-
-		req->command = OK;
-		System.clsmsg();
-	    System.send(from, req, length);
-	}
-
-}
-*/
-
-
 void read(int ata, char * ans, unsigned short sector, int offset, int count){
 	int i;
 
