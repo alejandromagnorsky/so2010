@@ -310,8 +310,8 @@ int freeTest(char * line){
 }
 
 void init() {
-	//System.exec(driver, "");
-
+	System.exec(echoserver, "");
+	System.exec(ohceserver, "");
     return;
 }
 
