@@ -81,6 +81,7 @@ void _read(int ata, char * ans, unsigned short sector, int offset, int count){
 		ans[i] = tmp[offset+i];
 }
 
+// Translate one word into two char
 void translateBytes(char * ans, unsigned short databyte){	
 	ans[0] = databyte & 0xFF;
 	ans[1] = databyte >> 8;
@@ -183,6 +184,7 @@ unsigned short getErrorRegister(int ata){
 	return rta;
 }
 
+// Send a command to the disk in order to read or write
 void sendComm(int ata, int rdwr, unsigned short sector){
 	_Cli();
 	

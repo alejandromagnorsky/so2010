@@ -6,20 +6,39 @@
 \makeindex
 
 %opening
-\title{\underline{\textbf{SuciOS}} \\ \small Standard Command-line Interface Operating System}
-\author{
-Magnorsky, Alejandro Ezequiel. (Leg. 50272). \\
-Merchante, Mariano. (Leg. 50094).\\
-Mata Suárez, Andrés Ricardo. (Leg. 50143). \\
-Ballesty, Pablo Andrés. (Leg. 49359).\\
-Pose, Jimena Belén. (Leg. 49015).\\
-Lezica, Santiago. (Leg. 49147).\\
-}
-\date{Lunes 1 de Noviembre}
 
 \begin{document}
+\begin{center}
+\underline{\textbf{\Large{Trabajo Práctico n$^{\circ}$ 3}}} \\
+\bigskip
+\textbf{\large{Sistemas Operativos}}
+\bigskip\bigskip\bigskip\bigskip\bigskip
+\begin{itemize}
+\item Alumnos
+\begin{itemize}
+\item Ballesty, Pablo Andrés 		49359
+\item Lezica, Santiago			49147
+\item Magnorsky, Alejandro		50272
+\item Mata Suárez, Andrés Ricardo 	50143
+\item Merchante, Mariano		50094
+\item Pose, Jimena Belén		49015
+\end{itemize}
+\bigskip\bigskip\bigskip\bigskip
+\item Profesores
+\begin{itemize}
+\item Etchegoyen, Hugo Eduardo
+\item Carlucci, Bruno Luciano Nicolás
+\end{itemize}
+\bigskip\bigskip\bigskip\bigskip
+\item Fecha de Entrega
+\begin{itemize}
+\item 29/11/10
+\end{itemize}
+\end{itemize}
+\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
+\bigskip\bigskip\bigskip\bigskip\bigskip\bigskip
 
-\maketitle
+- 2010 -\end{center}
 
 \newpage
 \tableofcontents
@@ -27,11 +46,13 @@ Lezica, Santiago. (Leg. 49147).\\
 \newpage
 \section{Introducción}
 \subsection{Objetivo}
+\par
 Continuar el Multitasker del Trabajo Práctico 2, agregándole manejo de disco,
 basado en el sistema de manejo de disco de MINIX.
 
 
 \subsection{Enunciado}
+\par
 El trabajo consta de la realización de un manejador de disco símil al de MINIX,
 para el sistema multitasker creado en el TP2. El mismo deberá poder leer y
 escribir bytes a disco, pero no requerirá un filesystem. La información escrita
@@ -39,6 +60,7 @@ a disco, naturalmente debe poder persistir cuando la máquina se apague o se
 reinicie.
 
 \subsection{Programas de prueba}
+\par
 Además del sistema a disco, los alumnos deberán desarrollar en assembler un
 programa pequeño que carezca de stack y sea independiente de contexto. Los
 alumnos deberán poner este programa en el disco en una zona conocida y agregar
@@ -51,6 +73,7 @@ otro programa se ejecuta.
 
 
 \subsection{Material a entregar}
+\par
 Cada grupo deberá entregar los fuentes, una imagen booteable con el bootloader
 y el multitasker y los datos pertinentes cargados a disco. Además deberán
 entregar un informe impreso detallando las decisiones respecto a los items que
@@ -58,15 +81,18 @@ quedaron a elección del grupo, problemas presentados y la solución de los mism
 durante la realización del trabajo.
 
 \subsection{Integrantes}
+\par
 El trabajo puede hacerse en grupos de seis integrantes. Se evaluará la funcionalidad
 de la aplicación así como el estilo del código y la calidad del informe entregado.
 
 \subsection{Consideraciones}
+\par
 Todo punto no explícito en este documento podrá ser interpretado a convenieniencia
 del alumno, siempre dentro de los márgenes del sentido común. Ante la
 duda, consultar a los docentes o enviar un mail al mail de la cátedra.
 
 \subsection{Fecha de entrega}
+\par
 La fecha de entrega del trabajo práctico es el Lunes 29 de Noviembre a las 16:00.
 
 
@@ -76,10 +102,65 @@ La fecha de entrega del trabajo práctico es el Lunes 29 de Noviembre a las 16:0
 
 \section{Desarrollo}
 
+\subsection{Funcionamiento del driver}
+Para leer y escribir del disco se desarrollaron las funciones \emph{_read} y \emph{_write}. Cada 
+una lee o escribe un sector en el disco, recibiendo un cierto offset y una cantidad determinada de bytes. 
+Para una mayor funcionalidad se implementaron las funciones \emph{read} y \emph{write},
+las cuales dan la posibilidad de escribir o leer del disco más de un sector.
+Para poder leer o escribir en el disco hay que enviar un comando al disco (LBA_READ o LBA_WRITE respectivamente), 
+así como la cantidad de sectores y el sector inicial a los registros correspondientes del disco.
+Una vez que se termina el comando, se debe leer o escribir la información del registro 0, la cual
+tiene un tamaño de 2 bytes (1 word). Para lograr procesar los datos obtenidos se creó la función \emph{translateBytes}, 
+con la cual se logra transformar una word en un arreglo de 2 bytes
+
 \subsection{Problemas encontrados y sus respectivas soluciones}
+\par
+Comenzamos intentando utilizar los archivos at\_wini.c y driver.c de Minix 2.0.4. En un 
+principio incorporamos funciones poco a poco, encontrando el problema que a medida que 
+agregábamos una función a nuestro sistema operativo nos veíamos forzados a importar mucho 
+contenido fuera de lo que era el manejo del disco (como constantes, macros, funciones extras, etc).
+Otro problema encontrado fue que nos vimos forzados a incorporar los métodos de IPC análogos a
+los de Minix (ya que los IPCs con los que contábamos eran muy diferentes), los procesos de Minix 
+(la estructura de un proceso) y el manejo de interrupciones.\par
+Intentando resolver este problema nos encontramos con que esta versión de Minix usa un tipo de
+dato llamado u64, que sirve para el manejo de disco en sistemas de 64 bits, lo que dificultaba 
+aún más la incorporación del driver de Minix a nuestro sistema operativo.\par
+Como consecuencia de lo antes mencionado, decididimos utilizar la versión más básica de Minix, la 1.1.
+Sin embargo, si bien ya no teníamos el problema de los 64 bits, los otros problemas seguían presentes.
+Finalmente optamos por investigar por otros medios el funcionamiento del driver de disco ya que las
+incompatibilidades entre ambos sistemas operativos era muy grande. Es por eso que recomenzamos el trabajo, 
+pero esta vez armando nuestro propio driver basándonos en las especificaciones del disco ATA (El pdf utilizado
+se encuentra en la carpeta docs entregada bajo el nombre de ``Manual\_ATA\_ATAPI.pdf'').\par
+Utilizamos el modo LBA (Logical block addressing), el cual sirve para especificar la localización de los bloques de datos en el 
+disco duro. Los bloques lógicos en nuestro sistema operativo son de 512 bytes cada uno. Este sistema nos permite tratar al disco
+como si fuera un vector haciendo que la lectura y escritura sea rápida y sencilla. \par
+Tanto la lectura como la escritura en el disco son System Calls, asegurándonos de que nadie interrumpa dichas operaciones ya que 
+están protegidas por cli y sti.
+
 
 \subsection{Programas de prueba}
 
+  \subsubsection{Programa en el disco}
+    Hicimos un programa que llena la pantalla con el caracter ``a'' de color rojo.\par
+    En un principio intentamos compilarlo externamente y copiar en el primer sector del disco el código objeto obtenido
+    (utilizando el programa de edición \emph{hexedit}). Cuando ejecutábamos el comando programDisk, alojábamos dicho código objeto
+    en una página en memoria, para luego hacer un call a la primer posición de memoria de dicha página.	Ejecutando programDisk 
+    obteníamos errores de protección. El error surgía de que el código objeto obtenido externamente presentaba diferencias al código
+    objeto del mismo programa pero compilado internamente. Para solucionarlo, imprimimos todos los bytes que componían el código objeto
+    compilado internamente y los copiamos tal cual al primer sector de disco.
+    
+
   \subsubsection{File system}
+  Para ejemplificar el trabajo realizado, decidimos desarrollar un file system minimal, para poder demostrar los read y write de disco.
+
+\newpage
+
+\section{Conclusión}
+Intentar utilizar el driver de Minix en nuestro sistema operativo fue improductivo, ya que diferían demasiado en cosas críticas. Haberlo 
+programado nosotros mismos fue más didáctico y además tuvimos mayor control de lo que hacía el driver. Un punto imprescindible para la realización 
+del trabajo práctico fue la investigación realizada para encontrar la forma específica de interactuar con el controlador de disco. \par
+\par
+Cabe mencionar que nuestro driver de disco es compatible únicamente con los dispositivos AT y ATA. 
+  
 
 \end{document}
