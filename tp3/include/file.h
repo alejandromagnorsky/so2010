@@ -7,6 +7,8 @@
 // For now, just use contiguous sectors for files, no fragmentation ( no sector nodes )
 
 
+#define _README "What's the use of a good quotation if you can't change it? -- Dr. Who"
+
 #define _MAX_FILES 500
 #define _DEFAULT_FILESIZE 512
 #define _FILE_NAMELENGTH 255
@@ -62,6 +64,12 @@ int loadFileSystem();
 
 int fileIO(char * a);
 
+
+int pwd(char * arg);
+
+int cat(char * arg);
+
+int cd(char * arg);
 
 int touch( char * arg );
 
