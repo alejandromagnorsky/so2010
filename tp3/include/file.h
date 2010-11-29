@@ -19,6 +19,12 @@
 // Estupido malloc
 #define _FILE_CHILDREN 100
 
+#define _FILE_ROOT "%"
+
+
+#define EOF -1
+
+
 // Previous typedef for recursive declaration.
 typedef struct File File;
 
@@ -43,15 +49,24 @@ struct File {
 #define _TABLE_STARTUP_SECTOR 10 
 #define _TABLE_SECTOR_SIZE (_MAX_SECTOR_BYTES/512)
 
+#define _TABLE_HEADER "TABLE START"
+
 extern char sectorTable[_MAX_SECTOR_BYTES];
 
 extern File fileTable[_MAX_FILES];
 
 
+void createFilesystem();
 
+int loadFileSystem();
 
 int fileIO(char * a);
 
 
+int touch( char * arg );
+
+int ls(char * a);
+
+int tree(char *a);
 
 #endif

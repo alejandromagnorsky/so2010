@@ -3,7 +3,7 @@
 #include "../include/shell.h"
 
 
-#define NUM_COMMANDS 21
+#define NUM_COMMANDS 24
 
 #define SHELL_PROMPT "SuciOS_tty%d$ "
 
@@ -32,9 +32,12 @@ static struct {
 				 {"programDisk", "execute the program that resides in the sector 0 of the disk", programDisk},
 				 {"readDisk", "read a string from the disk", read_disk},
 				 {"writeDisk", "write a string into the disk", write_disk},
-				 {"fileIO", "Test", fileIO}
+				 {"fileIO", "Test", fileIO},
+				 {"touch", "Create/update file", touch},
+				 {"ls", "Show the contents of dir", ls},
+				 {"tree", "Show the contents of dir recursively", tree}
+				
 };
-
 
 int get_command(command_t* command){
 	linebuffer_t bufferinput = {{0},0};
@@ -307,6 +310,8 @@ int freeTest(char * line){
 void init() {
 	//System.exec(driver, "");
 
+	printf("HOLAAA\n");
+
 
     return;
 }
@@ -354,7 +359,7 @@ int programDisk(char * a){
 int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
 
-	disk_cmd cmd = {ATA0, 22, 0, 512, buffer};
+	disk_cmd cmd = {ATA0, 20, 0, 512, buffer};
 	System.readDisk(&cmd);
 
 	cmd.buffer[511] = '\0';
