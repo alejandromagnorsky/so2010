@@ -30,7 +30,6 @@ static struct {
 				 {"programDisk", "execute the program that resides in the sector 0 of the disk", programDisk},
 				 {"readDisk", "read a string from the disk", read_disk},
 				 {"writeDisk", "write a string into the disk", write_disk},
-				 {"fileIO", "Test", fileIO},
 				 {"touch", "Create/update file", touch},
 				 {"ls", "Show the contents of dir", ls},
 				 {"tree", "Show the contents of dir recursively", tree},
@@ -360,7 +359,7 @@ int programDisk(char * a){
 int read_disk(char * a){
 	char * buffer = (char *) malloc(512);
 
-	disk_cmd cmd = {ATA0, 2, 0, 512, buffer};
+	disk_cmd cmd = {ATA0, 0, 0, 512, buffer};
 	System.readDisk(&cmd);
 
 	cmd.buffer[511] = '\0';
