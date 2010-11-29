@@ -18,6 +18,8 @@
 #define _FILE_HEADER "FILE_START"
 #define _FILE_FOOTER "FILE_END"
 
+#define _FILE_DELETE "FILE_DELETED"
+
 // Estupido malloc
 #define _FILE_CHILDREN 100
 
@@ -77,6 +79,10 @@ int mkdir(char * arg);
 
 int ls(char * a);
 
+int edit(char * arg);
+
 int tree(char *a);
+
+int rm(char * arg);
 
 #endif

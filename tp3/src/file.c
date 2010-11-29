@@ -92,7 +92,6 @@ int loadFileSystem(){
 	System.readDisk(&headerCMD);
 	System.readDisk(&cmd);
 
-
 	if(!strcmp(header,_TABLE_HEADER)){
 		__loadFileTable();
 		return 0;
@@ -198,10 +197,7 @@ File * __loadFile(int sector){
 
 	// Its a file
 	if(!strcmp(header,_FILE_HEADER) && !strcmp(footer,_FILE_FOOTER)){
-
 		// Blabla, things to do
-
-
 		return file;
 	}
 
@@ -209,6 +205,58 @@ File * __loadFile(int sector){
 	// File not recognized
 	__freeFile(__getFileIndexBySector(file->sector));
 	return NULL;
+}
+
+
+
+void __deallocateFile(File * file){
+	// Clear sector on sectorTable
+	clearSector(file->sector);
+
+	// And clear all necessary sectors for file
+	int sectors = (file->size / 512) + 1;
+	int i;
+	for(i=0;i<sectors;i++)
+		clearSector(file->sector+i);
+
+	// Update table on disk, not that expensive
+	exportTable();
+
+	// DESTROY FILE HEADER
+	disk_cmd fileHeader = {ATA0, file->sector, 0, strlen(_FILE_DELETE)+1,_FILE_DELETE};
+	System.writeDisk(&fileHeader);
+}
+
+
+void __killChild(File * child, File * parent){
+	int i;
+	for(i=0;i<_FILE_CHILDREN;i++)
+		if(parent->children[i]!=NULL)
+			if(parent->children[i]->sector == child->sector){
+				parent->children[i] = NULL;
+				return;
+			}
+	return;
+}
+
+
+void __deleteFile(File * file){
+
+	if(file == NULL) return;
+	if(file->parent == NULL) return;
+
+
+	// Kill children
+	int i;
+	for(i=0;i<_FILE_CHILDREN;i++)
+		if(file->children[i]!=NULL)
+			__deleteFile(file->children[i]);
+		
+
+	// And deactivate this file
+	__killChild(file,file->parent);
+	__deallocateFile(file);
+	file->sector = -1;
 }
 
 // Allocate a file on disk!
@@ -302,6 +350,8 @@ File * __getFileBySector(int sector){
 	for(i=0;i<_MAX_FILES;i++)
 		if(fileTable[i].sector == sector)
 			return fileTable+i;
+
+	return NULL;
 }
 
 
@@ -314,9 +364,7 @@ void __addFileChild(File * parent, File * child){
 		}
 }
 
-
 void __constructFileTree(){
-
 	int i;
 	for(i=0;i<_MAX_FILES;i++)
 		if(fileTable[i].sector != -1){
@@ -326,17 +374,14 @@ void __constructFileTree(){
 			// Get parent and construct tree
 			File * parent = __getFileBySector(f->psector);
 			if(parent != NULL){
-
 				// Add parent to child
 				f->parent = parent;
 
 				// Add child to parent
 				__addFileChild(parent, f);
-
 			}
 		}
 }
-
 
 // Just load it, then do processing
 void __loadFileTable(){
@@ -438,9 +483,8 @@ int __fileHasChildren(File * file){
 	int i;
 	for(i=0;i<_FILE_CHILDREN;i++)
 		if(file->children[i] != NULL)
-			return 0;
-
-	return 1;
+			return 1;
+	return 0;
 }
 
 
@@ -477,7 +521,6 @@ File * __getChildByFileName( char * name, File * parent){
 				return parent->children[i];
 	return NULL;
 }
-
 
 int openFile( char * name, int flags){
 	File * curr = __getCurrentDir();
@@ -533,8 +576,20 @@ int writeFile(File * file, char * buff, int count){
 	return 0;
 }
 
-int vim(char * arg){
 
+int edit(char * arg){
+	openFile(arg, 0);
+
+	File * file = getFileByName(arg);
+
+	printf("Editing %s:\n", file->name);
+
+	char * tmp = (char *) malloc(512);
+	
+	scanf("%s",tmp);
+	writeFile(file,tmp, strlen(tmp));
+
+	printf("\n");
 }
 
 void printFilePosition(File * file){
@@ -609,14 +664,27 @@ int pwd(char * arg){
 	printf("\n");
 }
 
+int rm(char * arg){
+
+	File * curr = __getCurrentDir();
+	File * file = __getChildByFileName(arg,curr);
+
+	if(file!=NULL){
+		__deleteFile(file);
+		printf("File deleted\n");
+	} else printf("rm: File not found\n");
+
+}
+
 int cd(char * arg){
 	File * curr = __getCurrentDir();
 	File * child = __getChildByFileName(arg,curr);
 
+	if(strlen(arg) == 0)
+		child = fileTable;
+
 	if(child != NULL ){
-		if(__fileHasChildren(child))
-			__setCurrentDir(child);
-		else printf("cd: %s is not a directory\n");
+		__setCurrentDir(child);
 		return 0;
 	} else if( !strcmp(arg,".")){
 		// Do nothing
