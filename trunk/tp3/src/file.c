@@ -729,26 +729,3 @@ int ls(char * arg){
 	return -1;
 }
 
-int fileIO(char * a){
-
-	File * f = fileTable;
-
-	printf("\nFile tree: \n");
-	ls("%");
-
-//	if( openFile("hola", 0) == -1 )
-//		printf("File already exists.\n");
-
-	File * hola = getFileByName("hola");
-
-	char * buf = "Hola como estas";
-
-//	writeFile(hola, buf, strlen(buf));
-
-//	printf("Sector de hola: %d\n", hola->sector);
-
-
-	//cat("hola");
-
-	tree("%");
-}
