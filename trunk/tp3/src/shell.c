@@ -3,9 +3,7 @@
 #include "../include/shell.h"
 
 
-#define NUM_COMMANDS 24
-
-#define SHELL_PROMPT "SuciOS_tty%d$ "
+#define NUM_COMMANDS 27
 
 static struct {
     char* name;
@@ -35,7 +33,10 @@ static struct {
 				 {"fileIO", "Test", fileIO},
 				 {"touch", "Create/update file", touch},
 				 {"ls", "Show the contents of dir", ls},
-				 {"tree", "Show the contents of dir recursively", tree}
+				 {"tree", "Show the contents of dir recursively", tree},
+				 {"pwd", "Show current directory. -a for full details", pwd},
+				 {"cd", "Change directory", cd},
+				 {"cat", "Show file contents", cat}
 				
 };
 
@@ -309,9 +310,6 @@ int freeTest(char * line){
 
 void init() {
 	//System.exec(driver, "");
-
-	printf("HOLAAA\n");
-
 
     return;
 }

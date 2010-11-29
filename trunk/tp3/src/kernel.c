@@ -511,7 +511,6 @@ kmain(multiboot_info_t* mbd, unsigned int magic)
     _mascaraPIC2(0xFF);
 
 	_Sti();
-
 }
 
 /*

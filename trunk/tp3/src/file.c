@@ -47,8 +47,29 @@ void exportTable(){
 }
 
 
+
+void printTable(int from, int to){
+	int i;
+	for(i=from;i<to;i++){
+		int exists = getSector(i);
+		printf("Sector %d: %s\n", i, exists ? "exists" : "does not exist");
+	}
+}	
+
+
+void __initSectorTable(){
+	int i;
+
+	for(i=0;i<_MAX_SECTORS;i++)
+		clearSector(i);
+}
+
+
+
 void createFilesystem(){
 	int i;
+
+	__initSectorTable();
 
 	// First chunk is protected
 	for(i=0;i<_TABLE_STARTUP_SECTOR;i++)
@@ -60,19 +81,14 @@ void createFilesystem(){
 
 	exportTable();
 
+
 	__initFileTable();
 }
 
 
-void printTable(int from, int to){
-	int i;
-	for(i=from;i<to;i++){
-		int exists = getSector(i);
-		printf("Sector %d: %s\n", i, exists ? "exists" : "does not exist");
-	}
-}	
-
 int loadFileSystem(){
+
+	__initSectorTable();
 
 	char header[100];
 	disk_cmd headerCMD = {ATA0, _TABLE_STARTUP_SECTOR, 0, strlen(_TABLE_HEADER), header };
@@ -83,7 +99,7 @@ int loadFileSystem(){
 
 
 	if(!strcmp(header,_TABLE_HEADER)){
-	//	__loadFileTable();
+		__loadFileTable();
 		return 0;
 	}
 
@@ -421,6 +437,13 @@ void __initFileTable(){
 	__allocateFile(home);
 
 
+	File * readme = __createFile("readme.txt", __getFileFreeSector(), _DEFAULT_FILESIZE,base);
+	__allocateFile(readme);
+
+	
+	writeFile(readme,_README, strlen(_README));
+
+
 	__setCurrentDir(base);
 }
 
@@ -482,7 +505,6 @@ int openFile( char * name, int flags){
 	return 0;
 }
 
-
 int readFile(File * file, char * buff, int count){
 	if(file == NULL)
 		return -1;
@@ -495,7 +517,6 @@ int readFile(File * file, char * buff, int count){
 
 	// And allocate it
 	System.readDisk(&fileData);
-
 
 	return 0;
 }
@@ -534,7 +555,6 @@ int vim(char * arg){
 
 }
 
-
 int cat(char * arg){
 	File * file = getFileByName(arg);
 
@@ -568,42 +588,67 @@ int tree(char *a){
 	return 0;
 }
 
+
+int pwd(char * arg){
+
+	File * file = __getCurrentDir();
+
+	if(!strcmp(arg,"-a"))
+		__printFile(file);	
+	else printf("%s\n", file->name);
+}
+
+int cd(char * arg){
+	File * curr = __getCurrentDir();
+	File * child = __getChildByFileName(arg,curr);
+
+	if(child != NULL ){
+		__setCurrentDir(child);
+		return 0;
+	} else if( !strcmp(arg,".")){
+		// Do nothing
+		return 0;
+	} else if( !strcmp(arg,"..")){
+		if(curr->parent!=NULL)
+			__setCurrentDir(curr->parent);
+		else printf("cd: %s: Root directory\n",curr->name);
+		return 0;
+	}
+
+	printf("cd: %s: No such file or directory.\n", arg);
+	return -1;
+}
+
 int ls(char * arg){
 
-
-	printf("ls %s\n", arg);
-
-
-	File * file = getFileByName(arg);
+	File * file;
+	if(strlen(arg) == 0)
+		file = __getCurrentDir();
+	else
+		file = getFileByName(arg);
 
 	if(file!=NULL){
+
+		printf("ls: %s\n", file->name);
+
+		printf(".\t..\t");
 
 		int i;
 		for(i=0;i<_FILE_CHILDREN;i++)
 			if(file->children[i] != NULL){
-				printf("/%s\t", file->children[i]->name);
+				printf("%s\t", file->children[i]->name);
 			}
 
 		printf("\n");
 		return 0;
 	}
 
+	printf("ls: not found\n");
+
 	return -1;
 }
 
 int fileIO(char * a){
-
-	printf("Vamos a crear la tabla\n");
-	printf("Que hago?\n1) crear tabla\n2) cargar tabla\n3)pasar\n");
-	int opt = 0;
-	scanf("%d",&opt);
-	printf("\n");
-
-	if(opt == 1)
-		createFilesystem();
-	else if(opt== 2)
-		loadFileSystem();
-	else if(opt == 3);
 
 	File * f = fileTable;
 
