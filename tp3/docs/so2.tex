@@ -103,15 +103,15 @@ La fecha de entrega del trabajo práctico es el Lunes 29 de Noviembre a las 16:0
 \section{Desarrollo}
 
 \subsection{Funcionamiento del driver}
-Para leer y escribir del disco se desarrollaron las funciones \emph{_read} y \emph{_write}. Cada 
+Para leer y escribir del disco se desarrollaron las funciones \_read y \_write. Cada 
 una lee o escribe un sector en el disco, recibiendo un cierto offset y una cantidad determinada de bytes. 
-Para una mayor funcionalidad se implementaron las funciones \emph{read} y \emph{write},
+Para una mayor funcionalidad se implementaron las funciones read y write,
 las cuales dan la posibilidad de escribir o leer del disco más de un sector.
-Para poder leer o escribir en el disco hay que enviar un comando al disco (LBA_READ o LBA_WRITE respectivamente), 
+Para poder leer o escribir en el disco hay que enviar un comando al disco (LBA\_READ o LBA\_WRITE respectivamente), 
 así como la cantidad de sectores y el sector inicial a los registros correspondientes del disco.
 Una vez que se termina el comando, se debe leer o escribir la información del registro 0, la cual
-tiene un tamaño de 2 bytes (1 word). Para lograr procesar los datos obtenidos se creó la función \emph{translateBytes}, 
-con la cual se logra transformar una word en un arreglo de 2 bytes
+tiene un tamaño de 2 bytes (1 word). Para lograr procesar los datos obtenidos se creó la función translateBytes, 
+con la cual se logra transformar una word en un arreglo de 2 bytes.
 
 \subsection{Problemas encontrados y sus respectivas soluciones}
 \par
@@ -143,7 +143,7 @@ están protegidas por cli y sti.
   \subsubsection{Programa en el disco}
     Hicimos un programa que llena la pantalla con el caracter ``a'' de color rojo.\par
     En un principio intentamos compilarlo externamente y copiar en el primer sector del disco el código objeto obtenido
-    (utilizando el programa de edición \emph{hexedit}). Cuando ejecutábamos el comando programDisk, alojábamos dicho código objeto
+    (utilizando el programa de edición hexedit). Cuando ejecutábamos el comando programDisk, alojábamos dicho código objeto
     en una página en memoria, para luego hacer un call a la primer posición de memoria de dicha página.	Ejecutando programDisk 
     obteníamos errores de protección. El error surgía de que el código objeto obtenido externamente presentaba diferencias al código
     objeto del mismo programa pero compilado internamente. Para solucionarlo, imprimimos todos los bytes que componían el código objeto
@@ -151,16 +151,20 @@ están protegidas por cli y sti.
     
 
   \subsubsection{File system}
-  Para ejemplificar el trabajo realizado, decidimos desarrollar un file system minimal, para poder demostrar los read y write de disco.
+  Para ejemplificar el trabajo realizado, decidimos desarrollar un sistema de archivos minimal. Básicamente está conformado por un árbol sencillo de archivos, con la raiz "\%", debido a que "/" no estaba del todo mapeada en el teclado. No hay distinción entre archivo y directorio; todo archivo puede poseer una cantidad limitada de hijos. Si bien esto no es lo óptimo, es fácil de resolver agregando un bit en el encabezado del archivo en disco. La persistencia de los archivos se logra guardando en disco un encabezado de 512 bytes en algun sector vacío, y el contenido mismo del archivo en n sectores posteriores al del encabezado. Los sectores de cada archivo son contiguos; es decir, el tamaño del archivo se fija cuando se crea, y no puede crecer. Si bien esto es una limitación importante, también es sencillo de resolver, utilizando listas de sectores, aunque supera el objetivo de esta demostración. La presencia de los sectores se resuelve con un mapa de bits que mapea 10 megabytes (el tamaño del disco que usamos), en el cual el n-ésimo bit dice si el sector n esta ocupado o no. Este mapa de bits se guarda en disco, y se intenta levantar al inicio del sistema operativo; si no se encuentra, se crea un mapa nuevo y se construye un árbol inicial. Asimismo, si encuentra el mapa de bits, lo levanta, e intenta cargar archivos desde todos los sectores ocupados. Si no llegara a encontrar un archivo, simplemente saltea al próximo sector ocupado y libera la información. Luego de cargar todos los archivos, reconstruye el árbol de archivos, basándose en la información persistida en el disco. Cada archivo guarda en el disco su nombre, su tamaño y el sector de su padre (el directorio en el que reside), además de dos strings que definen si es un archivo existente o no. Gracias a este método, es sencillo eliminar archivos y directorios; simplemente se corrompe el string del encabezado del archivo. Incluso se podrían recuperar archivos eliminados, ya que se utiliza un encabezado distinto para archivos eliminados.\par
+Además del sistema de archivos se incluyeron varios programas: cd, ls, rm, mkdir, edit, tree, pwd [-a], entre otros.
+Estos programas sirven para moverse dentro del árbol y poder ver, crear, editar o borrar archivos y directorios. 
 
 \newpage
 
 \section{Conclusión}
-Intentar utilizar el driver de Minix en nuestro sistema operativo fue improductivo, ya que diferían demasiado en cosas críticas. Haberlo 
+Intentar utilizar el driver de Minix en nuestro sistema operativo fue contraproductivo, ya que diferían demasiado en cosas críticas. Haberlo 
 programado nosotros mismos fue más didáctico y además tuvimos mayor control de lo que hacía el driver. Un punto imprescindible para la realización 
 del trabajo práctico fue la investigación realizada para encontrar la forma específica de interactuar con el controlador de disco. \par
 \par
 Cabe mencionar que nuestro driver de disco es compatible únicamente con los dispositivos AT y ATA. 
+Con respecto al sistema de archivos, hubo varias cosas que nos hubiera gustado poder completar, como lista de sectores y directorios bien implementados. También, no alcanzó el tiempo para extender la funcionalidad del sistema como nos hubiera gustado. 
+
   
 
 \end{document}
