@@ -1,0 +1,1 @@
+Simulación en paralelo de una colonia de hormigas, con cuatro métodos de IPC distintos.
